@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ model.header.app_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              bg: '#F3F4F6',
+              panel: '#FFFFFF',
+              line: '#D1D5DB',
+              pri: '#1D4ED8',
+              ok: '#15803D',
+              warn: '#B45309',
+              bad: '#B91C1C',
+              muted: '#475569'
+            },
+            fontFamily: {
+              sans: ['Pretendard', 'Noto Sans KR', 'system-ui', 'sans-serif']
+            }
+          }
+        }
+      }
+    </script>
+  </head>
+  <body class="bg-bg font-sans text-slate-900">
+    <main class="mx-auto max-w-[1240px] p-4 md:p-6">
+      <section class="rounded-2xl border border-line bg-panel p-4 md:p-5">
+        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 class="text-2xl font-bold">{{ model.header.app_name }}</h1>
+            <p class="text-sm text-muted">기준일 {{ model.date_display_ko }}</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="rounded-full border px-2 py-1 font-medium">데이터 소스</span>
+            <span class="rounded-full px-2 py-1 font-semibold {% if model.data_sources.fmp == 'live' %}bg-emerald-100 text-ok{% elif model.data_sources.fmp == 'stale' %}bg-amber-100 text-warn{% else %}bg-red-100 text-bad{% endif %}">
+              FMP: {{ model.data_sources.fmp }}
+            </span>
+            <span class="rounded-full px-2 py-1 font-semibold {% if model.data_sources.rss == 'live' %}bg-emerald-100 text-ok{% elif model.data_sources.rss == 'stale' %}bg-amber-100 text-warn{% else %}bg-red-100 text-bad{% endif %}">
+              RSS: {{ model.data_sources.rss }}
+            </span>
+            <span class="rounded-full border border-line px-2 py-1 text-muted">
+              OK {{ model.result_counts.ok }} / Unavailable {{ model.result_counts.unavailable }} / Not Implemented {{ model.result_counts.not_implemented }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[360px_1fr]">
+        <aside class="rounded-2xl border border-line bg-panel p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="text-2xl font-bold">스킬 선택</h2>
+            <button id="toggle-all" class="text-sm font-semibold text-pri">전체 선택/해제</button>
+          </div>
+          <p class="mb-2 text-sm text-muted">왼쪽에서 스킬을 체크/해제한 뒤 실행 버튼을 누르세요.</p>
+          <p id="selected-count" class="mb-3 text-sm font-semibold text-pri">선택 {{ model.selected_skill_count }}개</p>
+
+          <form id="skill-form" method="post" action="/dashboard/run" class="space-y-4">
+            <div class="max-h-[360px] space-y-2 overflow-y-auto pr-1">
+              {% for skill in model.skill_catalog %}
+                <label class="block rounded-xl border border-line p-2">
+                  <div class="flex items-start gap-2">
+                    <input type="checkbox" name="skills" value="{{ skill.slug }}" {% if skill.selected %}checked{% endif %} class="mt-1" />
+                    <span class="min-w-0">
+                      <span class="block truncate text-sm font-semibold">{{ skill.display_name }}</span>
+                      <span class="block truncate text-xs text-muted">{{ skill.slug }} · {{ skill.family }}</span>
+                      {% if not skill.implemented %}
+                        <span class="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">not_implemented</span>
+                      {% endif %}
+                    </span>
+                  </div>
+                </label>
+              {% endfor %}
+            </div>
+
+            <div class="space-y-2 rounded-xl border border-line p-3">
+              <h3 class="text-sm font-semibold">economic-calendar-fetcher</h3>
+              <div class="grid grid-cols-3 gap-2 text-xs">
+                <label class="space-y-1"><span>from_days</span><input name="param__economic-calendar-fetcher__from_days" type="number" class="w-full rounded border border-line px-2 py-1" value="{{ model.params_defaults['economic-calendar-fetcher'].from_days }}" /></label>
+                <label class="space-y-1"><span>to_days</span><input name="param__economic-calendar-fetcher__to_days" type="number" class="w-full rounded border border-line px-2 py-1" value="{{ model.params_defaults['economic-calendar-fetcher'].to_days }}" /></label>
+                <label class="space-y-1"><span>country</span><input name="param__economic-calendar-fetcher__country" type="text" class="w-full rounded border border-line px-2 py-1" value="{{ model.params_defaults['economic-calendar-fetcher'].country }}" /></label>
+              </div>
+            </div>
+
+            <div class="space-y-2 rounded-xl border border-line p-3">
+              <h3 class="text-sm font-semibold">earnings-calendar</h3>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <label class="space-y-1"><span>days</span><input name="param__earnings-calendar__days" type="number" class="w-full rounded border border-line px-2 py-1" value="{{ model.params_defaults['earnings-calendar'].days }}" /></label>
+                <label class="space-y-1"><span>min_market_cap</span><input name="param__earnings-calendar__min_market_cap" type="number" class="w-full rounded border border-line px-2 py-1" value="{{ model.params_defaults['earnings-calendar'].min_market_cap }}" /></label>
+              </div>
+            </div>
+
+            <div class="space-y-2 rounded-xl border border-line p-3">
+              <h3 class="text-sm font-semibold">market-news-analyst</h3>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <label class="space-y-1"><span>lookback_days</span><input name="param__market-news-analyst__lookback_days" type="number" class="w-full rounded border border-line px-2 py-1" value="{{ model.params_defaults['market-news-analyst'].lookback_days }}" /></label>
+                <label class="space-y-1"><span>max_items</span><input name="param__market-news-analyst__max_items" type="number" class="w-full rounded border border-line px-2 py-1" value="{{ model.params_defaults['market-news-analyst'].max_items }}" /></label>
+              </div>
+            </div>
+
+            <div class="space-y-2 rounded-xl border border-line p-3">
+              <h3 class="text-sm font-semibold">us-stock-analysis</h3>
+              <label class="space-y-1 text-xs">
+                <span>ticker</span>
+                <input name="param__us-stock-analysis__ticker" type="text" class="w-full rounded border border-line px-2 py-1" placeholder="AAPL (비우면 자동 선택)" value="{{ model.params_defaults['us-stock-analysis'].ticker }}" />
+              </label>
+            </div>
+
+            <button type="submit" class="w-full rounded-2xl bg-pri py-3 text-lg font-bold text-white">선택한 스킬 실행</button>
+            <p id="run-status" class="text-xs text-muted"></p>
+          </form>
+        </aside>
+
+        <section class="space-y-4">
+          <article class="rounded-2xl border border-line bg-panel p-4">
+            <h2 class="mb-3 text-lg font-semibold">추천 종목 (선택 스킬 기반)</h2>
+            {% if model.top_picks %}
+              <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {% for pick in model.top_picks %}
+                  <div class="rounded-xl border border-line p-3">
+                    <p class="text-lg font-bold">{{ pick.symbol }}{% if pick.name %} · {{ pick.name }}{% endif %}</p>
+                    {% if pick.sector %}
+                      <p class="text-xs text-muted">{{ pick.sector }}</p>
+                    {% endif %}
+                    <p class="text-xs text-muted">{{ pick.reason }}</p>
+                    {% if pick.return_pct %}
+                      <p class="mt-1 text-xs text-muted">return {{ '%.2f'|format(pick.return_pct) }}%</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm font-semibold text-pri">Score {{ '%.2f'|format(pick.score) }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-sm text-muted">현재 선택/실행된 ok 스킬의 실제 payload 근거가 없어 추천 종목이 없습니다.</p>
+            {% endif %}
+          </article>
+
+          <article class="rounded-2xl border border-line bg-panel p-4">
+            <h2 class="mb-3 text-lg font-semibold">스킬 실행 결과</h2>
+            {% if model.results %}
+              <div class="space-y-3">
+                {% for result in model.results %}
+                  <div class="rounded-xl border border-line p-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p class="font-semibold">{{ result.display_name }}</p>
+                        <p class="text-xs text-muted">{{ result.skill_slug }} · {{ result.family }}</p>
+                      </div>
+                      <div class="flex items-center gap-2 text-xs">
+                        <span class="rounded-full px-2 py-1 font-semibold {% if result.status == 'ok' %}bg-emerald-100 text-ok{% elif result.status == 'unavailable' %}bg-red-100 text-bad{% else %}bg-slate-100 text-slate-600{% endif %}">
+                          {{ result.status }}
+                        </span>
+                        {% if result.score_0_100 is not none %}
+                          <span class="rounded border border-line px-2 py-1">score {{ '%.1f'|format(result.score_0_100) }}</span>
+                        {% endif %}
+                        {% if result.confidence_0_1 is not none %}
+                          <span class="rounded border border-line px-2 py-1">conf {{ '%.2f'|format(result.confidence_0_1) }}</span>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <p class="mt-2 text-sm">{{ result.summary_ko }}</p>
+                    {% if result.reason_code %}
+                      <p class="mt-1 text-xs text-bad">reason_code: {{ result.reason_code }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-muted">
+                      cache {{ result.cache_info.mode }} · fetched_at {{ result.cache_info.fetched_at or '-' }}
+                    </p>
+
+                    {% if result.status == 'ok' and result.skill_slug == 'economic-calendar-fetcher' %}
+                      <div class="mt-3 rounded-lg bg-slate-50 p-2 text-xs">
+                        {% set impact = result.analysis_payload.impact_summary %}
+                        <p>impact summary: High {{ impact.High or 0 }}, Medium {{ impact.Medium or 0 }}, Low {{ impact.Low or 0 }}</p>
+                        <p class="mt-1">events {{ result.analysis_payload.events|length }}건</p>
+                      </div>
+                    {% endif %}
+
+                    {% if result.status == 'ok' and result.skill_slug == 'earnings-calendar' %}
+                      <div class="mt-3 rounded-lg bg-slate-50 p-2 text-xs">
+                        <p>earnings {{ result.analysis_payload.earnings|length }}건</p>
+                        {% for row in result.analysis_payload.earnings[:5] %}
+                          <p class="mt-1">{{ row.date }} · {{ row.ticker }} · {{ row.timing }}</p>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+
+                    {% if result.status == 'ok' and result.skill_slug == 'market-news-analyst' %}
+                      <div class="mt-3 rounded-lg bg-slate-50 p-2 text-xs">
+                        <p>ranked_events {{ result.analysis_payload.ranked_events|length }}건</p>
+                        {% for row in result.analysis_payload.ranked_events[:5] %}
+                          <p class="mt-1">{{ '%.2f'|format(row.impact_score) }} · {{ row.headline }}</p>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+
+                    {% if result.status == 'ok' and result.skill_slug == 'us-stock-analysis' %}
+                      <div class="mt-3 rounded-lg bg-slate-50 p-2 text-xs">
+                        <p>{{ result.analysis_payload.ticker }} · {{ result.analysis_payload.fundamentals.sector }}</p>
+                        <p class="mt-1">price {{ '%.2f'|format(result.analysis_payload.technicals.price or 0) }} · day {{ '%.2f'|format(result.analysis_payload.technicals.day_change_pct or 0) }}%</p>
+                        <p class="mt-1">bull: {{ result.analysis_payload.bull_case[0] if result.analysis_payload.bull_case else '-' }}</p>
+                        <p class="mt-1">bear: {{ result.analysis_payload.bear_case[0] if result.analysis_payload.bear_case else '-' }}</p>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-sm text-muted">실행 결과가 없습니다. 왼쪽에서 스킬을 선택 후 실행하세요.</p>
+            {% endif %}
+          </article>
+
+          {% if model.warnings %}
+            <article class="rounded-2xl border border-amber-300 bg-amber-50 p-3">
+              <h2 class="text-sm font-semibold text-amber-900">Warnings</h2>
+              <ul class="mt-2 space-y-1 text-xs text-amber-800">
+                {% for warning in model.warnings %}
+                  <li>{{ warning }}</li>
+                {% endfor %}
+              </ul>
+            </article>
+          {% endif %}
+
+          <article class="rounded-2xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+            {% for badge in model.risk_badges %}
+              <span class="mr-3 inline-block font-semibold">{{ badge }}</span>
+            {% endfor %}
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const form = document.getElementById('skill-form');
+      const statusEl = document.getElementById('run-status');
+      const toggleAll = document.getElementById('toggle-all');
+      const selectedCount = document.getElementById('selected-count');
+      const skillBoxes = () => [...document.querySelectorAll('input[name="skills"]')];
+
+      const updateSelectedCount = () => {
+        const checked = skillBoxes().filter((b) => b.checked).length;
+        selectedCount.textContent = `선택 ${checked}개`;
+      };
+
+      updateSelectedCount();
+      document.addEventListener('change', (event) => {
+        if (event.target && event.target.name === 'skills') {
+          updateSelectedCount();
+        }
+      });
+
+      toggleAll.addEventListener('click', (event) => {
+        event.preventDefault();
+        const boxes = skillBoxes();
+        const shouldCheck = boxes.some((box) => !box.checked);
+        boxes.forEach((box) => {
+          box.checked = shouldCheck;
+        });
+        updateSelectedCount();
+      });
+
+      form.addEventListener('submit', () => {
+        statusEl.textContent = '실행 중...';
+      });
+    </script>
+  </body>
+</html>

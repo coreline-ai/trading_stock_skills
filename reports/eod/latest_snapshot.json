@@ -1,0 +1,115 @@
+{
+  "app_name": "Coreline Stock AI",
+  "as_of_date": "2026-02-26",
+  "notification_count": 0,
+  "auto_rebalance_enabled": true,
+  "strategy_profiles": {
+    "balanced": {
+      "profitability": 0.36,
+      "stability": 0.32,
+      "growth": 0.32
+    },
+    "aggressive": {
+      "profitability": 0.25,
+      "stability": 0.15,
+      "growth": 0.6
+    },
+    "defensive": {
+      "profitability": 0.3,
+      "stability": 0.55,
+      "growth": 0.15
+    }
+  },
+  "skill_classification_counts": {
+    "growth": 1,
+    "neutral": 1,
+    "decline": 0
+  },
+  "top_picks": [
+    {
+      "symbol": "MSFT",
+      "name": "Microsoft",
+      "sector": "Technology",
+      "return_pct": 0.9,
+      "ai_score_10": 7.5,
+      "sparkline_points": [
+        46.7,
+        50.7,
+        53.7,
+        57.7,
+        60.7,
+        62.7,
+        65.7
+      ]
+    },
+    {
+      "symbol": "JPM",
+      "name": "JPMorgan",
+      "sector": "Financials",
+      "return_pct": 0.3,
+      "ai_score_10": 6.4,
+      "sparkline_points": [
+        44.9,
+        48.9,
+        51.9,
+        55.9,
+        58.9,
+        60.9,
+        63.9
+      ]
+    },
+    {
+      "symbol": "AMZN",
+      "name": "Amazon",
+      "sector": "Consumer",
+      "return_pct": 0.6,
+      "ai_score_10": 6.8,
+      "sparkline_points": [
+        45.2,
+        49.2,
+        52.2,
+        56.2,
+        59.2,
+        61.2,
+        64.2
+      ]
+    },
+    {
+      "symbol": "AAPL",
+      "name": "Apple",
+      "sector": "Technology",
+      "return_pct": 1.2,
+      "ai_score_10": 7.8,
+      "sparkline_points": [
+        47.9,
+        51.9,
+        54.9,
+        58.9,
+        61.9,
+        63.9,
+        66.9
+      ]
+    },
+    {
+      "symbol": "GOOGL",
+      "name": "Alphabet",
+      "sector": "Technology",
+      "return_pct": 1.1,
+      "ai_score_10": 7.4,
+      "sparkline_points": [
+        46.4,
+        50.4,
+        53.4,
+        57.4,
+        60.4,
+        62.4,
+        65.4
+      ]
+    }
+  ],
+  "data_source": "sample",
+  "selected_skills": [
+    "market-news-analyst",
+    "us-stock-analysis"
+  ]
+}

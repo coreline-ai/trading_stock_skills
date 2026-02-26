@@ -1,0 +1,308 @@
+{
+  "app_name": "Coreline Stock AI",
+  "as_of_date": "2026-02-26",
+  "generated_at": "2026-02-26T13:48:03.250476+00:00",
+  "data_source": "sample",
+  "selected_skills": [
+    "market-news-analyst",
+    "us-stock-analysis"
+  ],
+  "notification_count": 0,
+  "auto_rebalance_enabled": true,
+  "skill_count": 2,
+  "strategy_profiles": {
+    "balanced": {
+      "profitability": 0.36,
+      "stability": 0.32,
+      "growth": 0.32
+    },
+    "aggressive": {
+      "profitability": 0.25,
+      "stability": 0.15,
+      "growth": 0.6
+    },
+    "defensive": {
+      "profitability": 0.3,
+      "stability": 0.55,
+      "growth": 0.15
+    }
+  },
+  "skill_classification_counts": {
+    "growth": 1,
+    "neutral": 1,
+    "decline": 0
+  },
+  "market_state": {
+    "as_of_date": "2026-02-26",
+    "spy_return_1d": 0.48,
+    "qqq_return_1d": 0.71,
+    "iwm_return_1d": -0.12,
+    "tlt_return_1d": 0.21,
+    "vix_level": 18.9,
+    "breadth_up_ratio": 0.63,
+    "recession_risk": 0.28,
+    "symbols": [
+      {
+        "symbol": "AAPL",
+        "name": "Apple",
+        "sector": "Technology",
+        "daily_return_pct": 1.2,
+        "momentum_20d": 5.9,
+        "ai_factor": 0.78
+      },
+      {
+        "symbol": "MSFT",
+        "name": "Microsoft",
+        "sector": "Technology",
+        "daily_return_pct": 0.9,
+        "momentum_20d": 4.7,
+        "ai_factor": 0.75
+      },
+      {
+        "symbol": "NVDA",
+        "name": "NVIDIA",
+        "sector": "Semiconductors",
+        "daily_return_pct": 2.6,
+        "momentum_20d": 9.3,
+        "ai_factor": 0.91
+      },
+      {
+        "symbol": "AMZN",
+        "name": "Amazon",
+        "sector": "Consumer",
+        "daily_return_pct": 0.6,
+        "momentum_20d": 3.2,
+        "ai_factor": 0.68
+      },
+      {
+        "symbol": "META",
+        "name": "Meta",
+        "sector": "Technology",
+        "daily_return_pct": 1.7,
+        "momentum_20d": 6.5,
+        "ai_factor": 0.82
+      },
+      {
+        "symbol": "GOOGL",
+        "name": "Alphabet",
+        "sector": "Technology",
+        "daily_return_pct": 1.1,
+        "momentum_20d": 4.4,
+        "ai_factor": 0.74
+      },
+      {
+        "symbol": "TSLA",
+        "name": "Tesla",
+        "sector": "Automotive",
+        "daily_return_pct": -0.7,
+        "momentum_20d": -1.5,
+        "ai_factor": 0.51
+      },
+      {
+        "symbol": "JPM",
+        "name": "JPMorgan",
+        "sector": "Financials",
+        "daily_return_pct": 0.3,
+        "momentum_20d": 2.9,
+        "ai_factor": 0.64
+      },
+      {
+        "symbol": "XOM",
+        "name": "Exxon Mobil",
+        "sector": "Energy",
+        "daily_return_pct": -0.2,
+        "momentum_20d": 1.4,
+        "ai_factor": 0.59
+      },
+      {
+        "symbol": "LLY",
+        "name": "Eli Lilly",
+        "sector": "Healthcare",
+        "daily_return_pct": 1.5,
+        "momentum_20d": 7.2,
+        "ai_factor": 0.86
+      },
+      {
+        "symbol": "AVGO",
+        "name": "Broadcom",
+        "sector": "Semiconductors",
+        "daily_return_pct": 1.9,
+        "momentum_20d": 8.1,
+        "ai_factor": 0.88
+      },
+      {
+        "symbol": "COST",
+        "name": "Costco",
+        "sector": "Consumer",
+        "daily_return_pct": 0.4,
+        "momentum_20d": 2.5,
+        "ai_factor": 0.62
+      }
+    ]
+  },
+  "skill_runs": [
+    {
+      "skill_slug": "market-news-analyst",
+      "score_0_100": 65.55,
+      "confidence_0_1": 0.78,
+      "regime": "Broadening",
+      "status": "growth",
+      "signals": [
+        "breadth_up_ratio=0.63",
+        "vix=18.9",
+        "cross_asset=SPY:+0.48%/QQQ:+0.71%/IWM:-0.12%"
+      ],
+      "risk_flags": [],
+      "invalidation_levels": [
+        "SPY 일봉 종가 -2.5% 하회 시 노출 축소",
+        "리더 종목 손절 -7% 규칙 적용"
+      ],
+      "narrative_ko": "Market News Analyst는 impact ranking 기준으로 점수 65.5/100을 산출했습니다. 현재 레짐은 Broadening이며, 상태는 growth로 분류됩니다.",
+      "top_candidates": [
+        "AAPL",
+        "MSFT",
+        "GOOGL",
+        "JPM",
+        "AMZN"
+      ]
+    },
+    {
+      "skill_slug": "us-stock-analysis",
+      "score_0_100": 52.4,
+      "confidence_0_1": 0.71,
+      "regime": "Broadening",
+      "status": "neutral",
+      "signals": [
+        "breadth_up_ratio=0.63",
+        "vix=18.9",
+        "cross_asset=SPY:+0.48%/QQQ:+0.71%/IWM:-0.12%"
+      ],
+      "risk_flags": [],
+      "invalidation_levels": [
+        "SPY 일봉 종가 -2.5% 하회 시 노출 축소",
+        "리더 종목 손절 -7% 규칙 적용"
+      ],
+      "narrative_ko": "US Stock Analysis는 fundamental+technical memo 기준으로 점수 52.4/100을 산출했습니다. 현재 레짐은 Broadening이며, 상태는 neutral로 분류됩니다.",
+      "top_candidates": [
+        "MSFT",
+        "AMZN",
+        "JPM",
+        "XOM",
+        "COST"
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "workflow_name": "daily_market_monitoring",
+      "exposure_band": "70-100%",
+      "portfolio_bias": "Risk-On",
+      "top_actions": [
+        "market-news-analyst 신호 재검증",
+        "상위 후보 AAPL, MSFT, GOOGL 우선 모니터링"
+      ],
+      "contributing_skills": [
+        "market-news-analyst"
+      ]
+    },
+    {
+      "workflow_name": "stock_research",
+      "exposure_band": "40-70%",
+      "portfolio_bias": "Balanced",
+      "top_actions": [
+        "us-stock-analysis 신호 재검증",
+        "상위 후보 MSFT, AMZN, JPM 우선 모니터링"
+      ],
+      "contributing_skills": [
+        "us-stock-analysis",
+        "market-news-analyst"
+      ]
+    }
+  ],
+  "top_picks": [
+    {
+      "symbol": "MSFT",
+      "name": "Microsoft",
+      "sector": "Technology",
+      "return_pct": 0.9,
+      "ai_score_10": 7.5,
+      "sparkline_points": [
+        46.7,
+        50.7,
+        53.7,
+        57.7,
+        60.7,
+        62.7,
+        65.7
+      ]
+    },
+    {
+      "symbol": "JPM",
+      "name": "JPMorgan",
+      "sector": "Financials",
+      "return_pct": 0.3,
+      "ai_score_10": 6.4,
+      "sparkline_points": [
+        44.9,
+        48.9,
+        51.9,
+        55.9,
+        58.9,
+        60.9,
+        63.9
+      ]
+    },
+    {
+      "symbol": "AMZN",
+      "name": "Amazon",
+      "sector": "Consumer",
+      "return_pct": 0.6,
+      "ai_score_10": 6.8,
+      "sparkline_points": [
+        45.2,
+        49.2,
+        52.2,
+        56.2,
+        59.2,
+        61.2,
+        64.2
+      ]
+    },
+    {
+      "symbol": "AAPL",
+      "name": "Apple",
+      "sector": "Technology",
+      "return_pct": 1.2,
+      "ai_score_10": 7.8,
+      "sparkline_points": [
+        47.9,
+        51.9,
+        54.9,
+        58.9,
+        61.9,
+        63.9,
+        66.9
+      ]
+    },
+    {
+      "symbol": "GOOGL",
+      "name": "Alphabet",
+      "sector": "Technology",
+      "return_pct": 1.1,
+      "ai_score_10": 7.4,
+      "sparkline_points": [
+        46.4,
+        50.4,
+        53.4,
+        57.4,
+        60.4,
+        62.4,
+        65.4
+      ]
+    }
+  ],
+  "quality_summary": {
+    "avg_score": 58.97,
+    "low_score_skills": []
+  }
+}

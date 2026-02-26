@@ -1,0 +1,591 @@
+{
+  "run_id": "825b3a4e-9b30-4d2b-9588-a39684d18369",
+  "as_of_date": "2026-02-27",
+  "data_sources": {
+    "fmp": "unavailable",
+    "rss": "unavailable"
+  },
+  "results": [
+    {
+      "skill_slug": "sector-analyst",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "breadth-chart-analyst",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "technical-analyst",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "market-news-analyst",
+      "status": "unavailable",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "FMP API 키가 없어 뉴스 분석을 수행할 수 없습니다.",
+      "reason_code": "NO_API_KEY",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {
+        "fmp": "unavailable",
+        "rss": "unavailable"
+      }
+    },
+    {
+      "skill_slug": "us-stock-analysis",
+      "status": "unavailable",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "FMP API 키가 없어 종목 분석을 수행할 수 없습니다.",
+      "reason_code": "NO_API_KEY",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {
+        "fmp": "unavailable"
+      }
+    },
+    {
+      "skill_slug": "market-environment-analysis",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "market-breadth-analyzer",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "uptrend-analyzer",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "macro-regime-detector",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "institutional-flow-tracker",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "theme-detector",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "economic-calendar-fetcher",
+      "status": "unavailable",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "FMP API 키가 없어 경제 캘린더를 조회할 수 없습니다.",
+      "reason_code": "NO_API_KEY",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {
+        "fmp": "unavailable"
+      }
+    },
+    {
+      "skill_slug": "earnings-calendar",
+      "status": "unavailable",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "FMP API 키가 없어 실적 캘린더를 조회할 수 없습니다.",
+      "reason_code": "NO_API_KEY",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {
+        "fmp": "unavailable"
+      }
+    },
+    {
+      "skill_slug": "scenario-analyzer",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "backtest-expert",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "stanley-druckenmiller-investment",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "us-market-bubble-detector",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "options-strategy-advisor",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "portfolio-manager",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "strategy-pivot-designer",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "market-top-detector",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "ftd-detector",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "earnings-trade-analyzer",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "pead-screener",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "vcp-screener",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "canslim-screener",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "value-dividend-screener",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "dividend-growth-pullback-screener",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "kanchi-dividend-sop",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "kanchi-dividend-review-monitor",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "kanchi-dividend-us-tax-accounting",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "pair-trade-screener",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "edge-candidate-agent",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "edge-concept-synthesizer",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "edge-hint-extractor",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "edge-strategy-designer",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "dual-axis-skill-reviewer",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    },
+    {
+      "skill_slug": "weekly-trade-strategy",
+      "status": "not_implemented",
+      "score_0_100": null,
+      "confidence_0_1": null,
+      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
+      "reason_code": "NOT_IMPLEMENTED",
+      "cache_info": {
+        "mode": "none",
+        "fetched_at": null,
+        "expires_at": null
+      },
+      "analysis_payload": {},
+      "source_statuses": {}
+    }
+  ],
+  "top_picks": [],
+  "warnings": []
+}

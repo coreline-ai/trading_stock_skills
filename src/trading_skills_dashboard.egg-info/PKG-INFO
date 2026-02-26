@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: trading-skills-dashboard
+Version: 0.1.0
+Summary: Dashboard API and UI for trading skills engine
+Requires-Python: >=3.11
+Requires-Dist: fastapi>=0.116.1
+Requires-Dist: uvicorn>=0.35.0
+Requires-Dist: jinja2>=3.1.6
+Requires-Dist: pydantic>=2.11.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.3.0; extra == "dev"
+Requires-Dist: httpx>=0.28.1; extra == "dev"
+Requires-Dist: beautifulsoup4>=4.13.0; extra == "dev"

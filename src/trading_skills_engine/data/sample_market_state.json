@@ -1,0 +1,24 @@
+{
+  "as_of_date": "2026-02-26",
+  "spy_return_1d": 0.48,
+  "qqq_return_1d": 0.71,
+  "iwm_return_1d": -0.12,
+  "tlt_return_1d": 0.21,
+  "vix_level": 18.9,
+  "breadth_up_ratio": 0.63,
+  "recession_risk": 0.28,
+  "symbols": [
+    {"symbol": "AAPL", "name": "Apple", "sector": "Technology", "daily_return_pct": 1.2, "momentum_20d": 5.9, "ai_factor": 0.78},
+    {"symbol": "MSFT", "name": "Microsoft", "sector": "Technology", "daily_return_pct": 0.9, "momentum_20d": 4.7, "ai_factor": 0.75},
+    {"symbol": "NVDA", "name": "NVIDIA", "sector": "Semiconductors", "daily_return_pct": 2.6, "momentum_20d": 9.3, "ai_factor": 0.91},
+    {"symbol": "AMZN", "name": "Amazon", "sector": "Consumer", "daily_return_pct": 0.6, "momentum_20d": 3.2, "ai_factor": 0.68},
+    {"symbol": "META", "name": "Meta", "sector": "Technology", "daily_return_pct": 1.7, "momentum_20d": 6.5, "ai_factor": 0.82},
+    {"symbol": "GOOGL", "name": "Alphabet", "sector": "Technology", "daily_return_pct": 1.1, "momentum_20d": 4.4, "ai_factor": 0.74},
+    {"symbol": "TSLA", "name": "Tesla", "sector": "Automotive", "daily_return_pct": -0.7, "momentum_20d": -1.5, "ai_factor": 0.51},
+    {"symbol": "JPM", "name": "JPMorgan", "sector": "Financials", "daily_return_pct": 0.3, "momentum_20d": 2.9, "ai_factor": 0.64},
+    {"symbol": "XOM", "name": "Exxon Mobil", "sector": "Energy", "daily_return_pct": -0.2, "momentum_20d": 1.4, "ai_factor": 0.59},
+    {"symbol": "LLY", "name": "Eli Lilly", "sector": "Healthcare", "daily_return_pct": 1.5, "momentum_20d": 7.2, "ai_factor": 0.86},
+    {"symbol": "AVGO", "name": "Broadcom", "sector": "Semiconductors", "daily_return_pct": 1.9, "momentum_20d": 8.1, "ai_factor": 0.88},
+    {"symbol": "COST", "name": "Costco", "sector": "Consumer", "daily_return_pct": 0.4, "momentum_20d": 2.5, "ai_factor": 0.62}
+  ]
+}

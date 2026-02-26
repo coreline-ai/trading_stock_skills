@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Stock Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2563EB", // Royal Blue
+                        "background-light": "#F3F4F6",
+                        "background-dark": "#0B1121", // Very dark navy
+                        "surface-dark": "#151e32", // Slightly lighter navy for cards
+                        "surface-highlight": "#1E293B",
+                        "accent-red": "#EF4444",
+                        "accent-green": "#10B981",
+                        "text-secondary": "#94A3B8"
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "1rem",
+                        '2xl': "1.5rem"
+                    },
+                },
+            },
+        };
+    </script>
+<style>.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-white font-sans antialiased min-h-screen pb-20">
+<header class="sticky top-0 z-50 bg-white/90 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 px-4 py-3">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center space-x-2">
+<div class="w-8 h-8 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+<span class="material-icons-round text-white text-lg">ssid_chart</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight">Coreline <span class="text-primary font-light">Stock AI</span></h1>
+</div>
+<div class="flex items-center space-x-3">
+<button class="p-2 rounded-full bg-gray-100 dark:bg-surface-dark text-gray-600 dark:text-gray-300">
+<span class="material-icons-round text-xl">notifications</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 overflow-hidden border-2 border-white dark:border-slate-700">
+<img alt="User Profile" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXtkqv3rDhzttt2wPQ3G7NnMbuBqJ5ZVJ8FXFKl6dyfXboGTiEhOlC5PqtopawYEh8eFrZeIzznBe_Kethnl1FK1do9SUaVlJXkrH-FhIM5gOp0NJyjers2eUHXX_fMSN-WnYyy9I8QbJa0h4Y90ZjO1kFwKsfbZFw5H__ILrrpZC1DLB384syKSfCZ68Bml2d7zCoS2X0cBW5lhxJdq8CckBaghQfz2YokrePSfUC1FxPwnQVfKhHWRta2VMG0fciSKpXYxCmiEs"/>
+</div>
+</div>
+</div>
+<div class="flex space-x-3">
+<div class="relative flex-1">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons-round text-gray-400">search</span>
+<input class="w-full bg-gray-100 dark:bg-surface-dark border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary placeholder-gray-500 dark:text-white" placeholder="Search ticker or company..." type="text"/>
+</div>
+<button class="flex items-center space-x-1 bg-gray-100 dark:bg-surface-dark px-3 py-2 rounded-xl text-xs font-medium border border-transparent dark:border-slate-700 whitespace-nowrap">
+<span class="material-icons-round text-sm text-primary">calendar_today</span>
+<span>2026. 02. 25.</span>
+</button>
+</div>
+</header>
+<main class="px-4 pt-6 space-y-8">
+<section>
+<div class="flex justify-between items-end mb-3">
+<h2 class="text-lg font-bold">Strategy Weighting</h2>
+<span class="text-xs text-text-secondary">Auto-rebalance enabled</span>
+</div>
+<div class="bg-white dark:bg-surface-dark p-1 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 flex relative overflow-hidden">
+<div class="w-1/3 h-full bg-primary absolute left-0 top-0 rounded-lg opacity-10"></div>
+<button class="flex-1 py-2.5 text-center text-sm font-semibold rounded-lg text-primary bg-white dark:bg-surface-highlight shadow-sm">
+                    Balanced
+                </button>
+<button class="flex-1 py-2.5 text-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">
+                    Aggressive
+                </button>
+<button class="flex-1 py-2.5 text-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">
+                    Defensive
+                </button>
+</div>
+<div class="mt-4 space-y-4 px-1">
+<div>
+<div class="flex justify-between text-xs mb-1.5 font-medium text-gray-500 dark:text-gray-400">
+<span>Profitability 0.36</span>
+<span>Stability 0.32</span>
+<span>Growth 0.32</span>
+</div>
+<div class="h-2 w-full bg-gray-200 dark:bg-slate-800 rounded-full flex overflow-hidden">
+<div class="h-full bg-blue-500 w-[36%]"></div>
+<div class="h-full bg-indigo-500 w-[32%]"></div>
+<div class="h-full bg-purple-500 w-[32%]"></div>
+</div>
+</div>
+</div>
+</section>
+<section>
+<h2 class="text-lg font-bold mb-3">Market Overview</h2>
+<div class="grid grid-cols-3 gap-3">
+<div class="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col items-center justify-center text-center">
+<span class="text-3xl font-bold text-accent-red mb-1">13</span>
+<span class="text-xs font-medium text-text-secondary uppercase tracking-wider">Decline</span>
+</div>
+<div class="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col items-center justify-center text-center">
+<span class="text-3xl font-bold text-gray-400 dark:text-slate-500 mb-1">1</span>
+<span class="text-xs font-medium text-text-secondary uppercase tracking-wider">Neutral</span>
+</div>
+<div class="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col items-center justify-center text-center">
+<span class="text-3xl font-bold text-accent-green mb-1">32</span>
+<span class="text-xs font-medium text-text-secondary uppercase tracking-wider">Growth</span>
+</div>
+</div>
+</section>
+<section>
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-lg font-bold">Top Picks <span class="text-primary text-sm font-normal ml-1">TOP5 Strategy</span></h2>
+<a class="text-sm text-primary font-medium hover:underline" href="#">View All</a>
+</div>
+<div class="space-y-4">
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 relative overflow-hidden">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-gray-500 dark:text-gray-300">
+                                LG
+                            </div>
+<div>
+<h3 class="font-bold text-base leading-tight">LG Chem</h3>
+<p class="text-xs text-text-secondary font-mono">051910</p>
+</div>
+</div>
+<div class="text-right">
+<div class="text-lg font-bold text-accent-red">+14.02%</div>
+<div class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 dark:text-blue-400 inline-block font-medium">Chemical</div>
+</div>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div class="flex flex-col">
+<span class="text-xs text-text-secondary mb-1">AI Score</span>
+<div class="flex items-baseline space-x-1">
+<span class="text-2xl font-bold text-white dark:text-white">6.9</span>
+<span class="text-xs text-text-secondary">/ 10</span>
+</div>
+</div>
+<div class="w-24 h-10">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
+<path d="M0 35 L10 32 L20 36 L30 25 L40 28 L50 20 L60 22 L70 15 L80 10 L90 12 L100 5" fill="none" stroke="#EF4444" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<defs>
+<linearGradient id="gradient-red" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#EF4444" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#EF4444" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path d="M0 35 L10 32 L20 36 L30 25 L40 28 L50 20 L60 22 L70 15 L80 10 L90 12 L100 5 V 40 H 0 Z" fill="url(#gradient-red)" stroke="none"></path>
+</svg>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 relative overflow-hidden">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xs font-bold text-blue-600 dark:text-blue-300">
+                                SS
+                            </div>
+<div>
+<h3 class="font-bold text-base leading-tight">Samsung Elec</h3>
+<p class="text-xs text-text-secondary font-mono">005930</p>
+</div>
+</div>
+<div class="text-right">
+<div class="text-lg font-bold text-accent-red">+2.96%</div>
+<div class="text-xs px-2 py-0.5 rounded bg-purple-500/10 text-purple-500 dark:text-purple-400 inline-block font-medium">Semicon</div>
+</div>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div class="flex flex-col">
+<span class="text-xs text-text-secondary mb-1">AI Score</span>
+<div class="flex items-baseline space-x-1">
+<span class="text-2xl font-bold text-white dark:text-white">6.8</span>
+<span class="text-xs text-text-secondary">/ 10</span>
+</div>
+</div>
+<div class="w-24 h-10">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
+<path d="M0 30 L15 32 L30 25 L45 28 L60 20 L75 15 L100 10" fill="none" stroke="#EF4444" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<defs>
+<linearGradient id="gradient-red-2" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#EF4444" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#EF4444" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path d="M0 30 L15 32 L30 25 L45 28 L60 20 L75 15 L100 10 V 40 H 0 Z" fill="url(#gradient-red-2)" stroke="none"></path>
+</svg>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 relative overflow-hidden">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-xs font-bold text-orange-600 dark:text-orange-300">
+                                SK
+                            </div>
+<div>
+<h3 class="font-bold text-base leading-tight">SK Hynix</h3>
+<p class="text-xs text-text-secondary font-mono">000660</p>
+</div>
+</div>
+<div class="text-right">
+<div class="text-lg font-bold text-accent-red">+1.5%</div>
+<div class="text-xs px-2 py-0.5 rounded bg-purple-500/10 text-purple-500 dark:text-purple-400 inline-block font-medium">Semicon</div>
+</div>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div class="flex flex-col">
+<span class="text-xs text-text-secondary mb-1">AI Score</span>
+<div class="flex items-baseline space-x-1">
+<span class="text-2xl font-bold text-white dark:text-white">6.6</span>
+<span class="text-xs text-text-secondary">/ 10</span>
+</div>
+</div>
+<div class="w-24 h-10">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
+<path d="M0 35 L20 30 L40 25 L60 28 L80 15 L100 12" fill="none" stroke="#EF4444" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<defs>
+<linearGradient id="gradient-red-3" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#EF4444" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#EF4444" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path d="M0 35 L20 30 L40 25 L60 28 L80 15 L100 12 V 40 H 0 Z" fill="url(#gradient-red-3)" stroke="none"></path>
+</svg>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 relative overflow-hidden">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-xs font-bold text-red-600 dark:text-red-300">
+                                KI
+                            </div>
+<div>
+<h3 class="font-bold text-base leading-tight">Kia Corp</h3>
+<p class="text-xs text-text-secondary font-mono">000270</p>
+</div>
+</div>
+<div class="text-right">
+<div class="text-lg font-bold text-blue-400">-0.12%</div>
+<div class="text-xs px-2 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400 inline-block font-medium">Auto</div>
+</div>
+</div>
+<div class="flex items-end justify-between mt-2">
+<div class="flex flex-col">
+<span class="text-xs text-text-secondary mb-1">AI Score</span>
+<div class="flex items-baseline space-x-1">
+<span class="text-2xl font-bold text-white dark:text-white">4.7</span>
+<span class="text-xs text-text-secondary">/ 10</span>
+</div>
+</div>
+<div class="w-24 h-10">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
+<path d="M0 10 L20 15 L40 12 L60 25 L80 30 L100 35" fill="none" stroke="#60A5FA" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<defs>
+<linearGradient id="gradient-blue" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#60A5FA" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#60A5FA" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path d="M0 10 L20 15 L40 12 L60 25 L80 30 L100 35 V 40 H 0 Z" fill="url(#gradient-blue)" stroke="none"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="pb-10">
+<div class="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl p-5 text-white shadow-lg shadow-blue-900/20 relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="font-bold text-lg mb-1">Upgrade to Pro</h3>
+<p class="text-blue-100 text-sm mb-4">Unlock advanced AI predictions and unlimited backtests.</p>
+<button class="bg-white text-blue-700 text-xs font-bold py-2 px-4 rounded-lg shadow-sm">View Plans</button>
+</div>
+<div class="absolute -right-4 -bottom-8 opacity-20 transform rotate-12">
+<span class="material-icons-round text-9xl">auto_graph</span>
+</div>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 w-full bg-white dark:bg-background-dark/95 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 pb-safe z-50">
+<div class="flex justify-around items-center h-16 max-w-lg mx-auto">
+<a class="flex flex-col items-center justify-center w-full h-full text-primary space-y-1" href="#">
+<span class="material-icons-round text-2xl">dashboard</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 space-y-1 transition" href="#">
+<span class="material-icons-round text-2xl">query_stats</span>
+<span class="text-[10px] font-medium">Analysis</span>
+</a>
+<div class="relative -top-5">
+<button class="w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-blue-500/30 flex items-center justify-center transform transition active:scale-95">
+<span class="material-icons-round text-2xl">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center justify-center w-full h-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 space-y-1 transition" href="#">
+<span class="material-icons-round text-2xl">favorite_border</span>
+<span class="text-[10px] font-medium">Watchlist</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 space-y-1 transition" href="#">
+<span class="material-icons-round text-2xl">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</a>
+</div>
+</nav>
+<div class="h-6 w-full bg-white dark:bg-background-dark fixed bottom-0 z-40"></div>
+
+</body></html>
