@@ -18,6 +18,7 @@ FastAPI 기반 트레이딩 스킬 실행 엔진과 대시보드입니다.
 - [동작 화면](#동작-화면)
 - [대시보드 사용법](#대시보드-사용법)
 - [API 사용법](#api-사용법)
+- [AI 최종 리포트](#ai-최종-리포트)
 - [스킬 독립 실행 원칙](#스킬-독립-실행-원칙)
 - [진단/테스트](#진단테스트)
 - [FMP 연동 및 런타임 토글](#fmp-연동-및-런타임-토글)
@@ -61,6 +62,13 @@ pip install -e '.[dev]'
 # start | stop | restart | status | check
 scripts/dashboard_server.sh restart
 scripts/dashboard_server.sh status
+
+# 서버 다운 시 자동 복구 1회 점검/복구
+scripts/dashboard_server.sh ensure
+
+# watchdog 상시 감시(15초 주기)
+scripts/dashboard_watchdog.sh start
+scripts/dashboard_watchdog.sh status
 ```
 
 접속:
@@ -94,6 +102,33 @@ python3.11 -m uvicorn trading_skills_engine.web.app:app --host 127.0.0.1 --port 
 - 추천 합집합 정규화 TOP10
 - 분석 스킬별 평가(타겟 분리: intersection/top10)
 - 최종 결과 요약(최종 교집합 + 최종 TOP5)
+- AI 최종 리포트(GLM 4.5)
+
+## AI 최종 리포트
+최종 추천 종목(TOP5)을 대상으로 AI 판정을 생성합니다.
+
+- 실행: 대시보드 왼쪽 `AI 최종 리포트 생성` 버튼(수동 실행)
+- 판정: `BUY / WATCH / AVOID` (UI에서 `매수 / 관망 / 비매수`)
+- 근거 수집 우선순위:
+  1. Yahoo Finance
+  2. Stooq
+  3. FMP (키+런타임 ON)
+  4. 내부 파이프라인 점수
+- 저장:
+  - 최신: `reports/ai/latest_ai_report.json`
+  - 이력: `reports/ai/history/*.json`
+
+환경 변수:
+```bash
+GLM_API_KEY=your_key
+GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+GLM_MODEL=glm-4.5
+GLM_TIMEOUT_SEC=20
+```
+
+참고:
+- `GLM_API_KEY`가 없으면 버튼은 비활성화됩니다.
+- TOP5 대상이 비어 있어도 버튼이 비활성화됩니다.
 
 ## API 사용법
 ### v2 엔드포인트
@@ -198,6 +233,7 @@ EOF
 - `TRADING_SKILLS_DISABLE_DOTENV=1` : `.env` 자동 로드 비활성화
 - `SKILL_RUN_REPORT_V2_PATH` : v2 리포트 저장 위치 변경
 - `FMP_RUNTIME_SETTINGS_PATH` : FMP 런타임 설정 파일 경로 변경
+- `AI_REPORT_PATH` : AI 리포트 저장 위치 변경
 
 ## 산출물 경로
 - v2 최신 리포트: `reports/skill_runs/latest_skill_runs_v2.json`
@@ -211,7 +247,14 @@ EOF
 ```bash
 scripts/dashboard_server.sh status
 scripts/dashboard_server.sh restart
+scripts/dashboard_server.sh ensure
+scripts/dashboard_watchdog.sh status || scripts/dashboard_watchdog.sh start
 curl -fsS http://127.0.0.1:8001/healthz
+```
+
+watchdog 로그:
+```bash
+tail -f /tmp/trading_skills_watchdog_8001.log
 ```
 
 ### `API Key missing`

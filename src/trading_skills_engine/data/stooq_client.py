@@ -1,0 +1,68 @@
+from __future__ import annotations
+
+import csv
+from dataclasses import dataclass
+from io import StringIO
+from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+
+class StooqError(RuntimeError):
+    pass
+
+
+@dataclass(frozen=True)
+class StooqClient:
+    base_url: str = "https://stooq.com"
+    timeout_sec: int = 4
+
+    def fetch_quote(self, symbol: str) -> dict[str, Any]:
+        normalized = str(symbol or "").strip().upper()
+        if not normalized:
+            raise StooqError("STOOQ_INVALID_SYMBOL")
+        stooq_symbol = f"{normalized.lower()}.us"
+        url = f"{self.base_url}/q/l/?s={stooq_symbol}&i=d"
+        req = Request(url, headers={"User-Agent": "trading-skills-engine/2.0"})
+
+        try:
+            with urlopen(req, timeout=self.timeout_sec) as response:
+                text = response.read().decode("utf-8", errors="ignore")
+        except HTTPError as exc:
+            raise StooqError(f"STOOQ_HTTP_{exc.code}") from exc
+        except URLError as exc:
+            raise StooqError("STOOQ_NETWORK_ERROR") from exc
+        except Exception as exc:
+            raise StooqError("STOOQ_PARSE_ERROR") from exc
+
+        reader = csv.DictReader(StringIO(text))
+        rows = list(reader)
+        if not rows:
+            raise StooqError("STOOQ_NO_ROWS")
+        row = rows[0]
+        close_raw = str(row.get("Close") or "").strip()
+        if not close_raw or close_raw.upper() == "N/D":
+            raise StooqError("STOOQ_SYMBOL_NOT_FOUND")
+
+        def _num(key: str) -> float | None:
+            raw = str(row.get(key) or "").strip()
+            if not raw or raw.upper() == "N/D":
+                return None
+            try:
+                return float(raw)
+            except (TypeError, ValueError):
+                return None
+
+        metrics: dict[str, Any] = {
+            "date": str(row.get("Date") or ""),
+            "open": _num("Open"),
+            "high": _num("High"),
+            "low": _num("Low"),
+            "close": _num("Close"),
+            "volume": _num("Volume"),
+        }
+        return {
+            "source": "stooq",
+            "url": url,
+            "metrics": metrics,
+        }

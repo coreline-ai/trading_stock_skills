@@ -6,11 +6,12 @@ from pathlib import Path
 import re
 from urllib.parse import parse_qs
 
-from fastapi import FastAPI, Query, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import BackgroundTasks, FastAPI, Query, Request
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from trading_skills_engine.ai.report_service import AIReportService
 from trading_skills_engine.config.fmp_runtime import FMPRuntimeSettingsStore
 from trading_skills_engine.engine.orchestrator import SkillEngineOrchestrator
 from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
@@ -68,6 +69,7 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
 
     app.state.dashboard_bff = DashboardBFF(snapshot_path=snapshot_path)
     app.state.dashboard_bff_v2 = DashboardBFFV2()
+    app.state.ai_report_service = AIReportService()
     app.state.templates = templates
 
     app.mount("/static", StaticFiles(directory=str(web_dir / "static")), name="static")
@@ -75,9 +77,151 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
     app.include_router(engine_router)
     app.include_router(engine_v2_router)
 
+    @app.middleware("http")
+    async def add_default_web_headers(request: Request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        response.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+        response.headers.setdefault("Cross-Origin-Resource-Policy", "same-origin")
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            (
+                "default-src 'self'; "
+                "script-src 'self' https://cdn.tailwindcss.com 'unsafe-inline'; "
+                "style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data:; "
+                "font-src 'self' data:; "
+                "connect-src 'self'; "
+                "object-src 'none'; "
+                "base-uri 'self'; "
+                "frame-ancestors 'none'"
+            ),
+        )
+        if request.url.scheme == "https":
+            response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
+
+        if path.startswith("/static/"):
+            response.headers.setdefault("Cache-Control", "public, max-age=86400")
+        elif path in {"/manifest.webmanifest", "/robots.txt", "/sitemap.xml", "/sw.js"}:
+            response.headers.setdefault("Cache-Control", "public, max-age=3600")
+        elif "text/html" in response.headers.get("content-type", ""):
+            response.headers.setdefault("Cache-Control", "no-cache")
+        return response
+
     @app.get("/healthz")
     def healthcheck() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/api/v2/ai-report/latest")
+    def ai_report_latest(request: Request) -> dict:
+        service: AIReportService = request.app.state.ai_report_service
+        latest = service.read_latest()
+        if not latest:
+            return {
+                "ready": False,
+                "message": "No AI report found",
+                "api_configured": service.api_configured(),
+            }
+        return {
+            "ready": True,
+            "api_configured": service.api_configured(),
+            "report": latest,
+        }
+
+    @app.get("/robots.txt", response_class=PlainTextResponse)
+    def robots_txt() -> PlainTextResponse:
+        return PlainTextResponse("User-agent: *\nAllow: /\nSitemap: /sitemap.xml\n")
+
+    @app.get("/sitemap.xml")
+    def sitemap_xml(request: Request) -> Response:
+        base_url = str(request.base_url).rstrip("/")
+        body = (
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            f"  <url><loc>{base_url}/dashboard</loc></url>\n"
+            f"  <url><loc>{base_url}/healthz</loc></url>\n"
+            "</urlset>\n"
+        )
+        return Response(content=body, media_type="application/xml")
+
+    @app.get("/manifest.webmanifest", response_class=JSONResponse)
+    def web_manifest() -> JSONResponse:
+        payload = {
+            "name": "Coreline Stock AI",
+            "short_name": "Coreline AI",
+            "description": "2단계 교집합 기반 종목 추천/분석 대시보드",
+            "lang": "ko-KR",
+            "start_url": "/dashboard",
+            "scope": "/",
+            "display": "standalone",
+            "background_color": "#F3F4F6",
+            "theme_color": "#1D4ED8",
+            "icons": [
+                {
+                    "src": "/static/favicon.svg",
+                    "sizes": "any",
+                    "type": "image/svg+xml",
+                    "purpose": "any maskable",
+                }
+            ],
+        }
+        return JSONResponse(payload)
+
+    @app.get("/sw.js")
+    def service_worker() -> Response:
+        script = """
+const CACHE_NAME = "coreline-static-v1";
+const STATIC_ASSETS = [
+  "/dashboard",
+  "/static/dashboard.css",
+  "/static/favicon.svg",
+  "/manifest.webmanifest"
+];
+self.addEventListener("install", (event) => {
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)));
+  self.skipWaiting();
+});
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+  if (request.method !== "GET" || url.origin !== self.location.origin) {
+    return;
+  }
+  if (url.pathname.startsWith("/static/")) {
+    event.respondWith(
+      caches.match(request).then((cached) => cached || fetch(request).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+        return res;
+      }))
+    );
+    return;
+  }
+  if (url.pathname === "/dashboard") {
+    event.respondWith(
+      fetch(request).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+        return res;
+      }).catch(() => caches.match(request))
+    );
+  }
+});
+        """.strip()
+        return Response(content=script, media_type="application/javascript")
 
     @app.get("/dashboard", response_class=HTMLResponse)
     def dashboard_page(
@@ -198,6 +342,21 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
             )
         )
         return RedirectResponse(url="/dashboard", status_code=303)
+
+    @app.post("/dashboard/ai-report/run")
+    async def dashboard_ai_report_run(request: Request, background_tasks: BackgroundTasks) -> RedirectResponse:
+        raw_bytes = await request.body()
+        if len(raw_bytes) > 64_000:
+            return RedirectResponse(url="/dashboard", status_code=303)
+        service: AIReportService = request.app.state.ai_report_service
+        runtime = service.read_runtime()
+        if str(runtime.get("status") or "").lower() == "running":
+            return RedirectResponse(url="/dashboard?ai_report=running", status_code=303)
+        if not service.api_configured():
+            service.generate_and_persist()
+            return RedirectResponse(url="/dashboard?ai_report=missing_key", status_code=303)
+        background_tasks.add_task(service.run_with_runtime)
+        return RedirectResponse(url="/dashboard?ai_report=queued", status_code=303)
 
     return app
 

@@ -7,6 +7,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
+from trading_skills_engine.ai.report_service import AIReportService
 from trading_skills_engine.config.fmp_runtime import get_fmp_runtime_state
 from trading_skills_engine.skills.catalog import SKILL_CATALOG
 from trading_skills_engine.skills_v2.registry import is_implemented, is_recommendation_capable
@@ -100,6 +101,7 @@ class DashboardBFFV2:
     def __init__(self, report_path: Path | None = None) -> None:
         env_path = os.getenv("SKILL_RUN_REPORT_V2_PATH")
         self.report_path = Path(env_path) if env_path else (report_path or DEFAULT_REPORT_PATH)
+        self.ai_report_service = AIReportService(source_report_path=self.report_path)
 
     def get_dashboard_view_model(self) -> dict[str, Any]:
         report = self._load_report()
@@ -151,6 +153,10 @@ class DashboardBFFV2:
         )
         selected_skill_top5 = _build_selected_skill_top5(results_enriched)
         final_intersection_top5 = _build_final_intersection_top5(pipeline_tables)
+        ai_runtime = _build_ai_runtime(
+            source_report=report,
+            ai_report_service=self.ai_report_service,
+        )
         recommender_list = [item for item in catalog if item["trait_role"] in {"direct", "candidate"}]
         analyzer_list = [item for item in catalog if item["trait_role"] == "analysis_only"]
         selected_recommender_count = sum(1 for item in recommender_list if item.get("selected"))
@@ -174,6 +180,7 @@ class DashboardBFFV2:
                 "selected_skill_scores": selected_skill_top5,
                 "final_intersection": final_intersection_top5,
             },
+            "ai_runtime": ai_runtime,
             "left_menu": {
                 "recommender_skills": recommender_list,
                 "analyzer_skills": analyzer_list,
@@ -897,3 +904,127 @@ def _build_symbol_name_ko_map(
         if ko:
             symbol_name_ko[symbol] = ko
     return symbol_name_ko
+
+
+def _build_ai_runtime(
+    source_report: dict[str, Any],
+    ai_report_service: AIReportService,
+) -> dict[str, Any]:
+    target_count = len(_extract_ai_target_symbols(source_report))
+    api_configured = ai_report_service.api_configured()
+    runtime = ai_report_service.read_runtime()
+    status = str(runtime.get("status") or "idle").lower()
+    is_running = status == "running"
+    disabled_reason = ""
+    if is_running:
+        disabled_reason = "AI 리포트 생성 진행 중"
+    elif not api_configured:
+        disabled_reason = "GLM API Key missing"
+    elif target_count == 0:
+        disabled_reason = "최종 TOP5 없음"
+
+    latest_raw = ai_report_service.read_latest()
+    latest_report = _normalize_ai_report(latest_raw) if isinstance(latest_raw, dict) else None
+
+    return {
+        "api_configured": api_configured,
+        "status": status,
+        "is_running": is_running,
+        "runtime": runtime,
+        "can_run": api_configured and target_count > 0 and not is_running,
+        "disabled_reason": disabled_reason,
+        "target_count": target_count,
+        "latest_report": latest_report,
+    }
+
+
+def _extract_ai_target_symbols(source_report: dict[str, Any]) -> list[str]:
+    symbols: list[str] = []
+    pipeline = source_report.get("pipeline")
+    if isinstance(pipeline, dict):
+        final_summary = pipeline.get("final_summary")
+        top5 = final_summary.get("top5_from_top10") if isinstance(final_summary, dict) else None
+        if isinstance(top5, list):
+            for row in top5[:5]:
+                if not isinstance(row, dict):
+                    continue
+                symbol = str(row.get("symbol") or "").strip().upper()
+                if symbol and symbol not in symbols:
+                    symbols.append(symbol)
+    if symbols:
+        return symbols
+
+    top_picks = source_report.get("top_picks")
+    if isinstance(top_picks, list):
+        for row in top_picks[:5]:
+            if not isinstance(row, dict):
+                continue
+            symbol = str(row.get("symbol") or "").strip().upper()
+            if symbol and symbol not in symbols:
+                symbols.append(symbol)
+    return symbols[:5]
+
+
+def _normalize_ai_report(raw: dict[str, Any]) -> dict[str, Any]:
+    symbols_raw = raw.get("symbols")
+    symbols_raw = symbols_raw if isinstance(symbols_raw, list) else []
+    symbols: list[dict[str, Any]] = []
+    for row in symbols_raw:
+        if not isinstance(row, dict):
+            continue
+        symbol = str(row.get("symbol") or "").strip().upper()
+        if not symbol:
+            continue
+        decision = str(row.get("decision") or "WATCH").upper()
+        decisions_ko = {
+            "BUY": "매수",
+            "WATCH": "관망",
+            "AVOID": "비매수",
+        }
+        evidence_raw = row.get("evidence")
+        evidence_raw = evidence_raw if isinstance(evidence_raw, list) else []
+        evidence: list[dict[str, Any]] = []
+        for item in evidence_raw:
+            if not isinstance(item, dict):
+                continue
+            source = str(item.get("source") or "").strip().lower()
+            if source not in {"yahoo", "stooq", "fmp", "internal"}:
+                continue
+            evidence.append(
+                {
+                    "source": source,
+                    "source_label": {
+                        "yahoo": "Yahoo Finance",
+                        "stooq": "Stooq",
+                        "fmp": "FMP",
+                        "internal": "내부 파이프라인",
+                    }.get(source, source),
+                    "url": str(item.get("url") or ""),
+                    "metrics": item.get("metrics", {}) if isinstance(item.get("metrics"), dict) else {},
+                }
+            )
+
+        symbols.append(
+            {
+                "symbol": symbol,
+                "decision": decision,
+                "decision_ko": decisions_ko.get(decision, "관망"),
+                "confidence_0_1": round(_to_float(row.get("confidence_0_1"), 0.5), 2),
+                "score_0_100": round(_to_float(row.get("score_0_100"), 50.0), 2),
+                "summary_ko": str(row.get("summary_ko") or ""),
+                "reasons_ko": _to_str_list(row.get("reasons_ko")),
+                "risks_ko": _to_str_list(row.get("risks_ko")),
+                "evidence": evidence,
+            }
+        )
+
+    return {
+        "run_id": str(raw.get("run_id") or ""),
+        "created_at": str(raw.get("created_at") or ""),
+        "status": str(raw.get("status") or "unavailable"),
+        "provider": str(raw.get("provider") or "glm"),
+        "model": str(raw.get("model") or "glm-4.5"),
+        "portfolio_summary_ko": str(raw.get("portfolio_summary_ko") or ""),
+        "warnings": _to_str_list(raw.get("warnings")),
+        "symbols": symbols,
+    }

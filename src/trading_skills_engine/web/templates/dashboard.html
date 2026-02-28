@@ -1,9 +1,27 @@
 <!DOCTYPE html>
 <html lang="ko">
   <head>
+    {% set canonical_url = (request.base_url|string) ~ 'dashboard' %}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ model.header.app_name }}</title>
+    <meta name="description" content="2단계 교집합 파이프라인 기반 종목 추천 및 분석 대시보드" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta name="theme-color" content="#1D4ED8" />
+    <meta name="application-name" content="{{ model.header.app_name }}" />
+    <link rel="canonical" href="{{ canonical_url }}" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="shortcut icon" href="/static/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ model.header.app_name }}" />
+    <meta property="og:description" content="추천 스킬과 분석 스킬을 분리해 교집합 기반으로 후보를 선별합니다." />
+    <meta property="og:url" content="{{ canonical_url }}" />
+    <meta property="og:image" content="{{ (request.base_url|string) ~ 'static/favicon.svg' }}" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="{{ model.header.app_name }}" />
+    <meta name="twitter:description" content="트레이딩 스킬 실행 결과와 최종 TOP5를 확인하세요." />
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -164,6 +182,26 @@
 
             <button type="submit" class="w-full rounded-2xl bg-black py-3 text-lg font-bold text-white">선택한 스킬 실행</button>
             <p id="run-status" class="text-xs text-muted"></p>
+          </form>
+
+          <form id="ai-report-form" method="post" action="/dashboard/ai-report/run" class="mt-3 space-y-2">
+            <button
+              id="ai-report-btn"
+              type="submit"
+              class="w-full rounded-2xl py-2.5 text-sm font-bold text-white {% if model.ai_runtime.can_run %}bg-slate-800 hover:bg-slate-900{% else %}cursor-not-allowed bg-slate-400{% endif %}"
+              {% if not model.ai_runtime.can_run %}disabled title="{{ model.ai_runtime.disabled_reason }}"{% endif %}
+            >
+              {% if model.ai_runtime.is_running %}AI 리포트 생성 진행 중...{% else %}AI 최종 리포트 생성{% endif %}
+            </button>
+            <p class="text-[11px] text-muted">
+              GLM API Key {% if model.ai_runtime.api_configured %}configured{% else %}missing{% endif %} · 대상 {{ model.ai_runtime.target_count }}개 · 상태 {{ model.ai_runtime.status }}
+            </p>
+            {% if not model.ai_runtime.can_run and model.ai_runtime.disabled_reason %}
+              <p class="text-[11px] text-bad">{{ model.ai_runtime.disabled_reason }}</p>
+            {% endif %}
+            <p id="ai-run-status" class="text-[11px] text-muted">
+              {% if request.query_params.get('ai_report') == 'queued' %}AI 리포트 생성 요청이 접수되었습니다. 잠시 후 자동 반영됩니다.{% elif request.query_params.get('ai_report') == 'running' %}이미 AI 리포트 생성이 진행 중입니다.{% elif request.query_params.get('ai_report') == 'missing_key' %}GLM API Key가 없어 실행되지 않았습니다.{% endif %}
+            </p>
           </form>
         </aside>
 
@@ -610,6 +648,97 @@
             {% endif %}
             {# Internal pipeline debug reasons are intentionally hidden in UI. #}
           </article>
+
+          <article class="rounded-2xl border border-line bg-panel p-4">
+            <h2 class="mb-3 text-lg font-semibold">AI 최종 리포트 (GLM 4.5)</h2>
+            {% if model.ai_runtime.latest_report %}
+              {% set ai = model.ai_runtime.latest_report %}
+              <div class="mb-2 flex flex-wrap items-center gap-2 text-xs">
+                <span class="rounded-full border border-line px-2 py-1">status {{ ai.status }}</span>
+                <span class="rounded-full border border-line px-2 py-1">model {{ ai.model }}</span>
+                <span class="rounded-full border border-line px-2 py-1">created {{ ai.created_at or '-' }}</span>
+              </div>
+              {% if ai.portfolio_summary_ko %}
+                <p class="mb-3 rounded-lg bg-slate-50 p-2 text-sm">{{ ai.portfolio_summary_ko }}</p>
+              {% endif %}
+              {% if ai.symbols %}
+                <div class="space-y-3">
+                  {% for row in ai.symbols %}
+                    <div class="rounded-xl border border-line p-3">
+                      <div class="flex flex-wrap items-center justify-between gap-2">
+                        <p class="text-base font-semibold">{{ symbol_with_ko(row.symbol) }}</p>
+                        <div class="flex items-center gap-2 text-xs">
+                          <span class="rounded px-2 py-0.5 font-semibold {% if row.decision == 'BUY' %}bg-emerald-100 text-ok{% elif row.decision == 'WATCH' %}bg-amber-100 text-warn{% else %}bg-red-100 text-bad{% endif %}">{{ row.decision_ko }}</span>
+                          <span class="rounded border border-line px-2 py-0.5">score {{ '%.1f'|format(row.score_0_100) }}</span>
+                          <span class="rounded border border-line px-2 py-0.5">conf {{ '%.2f'|format(row.confidence_0_1) }}</span>
+                        </div>
+                      </div>
+                      {% if row.summary_ko %}
+                        <p class="mt-2 text-sm">{{ row.summary_ko }}</p>
+                      {% endif %}
+                      {% if row.reasons_ko %}
+                        <p class="mt-1 text-xs text-slate-700">근거: {{ row.reasons_ko|join(' | ') }}</p>
+                      {% endif %}
+                      {% if row.risks_ko %}
+                        <p class="mt-1 text-xs text-bad">리스크: {{ row.risks_ko|join(' | ') }}</p>
+                      {% endif %}
+                      {% if row.evidence %}
+                        <div class="mt-2 overflow-x-auto">
+                          <table class="min-w-full text-xs">
+                            <thead>
+                              <tr class="text-left text-muted">
+                                <th class="pr-4">source</th>
+                                <th class="pr-4">url</th>
+                                <th>metrics</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for ev in row.evidence %}
+                                <tr class="border-t border-line">
+                                  <td class="py-1 pr-4">{{ ev.source_label }}</td>
+                                  <td class="py-1 pr-4">
+                                    {% if ev.url %}
+                                      <a href="{{ ev.url }}" target="_blank" rel="noopener noreferrer" class="text-pri underline">open</a>
+                                    {% else %}
+                                      -
+                                    {% endif %}
+                                  </td>
+                                  <td class="py-1">
+                                    {% if ev.metrics %}
+                                      {% for k, v in ev.metrics.items() %}
+                                        <span class="mr-2 inline-block">{{ k }}={{ v }}</span>
+                                      {% endfor %}
+                                    {% else %}
+                                      -
+                                    {% endif %}
+                                  </td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="text-sm text-muted">AI 종목 분석 결과가 없습니다.</p>
+              {% endif %}
+              {% if ai.warnings %}
+                <div class="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-2">
+                  <p class="text-xs font-semibold text-amber-900">AI Warnings</p>
+                  <ul class="mt-1 space-y-1 text-xs text-amber-800">
+                    {% for warning in ai.warnings %}
+                      <li>{{ warning }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            {% else %}
+              <p class="text-sm text-muted">아직 AI 최종 리포트가 없습니다. 버튼을 눌러 생성하세요.</p>
+            {% endif %}
+          </article>
+
           <article class="rounded-2xl border border-line bg-panel p-4">
             <h2 class="mb-3 text-lg font-semibold">스킬 실행 결과</h2>
             {% if model.results %}
@@ -710,6 +839,9 @@
       const selectedCount = document.getElementById('selected-count');
       const roleCountsEl = document.getElementById('role-counts');
       const roleLimitMsgEl = document.getElementById('role-limit-msg');
+      const aiForm = document.getElementById('ai-report-form');
+      const aiStatusEl = document.getElementById('ai-run-status');
+      const aiButton = document.getElementById('ai-report-btn');
       const skillBoxes = () => [...document.querySelectorAll('input[name="recommender_skills"], input[name="analyzer_skills"]')];
       const roleMax = { recommender: 5, analyzer: 3 };
 
@@ -793,6 +925,26 @@
         applyRoleCaps();
         statusEl.textContent = '실행 중...';
       });
+
+      if (aiForm) {
+        aiForm.addEventListener('submit', () => {
+          if (aiStatusEl) {
+            aiStatusEl.textContent = 'AI 리포트 생성 요청 전송 중...';
+          }
+          if (aiButton) {
+            aiButton.disabled = true;
+            aiButton.classList.remove('bg-slate-800', 'hover:bg-slate-900');
+            aiButton.classList.add('bg-slate-400', 'cursor-not-allowed');
+            aiButton.textContent = 'AI 리포트 생성 요청됨...';
+          }
+        });
+      }
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => null);
+        });
+      }
     </script>
   </body>
 </html>

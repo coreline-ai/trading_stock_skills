@@ -33,6 +33,20 @@ wait_for_stop() {
   return 1
 }
 
+wait_for_start() {
+  local pid="$1"
+  for _ in $(seq 1 "${STARTUP_TIMEOUT}"); do
+    if is_healthy; then
+      return 0
+    fi
+    if ! kill -0 "${pid}" >/dev/null 2>&1; then
+      return 1
+    fi
+    sleep 1
+  done
+  return 1
+}
+
 stop_server() {
   local pids
   pids="$(port_pids)"
@@ -62,22 +76,24 @@ start_server() {
   local pid=$!
   echo "${pid}" >"${PID_PATH}"
 
-  for _ in $(seq 1 "${STARTUP_TIMEOUT}"); do
-    if is_healthy; then
-      echo "started pid=${pid} url=http://${HOST}:${PORT}/dashboard"
-      return 0
-    fi
-    if ! kill -0 "${pid}" >/dev/null 2>&1; then
-      echo "server exited early pid=${pid}"
-      tail -n 120 "${LOG_PATH}" || true
-      return 1
-    fi
-    sleep 1
-  done
+  if wait_for_start "${pid}"; then
+    echo "started pid=${pid} url=http://${HOST}:${PORT}/dashboard"
+    return 0
+  fi
 
   echo "healthcheck timeout url=${HEALTH_URL}"
   tail -n 120 "${LOG_PATH}" || true
   return 1
+}
+
+ensure_server() {
+  if is_healthy; then
+    echo "health=ok url=http://${HOST}:${PORT}/dashboard"
+    return 0
+  fi
+  echo "health=fail -> restarting"
+  stop_server
+  start_server
 }
 
 status_server() {
@@ -123,8 +139,11 @@ case "${ACTION}" in
     echo "health=fail"
     exit 1
     ;;
+  ensure)
+    ensure_server
+    ;;
   *)
-    echo "usage: $0 {start|stop|restart|status|check}"
+    echo "usage: $0 {start|stop|restart|status|check|ensure}"
     exit 2
     ;;
 esac

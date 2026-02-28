@@ -29,6 +29,14 @@ def test_v2_skills_catalog_contract(client):
     assert isinstance(first["implemented"], bool)
 
 
+def test_v2_ai_report_latest_contract(client):
+    response = client.get("/api/v2/ai-report/latest")
+    assert response.status_code == 200
+    body = response.json()
+    assert "ready" in body
+    assert "api_configured" in body
+
+
 def test_v2_skills_catalog_has_expanded_implemented_set(client):
     response = client.get("/api/v2/skills")
     assert response.status_code == 200
