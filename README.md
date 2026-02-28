@@ -1,5 +1,10 @@
 # Trading Skills Engine + Dashboard
 
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.116-009688?logo=fastapi&logoColor=white)](pyproject.toml)
+[![Pytest](https://img.shields.io/badge/Pytest-48%20passed-0A9EDC?logo=pytest&logoColor=white)](tests)
+[![Upstream](https://img.shields.io/badge/Upstream-claude--trading--skills-181717?logo=github&logoColor=white)](https://github.com/tradermonty/claude-trading-skills)
+
 FastAPI 기반 트레이딩 스킬 실행 엔진과 대시보드입니다.  
 현재 카탈로그는 **38개 스킬**이며, 대시보드는 **v2 2단계 교집합 파이프라인**을 기본 실행 경로로 사용합니다.
 

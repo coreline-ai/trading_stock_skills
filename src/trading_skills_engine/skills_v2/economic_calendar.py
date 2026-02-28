@@ -28,12 +28,14 @@ class EconomicCalendarAnalyzer(SkillAnalyzer):
             payload = cached.payload
             if isinstance(payload, dict):
                 fmp_state = str(payload.get("_source_state") or "stale")
+                rss_state = _rss_state(payload)
             else:
                 fmp_state = "stale"
+                rss_state = "unavailable"
             if fmp_state == "live" and context.fmp_calendar is None:
                 fmp_state = "stale"
             if not (context.fmp_calendar is not None and fmp_state != "live"):
-                return self._build_ok(payload, CacheStore.cache_info("fresh", cached), fmp_state, "unavailable")
+                return self._build_ok(payload, CacheStore.cache_info("fresh", cached), fmp_state, rss_state)
 
         if context.fmp_calendar is None:
             stale = context.cache_store.get_stale(cache_key)
@@ -65,6 +67,7 @@ class EconomicCalendarAnalyzer(SkillAnalyzer):
                 return self._build_ok(proxy_payload, CacheStore.cache_info("fresh", saved), "unavailable", rss_state)
             payload = self._parse_events(raw)
             payload["_source_state"] = "live"
+            payload["_rss_state"] = "unavailable"
             saved = context.cache_store.set(cache_key, payload, ttl_hours=24)
             return self._build_ok(payload, CacheStore.cache_info("fresh", saved), "live", "unavailable")
         except Exception:
@@ -183,6 +186,7 @@ class EconomicCalendarAnalyzer(SkillAnalyzer):
                 "Low": int(summary.get("Low", 0)),
             },
             "_source_state": "stale",
+            "_rss_state": rss_state,
         }
         return payload, rss_state, warnings
 
@@ -248,3 +252,17 @@ def _source_state(payload: Any) -> str:
     if isinstance(payload, dict):
         return str(payload.get("_source_state") or "stale")
     return "stale"
+
+
+def _rss_state(payload: Any) -> str:
+    if not isinstance(payload, dict):
+        return "unavailable"
+    raw = str(payload.get("_rss_state") or "").strip().lower()
+    if raw in {"live", "stale", "unavailable"}:
+        return raw
+    mode = str(payload.get("mode") or "").strip().lower()
+    if mode == "rss_proxy":
+        return "live"
+    if mode == "template_proxy":
+        return "stale"
+    return "unavailable"

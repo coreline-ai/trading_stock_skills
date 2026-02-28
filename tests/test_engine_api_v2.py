@@ -128,6 +128,56 @@ def test_v2_market_news_runs_with_rss_without_fmp_key(client, monkeypatch):
     assert result["source_statuses"]["rss"] == "live"
 
 
+def test_economic_calendar_cached_run_preserves_rss_state(monkeypatch):
+    from datetime import date
+
+    from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
+    from trading_skills_engine.skills_v2.contracts import EngineRunRequestV2
+
+    orchestrator = SkillEngineOrchestratorV2()
+    orchestrator.fmp_calendar = None
+
+    def _fake_fetch(max_items=24):
+        del max_items
+        return (
+            [
+                {
+                    "headline": "Fed signals cautious rate stance",
+                    "source": "Federal Reserve",
+                    "source_url": "https://example.com/fed",
+                    "published_at": "2026-02-28T10:00:00+00:00",
+                }
+            ],
+            [],
+        )
+
+    monkeypatch.setattr(orchestrator.rss_client, "fetch", _fake_fetch)
+
+    req = EngineRunRequestV2(
+        selected_skills=["economic-calendar-fetcher"],
+        as_of_date=date(2026, 2, 28),
+        params_by_skill={
+            "economic-calendar-fetcher": {
+                "from_days": 19,
+                "to_days": 123,
+                "country": "USRSSCACHECHECK",
+            }
+        },
+    )
+
+    first = orchestrator.run(req)
+    second = orchestrator.run(req)
+    first_result = first.results[0]
+    second_result = second.results[0]
+
+    assert first_result.status == "ok"
+    assert second_result.status == "ok"
+    assert first_result.analysis_payload.get("mode") == "rss_proxy"
+    assert second_result.analysis_payload.get("mode") == "rss_proxy"
+    assert first_result.source_statuses.get("rss") == "live"
+    assert second_result.source_statuses.get("rss") == "live"
+
+
 def test_market_news_extract_tickers_filters_noise_tokens():
     from trading_skills_engine.skills_v2.market_news import _extract_tickers
 
