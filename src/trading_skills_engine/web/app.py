@@ -3,6 +3,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from datetime import date
 from pathlib import Path
+import re
 from urllib.parse import parse_qs
 
 from fastapi import FastAPI, Query, Request
@@ -10,9 +11,13 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from trading_skills_engine.config.fmp_runtime import FMPRuntimeSettingsStore
 from trading_skills_engine.engine.orchestrator import SkillEngineOrchestrator
 from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
+from trading_skills_engine.skills.catalog import SKILL_CATALOG
 from trading_skills_engine.skills_v2.contracts import EngineRunRequestV2
+from trading_skills_engine.skills_v2.registry import is_implemented
+from trading_skills_engine.skills_v2.traits import get_skill_trait
 from trading_skills_engine.web.models import StrategyProfile
 from trading_skills_engine.web.routes_dashboard import router as dashboard_router
 from trading_skills_engine.web.routes_engine import router as engine_router
@@ -45,14 +50,10 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
 
         orchestrator_v2 = SkillEngineOrchestratorV2()
         if not orchestrator_v2.report_path.exists():
+            default_v2_skills = [item.slug for item in SKILL_CATALOG if is_implemented(item.slug)]
             orchestrator_v2.run_and_persist(
                 EngineRunRequestV2(
-                    selected_skills=[
-                        "economic-calendar-fetcher",
-                        "earnings-calendar",
-                        "market-news-analyst",
-                        "us-stock-analysis",
-                    ],
+                    selected_skills=default_v2_skills,
                     as_of_date=date.today(),
                 )
             )
@@ -92,11 +93,41 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
         }
         return templates.TemplateResponse(request, "dashboard.html", context)
 
+    @app.post("/dashboard/fmp-toggle")
+    async def dashboard_fmp_toggle(request: Request) -> RedirectResponse:
+        raw_bytes = await request.body()
+        if len(raw_bytes) > 64_000:
+            return RedirectResponse(url="/dashboard", status_code=303)
+
+        raw_body = raw_bytes.decode("utf-8", errors="ignore")
+        try:
+            parsed = parse_qs(raw_body, max_num_fields=128)
+        except ValueError:
+            parsed = {}
+
+        enabled = _form_bool(_first(parsed, "enabled", "1"), default=True)
+        FMPRuntimeSettingsStore().set_enabled(enabled)
+        return RedirectResponse(url="/dashboard", status_code=303)
+
     @app.post("/dashboard/run")
     async def dashboard_run(request: Request) -> RedirectResponse:
-        raw_body = (await request.body()).decode("utf-8")
-        parsed = parse_qs(raw_body)
-        selected = [str(item) for item in parsed.get("skills", []) if str(item).strip()]
+        raw_bytes = await request.body()
+        if len(raw_bytes) > 64_000:
+            return RedirectResponse(url="/dashboard", status_code=303)
+
+        raw_body = raw_bytes.decode("utf-8", errors="ignore")
+        try:
+            parsed = parse_qs(raw_body, max_num_fields=512)
+        except ValueError:
+            parsed = {}
+
+        allowed_slugs = {item.slug for item in SKILL_CATALOG}
+        selected: list[str] = []
+        for raw in parsed.get("skills", []):
+            slug = str(raw).strip()
+            if not slug or slug not in allowed_slugs or slug in selected:
+                continue
+            selected.append(slug)
 
         params_by_skill = {
             "economic-calendar-fetcher": {
@@ -118,6 +149,61 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
         }
 
         filtered_params = {slug: params_by_skill.get(slug, {}) for slug in selected}
+        top_picks_mode = _first(parsed, "param__top-picks__mode", "skill_consensus").strip()
+        if top_picks_mode not in {"skill_consensus", "watchlist_consensus", "role_gated_consensus", "two_stage_intersection"}:
+            top_picks_mode = "skill_consensus"
+
+        watchlist_text = _first(parsed, "param__top-picks__watchlist", "")
+        watchlist_symbols = _parse_watchlist_symbols(watchlist_text)
+        top_picks_limit = _form_int(_first(parsed, "param__top-picks__limit"), 5)
+        top_picks_primary = _first(parsed, "param__top-picks__primary_skill", "").strip()
+        top_picks_confirm = _first(parsed, "param__top-picks__confirm_skills", "").strip()
+        top_picks_analysis = _first(parsed, "param__top-picks__analysis_skills", "").strip()
+        top_picks_min_confirm_votes = _form_int(_first(parsed, "param__top-picks__min_confirm_votes"), 1)
+        pipeline_recommenders_input = _first(parsed, "param__pipeline__recommender_skills", "").strip()
+        pipeline_analyzers_input = _first(parsed, "param__pipeline__analyzer_skills", "").strip()
+        pipeline_top_n = max(5, min(50, _form_int(_first(parsed, "param__pipeline__recommender_top_n"), 25)))
+        pipeline_include_watch = _form_bool(_first(parsed, "param__pipeline__include_watch"), False)
+        pipeline_comparison_mode = _form_bool(_first(parsed, "param__pipeline__comparison_mode"), False)
+        analyzer_pass_policy = "pass_or_watch" if pipeline_include_watch else "all_pass"
+
+        role_recommenders: list[str] = []
+        role_analyzers: list[str] = []
+        for slug in selected:
+            trait = get_skill_trait(slug)
+            role = trait.recommendation_role if trait else "analysis_only"
+            if role in {"direct", "candidate"}:
+                role_recommenders.append(slug)
+            else:
+                role_analyzers.append(slug)
+
+        effective_recommenders = role_recommenders if top_picks_mode == "two_stage_intersection" else _parse_skill_slugs(pipeline_recommenders_input)
+        effective_analyzers = role_analyzers if top_picks_mode == "two_stage_intersection" else _parse_skill_slugs(pipeline_analyzers_input)
+        pipeline_recommenders = ",".join(effective_recommenders)
+        pipeline_analyzers = ",".join(effective_analyzers)
+
+        filtered_params["top-picks"] = {
+            "primary_skill": top_picks_primary,
+            "confirm_skills": top_picks_confirm,
+            "analysis_skills": top_picks_analysis,
+            "min_confirm_votes": top_picks_min_confirm_votes,
+            "recommender_skills": pipeline_recommenders,
+            "analyzer_skills": pipeline_analyzers,
+            "recommender_top_n": pipeline_top_n,
+            "analyzer_pass_policy": analyzer_pass_policy,
+            "comparison_mode": pipeline_comparison_mode,
+        }
+
+        pipeline_config = None
+        if top_picks_mode == "two_stage_intersection":
+            pipeline_config = {
+                "recommender_skills": effective_recommenders,
+                "analyzer_skills": effective_analyzers,
+                "recommender_top_n": pipeline_top_n,
+                "intersection_policy": "strict",
+                "analyzer_pass_policy": analyzer_pass_policy,
+                "comparison_mode": pipeline_comparison_mode,
+            }
 
         orchestrator_v2 = SkillEngineOrchestratorV2()
         orchestrator_v2.run_and_persist(
@@ -125,6 +211,10 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
                 selected_skills=selected,
                 as_of_date=date.today(),
                 params_by_skill=filtered_params,
+                top_picks_mode=top_picks_mode,
+                watchlist_symbols=watchlist_symbols,
+                top_picks_limit=top_picks_limit,
+                pipeline_config=pipeline_config,
             )
         )
         return RedirectResponse(url="/dashboard", status_code=303)
@@ -140,6 +230,47 @@ def _form_int(raw: object, default: int) -> int:
         return int(str(raw))
     except (TypeError, ValueError):
         return default
+
+
+def _form_bool(raw: object, default: bool) -> bool:
+    text = str(raw).strip().lower()
+    if text in {"1", "true", "on", "yes"}:
+        return True
+    if text in {"0", "false", "off", "no"}:
+        return False
+    return default
+
+
+def _parse_watchlist_symbols(raw_text: str) -> list[str]:
+    if not raw_text:
+        return []
+    parsed: list[str] = []
+    for token in re.split(r"[\s,]+", raw_text):
+        symbol = token.strip().upper()
+        if not symbol or symbol in parsed:
+            continue
+        if len(symbol) > 10:
+            continue
+        if re.fullmatch(r"[A-Z0-9.\-]+", symbol) is None:
+            continue
+        parsed.append(symbol)
+    return parsed[:200]
+
+
+def _parse_skill_slugs(raw_text: str) -> list[str]:
+    if not raw_text:
+        return []
+    parsed: list[str] = []
+    for token in re.split(r"[\s,]+", raw_text):
+        slug = token.strip().lower()
+        if not slug or slug in parsed:
+            continue
+        if len(slug) > 80:
+            continue
+        if re.fullmatch(r"[a-z0-9\-]+", slug) is None:
+            continue
+        parsed.append(slug)
+    return parsed[:50]
 
 
 def _first(parsed: dict[str, list[str]], key: str, default: str = "") -> str:

@@ -8,6 +8,7 @@ __pycache__/
 # Virtualenv
 .venv/
 venv/
+.env
 
 # OS
 .DS_Store
@@ -18,3 +19,5 @@ venv/
 
 # Keep reports source files but ignore transient cache artifacts
 reports/cache/
+reports/skill_runs/history_v2/
+reports/runtime/

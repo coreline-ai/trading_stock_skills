@@ -36,6 +36,21 @@
             <p class="text-sm text-muted">기준일 {{ model.date_display_ko }}</p>
           </div>
           <div class="flex flex-wrap items-center gap-2 text-xs">
+            <form method="post" action="/dashboard/fmp-toggle">
+              <input type="hidden" name="enabled" value="{% if model.fmp_runtime.toggle_enabled %}0{% else %}1{% endif %}" />
+              <button
+                type="submit"
+                class="rounded-full border px-2 py-1 font-semibold {% if model.fmp_runtime.toggle_enabled %}border-emerald-300 bg-emerald-50 text-ok{% else %}border-slate-300 bg-slate-100 text-slate-700{% endif %}"
+              >
+                FMP {% if model.fmp_runtime.toggle_enabled %}ON{% else %}OFF{% endif %}
+              </button>
+            </form>
+            <span class="rounded-full border border-line px-2 py-1 text-muted">
+              사용량 {{ model.fmp_runtime.usage_label }}
+            </span>
+            <span class="rounded-full border border-line px-2 py-1 text-muted">
+              API Key {% if model.fmp_runtime.api_configured %}configured{% else %}missing{% endif %}
+            </span>
             <span class="rounded-full border px-2 py-1 font-medium">데이터 소스</span>
             <span class="rounded-full px-2 py-1 font-semibold {% if model.data_sources.fmp == 'live' %}bg-emerald-100 text-ok{% elif model.data_sources.fmp == 'stale' %}bg-amber-100 text-warn{% else %}bg-red-100 text-bad{% endif %}">
               FMP: {{ model.data_sources.fmp }}
@@ -58,23 +73,205 @@
           </div>
           <p class="mb-2 text-sm text-muted">왼쪽에서 스킬을 체크/해제한 뒤 실행 버튼을 누르세요.</p>
           <p id="selected-count" class="mb-3 text-sm font-semibold text-pri">선택 {{ model.selected_skill_count }}개</p>
+          <p id="role-counts" class="mb-1 text-xs font-semibold text-slate-700">
+            추천 0/5 · 분석 0/3
+          </p>
+          <p id="role-limit-msg" class="mb-3 text-xs text-bad"></p>
+          <div class="mb-3 rounded-xl border border-line bg-slate-50 p-2 text-xs">
+            <p class="font-semibold text-slate-700">추천 가능 {{ model.recommendation_summary.selected_recommendation_count }}개 · 분석 전용 {{ model.recommendation_summary.selected_analysis_only_count }}개</p>
+            <p class="mt-1 text-muted">전체 추천 가능 스킬 {{ model.recommendation_summary.total_recommendation_capable_count }}개</p>
+            <button type="button" id="select-recommendation-only" class="mt-2 rounded border border-line bg-white px-2 py-1 font-semibold text-pri">추천 가능 스킬만 선택</button>
+          </div>
 
           <form id="skill-form" method="post" action="/dashboard/run" class="space-y-4">
-            <div class="max-h-[360px] space-y-2 overflow-y-auto pr-1">
-              {% for skill in model.skill_catalog %}
-                <label class="block rounded-xl border border-line p-2">
-                  <div class="flex items-start gap-2">
-                    <input type="checkbox" name="skills" value="{{ skill.slug }}" {% if skill.selected %}checked{% endif %} class="mt-1" />
-                    <span class="min-w-0">
-                      <span class="block truncate text-sm font-semibold">{{ skill.display_name }}</span>
-                      <span class="block truncate text-xs text-muted">{{ skill.slug }} · {{ skill.family }}</span>
-                      {% if not skill.implemented %}
-                        <span class="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">not_implemented</span>
-                      {% endif %}
-                    </span>
-                  </div>
-                </label>
-              {% endfor %}
+            <div class="space-y-2 rounded-xl border border-line p-3">
+              <h3 class="text-sm font-semibold">권장 조합</h3>
+              <div class="space-y-2">
+                {% for preset in model.skill_presets %}
+                  <button
+                    type="button"
+                    data-preset-slugs="{{ preset.slugs|join(',') }}"
+                    class="preset-apply w-full rounded-lg border border-line bg-slate-50 px-2 py-2 text-left text-xs hover:bg-slate-100"
+                  >
+                    <span class="block font-semibold text-slate-700">{{ preset.label }}</span>
+                    <span class="block text-muted">{{ preset.description }}</span>
+                  </button>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="space-y-2 rounded-xl border border-line p-3">
+              <h3 class="text-sm font-semibold">추천 생성 방식</h3>
+              <label class="flex items-center gap-2 text-xs">
+                <input
+                  type="radio"
+                  name="param__top-picks__mode"
+                  value="skill_consensus"
+                  {% if model.params_defaults['top-picks'].mode == 'skill_consensus' %}checked{% endif %}
+                />
+                <span>기본: 스킬 결과 합산</span>
+              </label>
+              <label class="flex items-center gap-2 text-xs">
+                <input
+                  type="radio"
+                  name="param__top-picks__mode"
+                  value="watchlist_consensus"
+                  {% if model.params_defaults['top-picks'].mode == 'watchlist_consensus' %}checked{% endif %}
+                />
+                <span>워치리스트 고정 평가</span>
+              </label>
+              <label class="flex items-center gap-2 text-xs">
+                <input
+                  type="radio"
+                  name="param__top-picks__mode"
+                  value="role_gated_consensus"
+                  {% if model.params_defaults['top-picks'].mode == 'role_gated_consensus' %}checked{% endif %}
+                />
+                <span>역할 분리(Primary/Confirm/Analysis)</span>
+              </label>
+              <label class="flex items-center gap-2 text-xs">
+                <input
+                  type="radio"
+                  name="param__top-picks__mode"
+                  value="two_stage_intersection"
+                  {% if model.params_defaults['top-picks'].mode == 'two_stage_intersection' %}checked{% endif %}
+                />
+                <span>2단계 교집합(추천→분석)</span>
+              </label>
+              <label class="space-y-1 text-xs">
+                <span>watchlist (콤마/공백 구분)</span>
+                <textarea
+                  name="param__top-picks__watchlist"
+                  rows="2"
+                  class="w-full rounded border border-line px-2 py-1"
+                  placeholder="NVDA, AVGO, AAPL, MSFT, AMZN"
+                >{{ model.params_defaults['top-picks'].watchlist }}</textarea>
+              </label>
+              <label class="space-y-1 text-xs">
+                <span>top picks 표시 개수 (1~50)</span>
+                <input
+                  name="param__top-picks__limit"
+                  type="number"
+                  min="1"
+                  max="50"
+                  class="w-full rounded border border-line px-2 py-1"
+                  value="{{ model.params_defaults['top-picks'].limit }}"
+                />
+              </label>
+              <label class="space-y-1 text-xs">
+                <span>primary_skill (추천 1개)</span>
+                <input
+                  name="param__top-picks__primary_skill"
+                  list="recommendation-slugs"
+                  class="w-full rounded border border-line px-2 py-1"
+                  value="{{ model.params_defaults['top-picks'].primary_skill }}"
+                />
+              </label>
+              <label class="space-y-1 text-xs">
+                <span>confirm_skills (콤마 구분, 최대 2)</span>
+                <input
+                  name="param__top-picks__confirm_skills"
+                  class="w-full rounded border border-line px-2 py-1"
+                  value="{{ model.params_defaults['top-picks'].confirm_skills }}"
+                />
+              </label>
+              <label class="space-y-1 text-xs">
+                <span>analysis_skills (콤마 구분)</span>
+                <input
+                  name="param__top-picks__analysis_skills"
+                  class="w-full rounded border border-line px-2 py-1"
+                  value="{{ model.params_defaults['top-picks'].analysis_skills }}"
+                />
+              </label>
+              <label class="space-y-1 text-xs">
+                <span>min_confirm_votes (1~5)</span>
+                <input
+                  name="param__top-picks__min_confirm_votes"
+                  type="number"
+                  min="1"
+                  max="5"
+                  class="w-full rounded border border-line px-2 py-1"
+                  value="{{ model.params_defaults['top-picks'].min_confirm_votes }}"
+                />
+              </label>
+              <label class="space-y-1 text-xs">
+                <span>two-stage recommender skills (콤마, 최대 5)</span>
+                <input
+                  name="param__pipeline__recommender_skills"
+                  class="w-full rounded border border-line px-2 py-1"
+                  value="{{ model.params_defaults['top-picks'].recommender_skills }}"
+                />
+              </label>
+              <label class="space-y-1 text-xs">
+                <span>two-stage analyzer skills (콤마, 최대 3)</span>
+                <input
+                  name="param__pipeline__analyzer_skills"
+                  class="w-full rounded border border-line px-2 py-1"
+                  value="{{ model.params_defaults['top-picks'].analyzer_skills }}"
+                />
+              </label>
+              <label class="space-y-1 text-xs">
+                <span>two-stage recommender top N (5~50)</span>
+                <input
+                  name="param__pipeline__recommender_top_n"
+                  type="number"
+                  min="5"
+                  max="50"
+                  class="w-full rounded border border-line px-2 py-1"
+                  value="{{ model.params_defaults['top-picks'].recommender_top_n }}"
+                />
+              </label>
+              <label class="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  name="param__pipeline__include_watch"
+                  value="on"
+                  {% if model.params_defaults['top-picks'].include_watch %}checked{% endif %}
+                />
+                <span>WATCH 포함 교집합 사용 (검증용)</span>
+              </label>
+              <label class="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  name="param__pipeline__comparison_mode"
+                  value="on"
+                  {% if model.params_defaults['top-picks'].comparison_mode %}checked{% endif %}
+                />
+                <span>비교 모드 (all_pass vs pass_or_watch)</span>
+              </label>
+            </div>
+
+            <div class="rounded-2xl border border-line bg-slate-50 p-2">
+              <div class="max-h-[360px] space-y-2 overflow-y-auto pr-1">
+                {% for skill in model.skill_catalog %}
+                  <label class="block rounded-xl border border-line bg-white p-2">
+                    <div class="flex items-start gap-2">
+                      <input
+                        type="checkbox"
+                        name="skills"
+                        value="{{ skill.slug }}"
+                        data-role-group="{% if skill.trait_role in ['direct', 'candidate'] %}recommender{% else %}analyzer{% endif %}"
+                        {% if skill.selected %}checked{% endif %}
+                        class="mt-1"
+                      />
+                      <span class="min-w-0">
+                        <span class="block truncate text-sm font-semibold">{{ skill.display_name }}</span>
+                        <span class="block truncate text-xs text-muted">{{ skill.slug }} · {{ skill.family }}</span>
+                        <span class="block truncate text-[11px] text-muted">style {{ skill.trait_style }} · axes {{ skill.trait_axes|join(', ') }}</span>
+                        {% if skill.recommendation_capable %}
+                          <span class="mt-1 inline-block rounded bg-emerald-100 px-1.5 py-0.5 text-[11px] font-medium text-ok">recommendation</span>
+                        {% else %}
+                          <span class="mt-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-medium text-warn">analysis only</span>
+                        {% endif %}
+                        <span class="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">{{ skill.trait_role }}</span>
+                        {% if not skill.implemented %}
+                          <span class="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">not_implemented</span>
+                        {% endif %}
+                      </span>
+                    </div>
+                  </label>
+                {% endfor %}
+              </div>
             </div>
 
             <div class="space-y-2 rounded-xl border border-line p-3">
@@ -126,7 +323,26 @@
                     {% if pick.sector %}
                       <p class="text-xs text-muted">{{ pick.sector }}</p>
                     {% endif %}
+                    {% if pick.decision %}
+                      <p class="mt-1">
+                        <span class="rounded px-2 py-0.5 text-xs font-semibold {% if pick.decision == 'PASS' %}bg-emerald-100 text-ok{% elif pick.decision == 'WATCH' %}bg-amber-100 text-warn{% else %}bg-red-100 text-bad{% endif %}">
+                          {{ pick.decision }}
+                        </span>
+                      </p>
+                    {% endif %}
                     <p class="text-xs text-muted">{{ pick.reason }}</p>
+                    {% if pick.primary_skill %}
+                      <p class="mt-1 text-xs text-muted">primary {{ pick.primary_skill }}</p>
+                    {% endif %}
+                    {% if pick.confirm_required %}
+                      <p class="mt-1 text-xs text-muted">confirm {{ pick.confirm_votes }}/{{ pick.confirm_required }} · veto {{ pick.veto_count }}</p>
+                    {% endif %}
+                    {% if pick.confirm_hits %}
+                      <p class="mt-1 text-xs text-muted">confirm hits: {{ pick.confirm_hits|join(', ') }}</p>
+                    {% endif %}
+                    {% if pick.veto_skills %}
+                      <p class="mt-1 text-xs text-muted">veto skills: {{ pick.veto_skills|join(', ') }}</p>
+                    {% endif %}
                     {% if pick.return_pct %}
                       <p class="mt-1 text-xs text-muted">return {{ '%.2f'|format(pick.return_pct) }}%</p>
                     {% endif %}
@@ -135,9 +351,325 @@
                 {% endfor %}
               </div>
             {% else %}
-              <p class="text-sm text-muted">현재 선택/실행된 ok 스킬의 실제 payload 근거가 없어 추천 종목이 없습니다.</p>
+              <p class="text-sm text-muted">현재 선택된 스킬 조합에서 추천에 기여한 종목 근거가 부족합니다.</p>
+              <p class="mt-1 text-xs text-muted">추천 가능 스킬(녹색 배지)을 2~3개 이상 함께 선택하거나, 워치리스트 고정 평가 모드로 전환해보세요.</p>
             {% endif %}
           </article>
+
+          <article class="rounded-2xl border border-line bg-panel p-4">
+            <h2 class="mb-3 text-lg font-semibold">요약 TOP5</h2>
+            <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              <div class="rounded-xl border border-line p-3">
+                <p class="text-sm font-semibold">최종 교집합 TOP5</p>
+                {% if model.summary_top5.final_intersection %}
+                  <div class="mt-2 overflow-x-auto">
+                    <table class="min-w-full text-xs">
+                      <thead>
+                        <tr class="text-left text-muted">
+                          <th class="pr-4">rank</th>
+                          <th class="pr-4">symbol</th>
+                          <th class="pr-4">final_score</th>
+                          <th class="pr-4">support</th>
+                          <th>analyzer_avg</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for row in model.summary_top5.final_intersection %}
+                          <tr class="border-t border-line">
+                            <td class="py-1 pr-4">{{ loop.index }}</td>
+                            <td class="py-1 pr-4 font-semibold">{{ row.symbol }}</td>
+                            <td class="py-1 pr-4">{{ row.final_score }}</td>
+                            <td class="py-1 pr-4">{{ row.support_count }}</td>
+                            <td class="py-1">{{ row.analyzer_avg_score }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <p class="mt-2 text-xs text-muted">최종 교집합 기준 TOP5가 없습니다.</p>
+                {% endif %}
+              </div>
+              <div class="rounded-xl border border-line p-3">
+                <p class="text-sm font-semibold">선택 스킬 점수 TOP5</p>
+                {% if model.summary_top5.selected_skill_scores %}
+                  <div class="mt-2 overflow-x-auto">
+                    <table class="min-w-full text-xs">
+                      <thead>
+                        <tr class="text-left text-muted">
+                          <th class="pr-4">rank</th>
+                          <th class="pr-4">skill</th>
+                          <th class="pr-4">slug</th>
+                          <th class="pr-4">score</th>
+                          <th>conf</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for row in model.summary_top5.selected_skill_scores %}
+                          <tr class="border-t border-line">
+                            <td class="py-1 pr-4">{{ loop.index }}</td>
+                            <td class="py-1 pr-4 font-semibold">{{ row.display_name }}</td>
+                            <td class="py-1 pr-4">{{ row.skill_slug }}</td>
+                            <td class="py-1 pr-4">{{ row.score_0_100 }}</td>
+                            <td class="py-1">{{ row.confidence_0_1 }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <p class="mt-2 text-xs text-muted">점수 기반 TOP5를 계산할 수 없습니다.</p>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+
+          <article class="rounded-2xl border border-line bg-panel p-4">
+            <h2 class="mb-3 text-lg font-semibold">추천 스킬별 결과 테이블</h2>
+            <p class="mb-2 text-xs text-muted">스킬 수 {{ model.pipeline_tables.counts.recommender_skills }} · 교집합 {{ model.pipeline_tables.counts.recommender_intersection }}</p>
+            {% if model.pipeline_tables.recommender_outputs %}
+              <div class="space-y-3">
+                {% for output in model.pipeline_tables.recommender_outputs %}
+                  <div class="rounded-xl border border-line p-3">
+                    <p class="text-sm font-semibold">{{ output.skill_slug }}</p>
+                    {% if output.symbols %}
+                      <div class="mt-2 overflow-x-auto">
+                        <table class="min-w-full text-xs">
+                          <thead>
+                            <tr class="text-left text-muted">
+                              <th class="pr-4">symbol</th>
+                              <th class="pr-4">rank</th>
+                              <th class="pr-4">pct</th>
+                              <th class="pr-4">score</th>
+                              <th>reason</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for row in output.symbols %}
+                              <tr class="border-t border-line">
+                                <td class="py-1 pr-4 font-semibold">{{ row.symbol }}</td>
+                                <td class="py-1 pr-4">{{ row.rank }}</td>
+                                <td class="py-1 pr-4">{{ '%.1f'|format(row.percentile) }}</td>
+                                <td class="py-1 pr-4">{{ '%.1f'|format(row.raw_score) }}</td>
+                                <td class="py-1">{{ row.reason }}</td>
+                              </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    {% else %}
+                      <p class="mt-2 text-xs text-muted">종목 추출 결과 없음</p>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-sm text-muted">two-stage 모드 실행 결과가 없습니다.</p>
+            {% endif %}
+          </article>
+
+          <article class="rounded-2xl border border-line bg-panel p-4">
+            <h2 class="mb-3 text-lg font-semibold">추천 교집합 테이블</h2>
+            <p class="mb-2 text-xs text-muted">교집합 {{ model.pipeline_tables.counts.recommender_intersection }}개</p>
+            {% if model.pipeline_tables.recommender_intersection.symbols %}
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-xs">
+                  <thead>
+                    <tr class="text-left text-muted">
+                      <th class="pr-4">symbol</th>
+                      <th class="pr-4">support_count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for symbol in model.pipeline_tables.recommender_intersection.symbols %}
+                      <tr class="border-t border-line">
+                        <td class="py-1 pr-4 font-semibold">{{ symbol }}</td>
+                        <td class="py-1 pr-4">{{ model.pipeline_tables.recommender_intersection.support_count_by_symbol[symbol] if model.pipeline_tables.recommender_intersection.support_count_by_symbol else 0 }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="text-sm text-muted">추천 교집합이 비었습니다.</p>
+            {% endif %}
+            {% if model.pipeline_tables.recommender_intersection.dropped_by_stage %}
+              <p class="mt-2 text-xs text-muted">drop: {{ model.pipeline_tables.recommender_intersection.dropped_by_stage|join(', ') }}</p>
+            {% endif %}
+          </article>
+
+          <article class="rounded-2xl border border-line bg-panel p-4">
+            <h2 class="mb-3 text-lg font-semibold">추천 합집합 정규화 TOP10 테이블</h2>
+            <p class="mb-2 text-xs text-muted">TOP10 {{ model.pipeline_tables.counts.recommender_top10 }}개 · union {{ model.pipeline_tables.recommender_union_top10.source_union_count }}개</p>
+            {% if model.pipeline_tables.recommender_union_top10.symbols %}
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-xs">
+                  <thead>
+                    <tr class="text-left text-muted">
+                      <th class="pr-4">rank</th>
+                      <th class="pr-4">symbol</th>
+                      <th class="pr-4">support</th>
+                      <th class="pr-4">composite</th>
+                      <th class="pr-4">normalized_by_skill</th>
+                      <th>reasons</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in model.pipeline_tables.recommender_union_top10.symbols %}
+                      <tr class="border-t border-line">
+                        <td class="py-1 pr-4">{{ row.rank }}</td>
+                        <td class="py-1 pr-4 font-semibold">{{ row.symbol }}</td>
+                        <td class="py-1 pr-4">{{ row.support_count }}</td>
+                        <td class="py-1 pr-4">{{ row.composite_score }}</td>
+                        <td class="py-1 pr-4">{{ row.normalized_by_skill }}</td>
+                        <td class="py-1">{{ row.reasons|join(' | ') }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="text-sm text-muted">추천 합집합 TOP10이 비었습니다.</p>
+            {% endif %}
+          </article>
+
+          <article class="rounded-2xl border border-line bg-panel p-4">
+            <h2 class="mb-3 text-lg font-semibold">분석 스킬별 평가 테이블 (타겟 분리)</h2>
+            <p class="mb-2 text-xs text-muted">분석 스킬 {{ model.pipeline_tables.counts.analyzer_skills }}개 · intersection {{ model.pipeline_tables.analysis_targets.intersection_symbols|length }}개 · top10 {{ model.pipeline_tables.analysis_targets.top10_symbols|length }}개</p>
+            {% if model.pipeline_tables.analyzer_outputs_by_target %}
+              <div class="space-y-3">
+                {% for target_group in ['intersection', 'top10'] %}
+                  <div class="rounded-xl border border-line p-3">
+                    <p class="text-sm font-semibold">target: {{ target_group }}</p>
+                    <div class="mt-2 space-y-2">
+                      {% for output in model.pipeline_tables.analyzer_outputs_by_target if output.target_group == target_group %}
+                        <div class="rounded-lg border border-line p-2">
+                          <p class="text-xs font-semibold">{{ output.skill_slug }}</p>
+                          {% if output.evaluations %}
+                            <div class="mt-1 overflow-x-auto">
+                              <table class="min-w-full text-xs">
+                                <thead>
+                                  <tr class="text-left text-muted">
+                                    <th class="pr-4">symbol</th>
+                                    <th class="pr-4">decision</th>
+                                    <th class="pr-4">score</th>
+                                    <th class="pr-4">risk_flags</th>
+                                    <th>reasons</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for row in output.evaluations %}
+                                    <tr class="border-t border-line">
+                                      <td class="py-1 pr-4 font-semibold">{{ row.symbol }}</td>
+                                      <td class="py-1 pr-4">{{ row.decision }}</td>
+                                      <td class="py-1 pr-4">{{ '%.1f'|format(row.score) }}</td>
+                                      <td class="py-1 pr-4">{{ row.risk_flags|join(', ') }}</td>
+                                      <td class="py-1">{{ row.reasons|join(' | ') }}</td>
+                                    </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+                          {% else %}
+                            <p class="mt-1 text-xs text-muted">평가 대상 종목이 없습니다.</p>
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-sm text-muted">분석 결과가 없습니다.</p>
+            {% endif %}
+          </article>
+
+          <article class="rounded-2xl border border-line bg-panel p-4">
+            <h2 class="mb-3 text-lg font-semibold">최종 결과 요약 (교집합 + TOP5)</h2>
+            <p class="mb-2 text-xs text-muted">정책 {{ model.pipeline_tables.final_summary.policy_used or 'all_pass' }} · 교집합 {{ model.pipeline_tables.counts.final_symbols }}개 · TOP5 {{ model.pipeline_tables.counts.final_top5 }}개</p>
+            <div class="grid grid-cols-1 gap-3 xl:grid-cols-2">
+              <div class="rounded-xl border border-line p-3">
+                <p class="text-sm font-semibold">최종 교집합</p>
+                {% if model.pipeline_tables.final_summary.intersection_symbols %}
+                  <p class="mt-2 text-xs">{{ model.pipeline_tables.final_summary.intersection_symbols|join(', ') }}</p>
+                {% else %}
+                  <p class="mt-2 text-xs text-muted">최종 교집합이 비었습니다.</p>
+                {% endif %}
+              </div>
+              <div class="rounded-xl border border-line p-3">
+                <p class="text-sm font-semibold">최종 TOP5 (TOP10 분석 통과 기준)</p>
+                {% if model.pipeline_tables.final_summary.top5_from_top10 %}
+                  <div class="mt-2 overflow-x-auto">
+                    <table class="min-w-full text-xs">
+                      <thead>
+                        <tr class="text-left text-muted">
+                          <th class="pr-4">rank</th>
+                          <th class="pr-4">symbol</th>
+                          <th class="pr-4">final_score</th>
+                          <th class="pr-4">analyzer_avg</th>
+                          <th>support</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for row in model.pipeline_tables.final_summary.top5_from_top10 %}
+                          <tr class="border-t border-line">
+                            <td class="py-1 pr-4">{{ loop.index }}</td>
+                            <td class="py-1 pr-4 font-semibold">{{ row.symbol }}</td>
+                            <td class="py-1 pr-4">{{ row.final_score }}</td>
+                            <td class="py-1 pr-4">{{ row.analyzer_avg_score }}</td>
+                            <td class="py-1">{{ row.support_count }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <p class="mt-2 text-xs text-muted">최종 TOP5가 없습니다.</p>
+                {% endif %}
+              </div>
+            </div>
+            {% if model.pipeline_tables.final_intersection.comparison and model.pipeline_tables.final_intersection.comparison.enabled %}
+              <div class="mt-3 overflow-x-auto">
+                <table class="min-w-full text-xs">
+                  <thead>
+                    <tr class="text-left text-muted">
+                      <th class="pr-4">mode</th>
+                      <th class="pr-4">count</th>
+                      <th>symbols</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-t border-line">
+                      <td class="py-1 pr-4 font-semibold">strict_all_pass</td>
+                      <td class="py-1 pr-4">{{ model.pipeline_tables.final_intersection.comparison.strict_all_pass.count }}</td>
+                      <td class="py-1">{{ model.pipeline_tables.final_intersection.comparison.strict_all_pass.symbols|join(', ') }}</td>
+                    </tr>
+                    <tr class="border-t border-line">
+                      <td class="py-1 pr-4 font-semibold">watch_inclusive</td>
+                      <td class="py-1 pr-4">{{ model.pipeline_tables.final_intersection.comparison.watch_inclusive.count }}</td>
+                      <td class="py-1">{{ model.pipeline_tables.final_intersection.comparison.watch_inclusive.symbols|join(', ') }}</td>
+                    </tr>
+                    <tr class="border-t border-line">
+                      <td class="py-1 pr-4 font-semibold">watch_only_delta</td>
+                      <td class="py-1 pr-4">{{ model.pipeline_tables.final_intersection.comparison.watch_only_delta|length }}</td>
+                      <td class="py-1">{{ model.pipeline_tables.final_intersection.comparison.watch_only_delta|join(', ') }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            {% endif %}
+            {% if model.pipeline_tables.final_intersection.final_reasons %}
+              <p class="mt-2 text-xs text-muted">{{ model.pipeline_tables.final_intersection.final_reasons|join(' | ') }}</p>
+            {% endif %}
+            {% if model.pipeline_tables.final_summary.dropped_by_stage %}
+              <p class="mt-1 text-xs text-muted">drop: {{ model.pipeline_tables.final_summary.dropped_by_stage|join(', ') }}</p>
+            {% endif %}
+          </article>
+          <datalist id="recommendation-slugs">
+            {% for slug in model.role_groups.recommendation %}
+              <option value="{{ slug }}"></option>
+            {% endfor %}
+          </datalist>
 
           <article class="rounded-2xl border border-line bg-panel p-4">
             <h2 class="mb-3 text-lg font-semibold">스킬 실행 결과</h2>
@@ -238,17 +770,86 @@
       const statusEl = document.getElementById('run-status');
       const toggleAll = document.getElementById('toggle-all');
       const selectedCount = document.getElementById('selected-count');
+      const roleCountsEl = document.getElementById('role-counts');
+      const roleLimitMsgEl = document.getElementById('role-limit-msg');
+      const recommendationOnlyButton = document.getElementById('select-recommendation-only');
+      const presetButtons = [...document.querySelectorAll('.preset-apply')];
       const skillBoxes = () => [...document.querySelectorAll('input[name="skills"]')];
+      const roleMax = { recommender: 5, analyzer: 3 };
 
-      const updateSelectedCount = () => {
-        const checked = skillBoxes().filter((b) => b.checked).length;
-        selectedCount.textContent = `선택 ${checked}개`;
+      const roleOf = (box) => {
+        const role = box.dataset.roleGroup;
+        return role === 'recommender' ? 'recommender' : 'analyzer';
       };
 
-      updateSelectedCount();
+      const getRoleCounts = () => {
+        const counts = { recommender: 0, analyzer: 0 };
+        skillBoxes().forEach((box) => {
+          if (!box.checked) {
+            return;
+          }
+          counts[roleOf(box)] += 1;
+        });
+        return counts;
+      };
+
+      const setRoleLimitMessage = (message) => {
+        if (!roleLimitMsgEl) return;
+        roleLimitMsgEl.textContent = message || '';
+      };
+
+      const updateSelectedCount = (message = '') => {
+        const counts = getRoleCounts();
+        const checked = counts.recommender + counts.analyzer;
+        selectedCount.textContent = `선택 ${checked}개`;
+        if (roleCountsEl) {
+          roleCountsEl.textContent = `추천 ${counts.recommender}/${roleMax.recommender} · 분석 ${counts.analyzer}/${roleMax.analyzer}`;
+        }
+        setRoleLimitMessage(message);
+      };
+
+      const applyRoleCaps = () => {
+        const counters = { recommender: 0, analyzer: 0 };
+        let trimmedReco = 0;
+        let trimmedAnalyzer = 0;
+        skillBoxes().forEach((box) => {
+          if (!box.checked) return;
+          const role = roleOf(box);
+          counters[role] += 1;
+          if (counters[role] > roleMax[role]) {
+            box.checked = false;
+            if (role === 'recommender') {
+              trimmedReco += 1;
+            } else {
+              trimmedAnalyzer += 1;
+            }
+          }
+        });
+
+        const messages = [];
+        if (trimmedReco > 0) {
+          messages.push(`추천 스킬은 최대 ${roleMax.recommender}개까지 선택 가능합니다.`);
+        }
+        if (trimmedAnalyzer > 0) {
+          messages.push(`분석 스킬은 최대 ${roleMax.analyzer}개까지 선택 가능합니다.`);
+        }
+        updateSelectedCount(messages.join(' '));
+      };
+
+      applyRoleCaps();
       document.addEventListener('change', (event) => {
         if (event.target && event.target.name === 'skills') {
-          updateSelectedCount();
+          const box = event.target;
+          if (box.checked) {
+            const role = roleOf(box);
+            const counts = getRoleCounts();
+            if (counts[role] > roleMax[role]) {
+              box.checked = false;
+              updateSelectedCount(`${role === 'recommender' ? '추천' : '분석'} 스킬은 최대 ${roleMax[role]}개까지 선택 가능합니다.`);
+              return;
+            }
+          }
+          updateSelectedCount('');
         }
       });
 
@@ -259,10 +860,35 @@
         boxes.forEach((box) => {
           box.checked = shouldCheck;
         });
-        updateSelectedCount();
+        applyRoleCaps();
+      });
+
+      if (recommendationOnlyButton) {
+        recommendationOnlyButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          const boxes = skillBoxes();
+          boxes.forEach((box) => {
+            const tag = box.closest('label')?.querySelector('.bg-emerald-100');
+            box.checked = Boolean(tag);
+          });
+          applyRoleCaps();
+        });
+      }
+
+      presetButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const raw = button.getAttribute('data-preset-slugs') || '';
+          const wanted = raw.split(',').map((v) => v.trim()).filter(Boolean);
+          const wantedSet = new Set(wanted);
+          skillBoxes().forEach((box) => {
+            box.checked = wantedSet.has(box.value);
+          });
+          applyRoleCaps();
+        });
       });
 
       form.addEventListener('submit', () => {
+        applyRoleCaps();
         statusEl.textContent = '실행 중...';
       });
     </script>

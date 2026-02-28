@@ -1,591 +1,1701 @@
 {
-  "run_id": "825b3a4e-9b30-4d2b-9588-a39684d18369",
-  "as_of_date": "2026-02-27",
+  "run_id": "7a059d73-ef00-4133-a4ca-d65cab3309c4",
+  "as_of_date": "2026-02-28",
   "data_sources": {
-    "fmp": "unavailable",
-    "rss": "unavailable"
+    "fmp": "stale",
+    "rss": "live"
   },
   "results": [
     {
-      "skill_slug": "sector-analyst",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
+      "skill_slug": "us-stock-analysis",
+      "status": "ok",
+      "score_0_100": 59.74,
+      "confidence_0_1": 0.8,
+      "summary_ko": "NVDA의 펀더멘털/테크니컬/피어 데이터를 통합 분석했습니다.",
+      "reason_code": null,
       "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
+        "mode": "fresh",
+        "fetched_at": "2026-02-27T23:34:57.773821+00:00",
+        "expires_at": "2026-02-28T23:34:57.773821+00:00"
       },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "breadth-chart-analyst",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
+      "analysis_payload": {
+        "ticker": "NVDA",
+        "fundamentals": {
+          "company": "NVIDIA Corporation",
+          "market_cap": 4314044911927.0005,
+          "sector": "Technology",
+          "industry": "Semiconductors",
+          "pe_ratio": 35.86685567224966,
+          "roe": 1.0436887718291739,
+          "debt_to_equity": 0.0
+        },
+        "technicals": {
+          "price": 177.19,
+          "day_change_pct": -4.16464,
+          "year_high": 212.19,
+          "year_low": 86.62
+        },
+        "peer_snapshot": [
+          "AAPL",
+          "ADI",
+          "AVGO",
+          "ENTG",
+          "GOOGL",
+          "IMOS",
+          "MSFT",
+          "TER",
+          "TSM"
+        ],
+        "bull_case": [
+          "ROE가 상대적으로 높아 수익성 품질이 양호합니다."
+        ],
+        "bear_case": [
+          "단기 수익률이 약세입니다."
+        ],
+        "risk_items": [
+          "실적 가이던스 하향 가능성",
+          "밸류에이션 리레이팅 변동성"
+        ],
+        "citations": [
+          "https://financialmodelingprep.com/quote/NVDA",
+          "https://financialmodelingprep.com/profile/NVDA"
+        ],
+        "_source_state": "live"
       },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "technical-analyst",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
+      "source_statuses": {
+        "fmp": "stale"
+      }
     },
     {
       "skill_slug": "market-news-analyst",
-      "status": "unavailable",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "FMP API 키가 없어 뉴스 분석을 수행할 수 없습니다.",
-      "reason_code": "NO_API_KEY",
+      "status": "ok",
+      "score_0_100": 69.2,
+      "confidence_0_1": 0.9,
+      "summary_ko": "FMP/RSS 뉴스 60건을 임팩트 스코어로 랭킹했습니다.",
+      "reason_code": null,
       "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
+        "mode": "fresh",
+        "fetched_at": "2026-02-27T23:34:48.728079+00:00",
+        "expires_at": "2026-02-28T05:34:48.728079+00:00"
       },
-      "analysis_payload": {},
+      "analysis_payload": {
+        "ranked_events": [
+          {
+            "headline": "MasTec, Inc. (NYSE:MTZ) Demonstrates Impressive Q4 2025 Earnings and Growth Potential",
+            "published_at": "2026-02-27 22:03:01",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.9,
+            "breadth": 1.5,
+            "forward_significance": 1.7,
+            "impact_score": 4.84,
+            "source_url": "https://financialmodelingprep.com/market-news/mastec-inc-mtz-q4-2025-earnings-strong-performance-growth-outlook",
+            "related_tickers": []
+          },
+          {
+            "headline": "TransAlta Co. (NYSE: TAC) Quarterly Earnings Preview and Strategic Partnership Highlights",
+            "published_at": "2026-02-26 17:00:07",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.9,
+            "breadth": 1.5,
+            "forward_significance": 1.7,
+            "impact_score": 4.84,
+            "source_url": "https://financialmodelingprep.com/market-news/transalta-co-quarterly-earnings-strategic-partnership-highlights",
+            "related_tickers": [
+              "NYSE",
+              "TAC"
+            ]
+          },
+          {
+            "headline": "AbCellera Biologics Inc. (NASDAQ: ABCL) Demonstrates Financial Resilience and Growth",
+            "published_at": "2026-02-27 20:00:15",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.4,
+            "breadth": 1.5,
+            "forward_significance": 1.3,
+            "impact_score": 2.73,
+            "source_url": "https://financialmodelingprep.com/market-news/abcellera-biologics-financial-growth-insider-confidence",
+            "related_tickers": [
+              "ABCL"
+            ]
+          },
+          {
+            "headline": "Pearson plc (NYSE:PSO) Showcases Financial Health and Strategic Focus on AI",
+            "published_at": "2026-02-27 10:04:31",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.4,
+            "breadth": 1.5,
+            "forward_significance": 1.3,
+            "impact_score": 2.73,
+            "source_url": "https://financialmodelingprep.com/market-news/pearson-plc-financial-health-strategic-ai-focus",
+            "related_tickers": [
+              "AI"
+            ]
+          },
+          {
+            "headline": "MP Materials Corp. (NYSE: MP) Financial Overview and Strategic Moves",
+            "published_at": "2026-02-26 22:05:36",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.4,
+            "breadth": 1.5,
+            "forward_significance": 1.3,
+            "impact_score": 2.73,
+            "source_url": "https://financialmodelingprep.com/market-news/mp-materials-corp-financial-overview-strategic-moves",
+            "related_tickers": [
+              "MP",
+              "NYSE",
+              "MP"
+            ]
+          },
+          {
+            "headline": "Baidu Posts Profit Beat As AI Cloud Growth Accelerates, But Shares Fall",
+            "published_at": "2026-02-26 17:40:01",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.4,
+            "breadth": 1.5,
+            "forward_significance": 1.3,
+            "impact_score": 2.73,
+            "source_url": "https://financialmodelingprep.com/market-news/baidu-posts-profit-beat-as-ai-cloud-growth-accelerates-but-shares-fall",
+            "related_tickers": [
+              "AI"
+            ]
+          },
+          {
+            "headline": "Stellantis Posts Massive 2025 Loss Amid EV Strategy Reset and Writedowns",
+            "published_at": "2026-02-26 17:35:16",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.4,
+            "breadth": 1.5,
+            "forward_significance": 1.3,
+            "impact_score": 2.73,
+            "source_url": "https://financialmodelingprep.com/market-news/stellantis-posts-massive--loss-amid-ev-strategy-reset-and-writedowns",
+            "related_tickers": [
+              "EV"
+            ]
+          },
+          {
+            "headline": "Stella-Jones Inc. (OTC:STLJF) Financial Overview and Strategic Investments",
+            "published_at": "2026-02-26 15:00:03",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.4,
+            "breadth": 1.5,
+            "forward_significance": 1.3,
+            "impact_score": 2.73,
+            "source_url": "https://financialmodelingprep.com/market-news/stella-jones-inc-financial-overview-strategic-investments",
+            "related_tickers": []
+          },
+          {
+            "headline": "Joby Aviation Inc (NYSE: JOBY) Sees Positive Financial Performance and Strategic Partnerships",
+            "published_at": "2026-02-26 12:03:58",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.4,
+            "breadth": 1.5,
+            "forward_significance": 1.3,
+            "impact_score": 2.73,
+            "source_url": "https://financialmodelingprep.com/market-news/joby-aviation-surpasses-earnings-expectations-partners-with-uber",
+            "related_tickers": [
+              "NYSE",
+              "JOBY"
+            ]
+          },
+          {
+            "headline": "BorgWarner Inc. (NYSE:BWA): A Leader in Sustainable Mobility Solutions",
+            "published_at": "2026-02-27 21:00:03",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 1.4,
+            "forward_significance": 1.3,
+            "impact_score": 1.46,
+            "source_url": "https://financialmodelingprep.com/market-news/borgwarner-inc-nyse-bwa-sustainable-mobility-leader",
+            "related_tickers": []
+          },
+          {
+            "headline": "Warner Brothers Discovery's Stock Downgrade and Market Dynamics",
+            "published_at": "2026-02-27 08:00:10",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 1.4,
+            "forward_significance": 1.3,
+            "impact_score": 1.46,
+            "source_url": "https://financialmodelingprep.com/market-news/warner-brothers-discovery-stock-downgrade-market-dynamics",
+            "related_tickers": []
+          },
+          {
+            "headline": "Warner Bros. Discovery Beats Q4 EBITDA Estimates Amid Competing Takeover Bids",
+            "published_at": "2026-02-26 17:34:13",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 1.4,
+            "forward_significance": 1.3,
+            "impact_score": 1.46,
+            "source_url": "https://financialmodelingprep.com/market-news/warner-bros-discovery-beats-q-ebitda-estimates-amid-competing-takeover-bids",
+            "related_tickers": []
+          },
+          {
+            "headline": "Donaldson Company, Inc. (NYSE: DCI) Sees Upward Trend in Price Targets Amidst Financial Fluctuations",
+            "published_at": "2026-02-26 12:00:00",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 1.4,
+            "forward_significance": 1.3,
+            "impact_score": 1.46,
+            "source_url": "https://financialmodelingprep.com/market-news/donaldson-company-dci-price-targets-rise-amid-financial-changes",
+            "related_tickers": [
+              "NYSE",
+              "DCI"
+            ]
+          },
+          {
+            "headline": "Dell Shares Surge 15% on AI-Driven Earnings Beat and Upbeat 2027 Forecast",
+            "published_at": "2026-02-27 17:10:57",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/dell-shares-surge--on-aidriven-earnings-beat-and-upbeat--forecast",
+            "related_tickers": [
+              "AI"
+            ]
+          },
+          {
+            "headline": "Elastic Beats Q3 Estimates but Shares Fall 15% on Q4 Guidance",
+            "published_at": "2026-02-27 17:09:06",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/elastic-beats-q-estimates-but-shares-fall--on-q-guidance",
+            "related_tickers": []
+          },
+          {
+            "headline": "Intuit Beats Q2 Expectations but Q3 Guidance Disappoints",
+            "published_at": "2026-02-27 17:08:18",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/intuit-beats-q-expectations-but-q-guidance-disappoints",
+            "related_tickers": []
+          },
+          {
+            "headline": "StoneCo Ltd. (NASDAQ: STNE) Earnings Preview: Key Financial Insights",
+            "published_at": "2026-02-27 17:00:06",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/stoneco-ltd-nasdaq-stne-earnings-preview-q4-2025-financial-insights",
+            "related_tickers": [
+              "STNE"
+            ]
+          },
+          {
+            "headline": "ADT Inc. (NYSE: ADT) Earnings Preview and Financial Analysis",
+            "published_at": "2026-02-27 16:00:05",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/adt-inc-nyse-adt-q4-earnings-preview-financial-analysis",
+            "related_tickers": [
+              "ADT",
+              "NYSE",
+              "ADT"
+            ]
+          },
+          {
+            "headline": "Delek US Holdings, Inc. (NYSE: DK) Surpasses Earnings Expectations",
+            "published_at": "2026-02-27 15:04:43",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/delek-us-holdings-surpasses-earnings-expectations",
+            "related_tickers": [
+              "US",
+              "NYSE",
+              "DK"
+            ]
+          },
+          {
+            "headline": "EchoStar Corporation (NASDAQ:SATS) Quarterly Earnings Insight",
+            "published_at": "2026-02-27 15:00:04",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/echostar-corporation-nasdaq-sats-quarterly-earnings-insight",
+            "related_tickers": []
+          },
+          {
+            "headline": "Melrose Industries PLC (OTC:MLSPF) Earnings Report Highlights",
+            "published_at": "2026-02-27 14:03:41",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/melrose-industries-plc-earnings-report-highlights",
+            "related_tickers": [
+              "PLC"
+            ]
+          },
+          {
+            "headline": "Berkshire Hathaway Inc. (NYSE:BRK-B) Quarterly Earnings and Leadership Transition",
+            "published_at": "2026-02-27 14:00:06",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/berkshire-hathaway-earnings-leadership-transition",
+            "related_tickers": []
+          },
+          {
+            "headline": "Carter's, Inc. (NYSE:CRI) Exceeds Revenue Estimates in Q4 Earnings Report",
+            "published_at": "2026-02-27 13:07:00",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/carters-inc-exceeds-q4-revenue-estimates",
+            "related_tickers": []
+          },
+          {
+            "headline": "Berkshire Hathaway Inc. (NYSE:BRK-A) Quarterly Earnings Preview and Financial Health Analysis",
+            "published_at": "2026-02-27 13:00:05",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/berkshire-hathaway-earnings-preview-financial-analysis-2026",
+            "related_tickers": []
+          },
+          {
+            "headline": "Xponential Fitness, Inc. (NYSE: XPOF) Earnings Report Analysis",
+            "published_at": "2026-02-27 02:00:06",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/xponential-fitness-xpof-earnings-miss-revenue-beat-analysis",
+            "related_tickers": [
+              "NYSE",
+              "XPOF"
+            ]
+          },
+          {
+            "headline": "Vistance Networks, Inc. (NASDAQ: VISN) Earnings Report Highlights",
+            "published_at": "2026-02-27 01:00:06",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/vistance-networks-visn-q1-earnings-report",
+            "related_tickers": [
+              "VISN"
+            ]
+          },
+          {
+            "headline": "SBA Communications Corporation (NASDAQ: SBAC) Earnings Report Highlights",
+            "published_at": "2026-02-27 00:04:33",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/sba-communications-sbac-q4-earnings-miss-estimates-revenue-grows",
+            "related_tickers": [
+              "SBA",
+              "SBAC"
+            ]
+          },
+          {
+            "headline": "Rapid Micro Biosystems, Inc. (NASDAQ: RPID) Quarterly Earnings Preview",
+            "published_at": "2026-02-26 22:00:07",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/rapid-micro-biosystems-q4-full-year-2025-earnings-preview",
+            "related_tickers": [
+              "RPID"
+            ]
+          },
+          {
+            "headline": "Shake Shack Inc. (NYSE: SHAK) Earnings Overview",
+            "published_at": "2026-02-26 21:05:34",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/shake-shack-inc-shak-earnings-overview",
+            "related_tickers": [
+              "NYSE",
+              "SHAK"
+            ]
+          },
+          {
+            "headline": "Global Partners LP Unit (GLP)'s Upcoming Quarterly Earnings: A Financial Analysis",
+            "published_at": "2026-02-26 18:00:04",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/global-partners-lp-glp-quarterly-earnings-financial-analysis",
+            "related_tickers": [
+              "LP"
+            ]
+          },
+          {
+            "headline": "Hormel Sees Limited Earnings Impact From Turkey Business Sale",
+            "published_at": "2026-02-26 17:38:48",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/hormel-sees-limited-earnings-impact-from-turkey-business-sale",
+            "related_tickers": []
+          },
+          {
+            "headline": "Krispy Kreme Shares Surge 30% After Q4 Earnings and Revenue Beat",
+            "published_at": "2026-02-26 17:36:19",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/krispy-kreme-shares-surge--after-q-earnings-and-revenue-beat",
+            "related_tickers": []
+          },
+          {
+            "headline": "SBA Communications Corporation (NASDAQ:SBAC) Earnings Preview",
+            "published_at": "2026-02-26 14:00:04",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/sba-communications-earnings-preview-insights-financial-health",
+            "related_tickers": [
+              "SBA"
+            ]
+          },
+          {
+            "headline": "Arcutis Biotherapeutics Inc. (NASDAQ: ARQT) Surpasses Earnings Expectations and Shows Strong Revenue Growth",
+            "published_at": "2026-02-26 13:05:46",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/arcutis-biotherapeutics-beats-earnings-shows-strong-growth-q4-2025",
+            "related_tickers": [
+              "ARQT"
+            ]
+          },
+          {
+            "headline": "MP Materials Corp. (NYSE:MP) Earnings Preview and Financial Challenges",
+            "published_at": "2026-02-26 12:00:06",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/mp-materials-corp-earnings-preview-financial-challenges",
+            "related_tickers": [
+              "MP"
+            ]
+          },
+          {
+            "headline": "Nordex (OTC:NRDXF) Surpasses Earnings Expectations and Eyes U.S. Market Expansion",
+            "published_at": "2026-02-26 11:00:05",
+            "source": "Financial Modeling Prep",
+            "price_impact": 1.3,
+            "breadth": 0.8,
+            "forward_significance": 1.2,
+            "impact_score": 1.25,
+            "source_url": "https://financialmodelingprep.com/market-news/nordex-surpasses-earnings-expectations-eyes-us-market-expansion",
+            "related_tickers": []
+          },
+          {
+            "headline": "Frontline Ltd. (NYSE:FRO) Financial Performance Analysis",
+            "published_at": "2026-02-27 22:00:05",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/frontline-ltd-nyse-fro-financial-performance-analysis",
+            "related_tickers": []
+          },
+          {
+            "headline": "NIC Inc. (NASDAQ:NIC) Sees Positive Momentum Amidst Slight Dip",
+            "published_at": "2026-02-27 21:00:03",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/nic-inc-nasdaq-nic-positive-momentum-growth-financials",
+            "related_tickers": [
+              "NIC"
+            ]
+          },
+          {
+            "headline": "Autodesk Shares Rise After Q4 Beat and Strong Fiscal 2027 Outlook",
+            "published_at": "2026-02-27 17:11:59",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/autodesk-shares-rise-after-q-beat-and-strong-fiscal--outlook",
+            "related_tickers": []
+          },
+          {
+            "headline": "Duolingo Shares Drop 18% After Soft 2026 Outlook Despite Q4 Beat",
+            "published_at": "2026-02-27 17:10:11",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/duolingo-shares-drop--after-soft--outlook-despite-q-beat",
+            "related_tickers": []
+          },
+          {
+            "headline": "Monster Beverage Tops Q4 Estimates but Shares Slip on Rising Costs",
+            "published_at": "2026-02-27 17:07:24",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/monster-beverage-tops-q-estimates-but-shares-slip-on-rising-costs",
+            "related_tickers": []
+          },
+          {
+            "headline": "London Stock Exchange Group's Financial Performance Analysis",
+            "published_at": "2026-02-27 12:04:47",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/london-stock-exchange-group-financial-performance-analysis",
+            "related_tickers": []
+          },
+          {
+            "headline": "uniQure N.V. (NASDAQ: QURE) Faces Legal Challenges Amid Financial Struggles",
+            "published_at": "2026-02-27 12:00:04",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/uniQure-NV-NASDAQ-QURE-Legal-Challenges-Financial-Struggles",
+            "related_tickers": [
+              "QURE"
+            ]
+          },
+          {
+            "headline": "Collegium Pharmaceutical's Efficient Capital Utilization Stands Out in the Pharmaceutical Industry",
+            "published_at": "2026-02-27 12:00:02",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/collegium-pharmaceutical-capital-utilization-pharma-industry",
+            "related_tickers": []
+          },
+          {
+            "headline": "Delek US Holdings, Inc. (NYSE: DK) Overview and Analysts' Expectations",
+            "published_at": "2026-02-27 12:00:01",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/delek-us-holdings-analyst-expectations-market-outlook",
+            "related_tickers": [
+              "US",
+              "NYSE",
+              "DK"
+            ]
+          },
+          {
+            "headline": "Golar LNG Limited (NASDAQ:GLNG) - A Promising Investment in the LNG Sector",
+            "published_at": "2026-02-27 12:00:00",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/golar-lng-limited-nasdaq-glng-promising-investment-lng-sector",
+            "related_tickers": [
+              "LNG",
+              "LNG"
+            ]
+          },
+          {
+            "headline": "Ibotta, Inc. (IBTA) vs. Red Violet, Inc. (RDVT): A Comparative Analysis",
+            "published_at": "2026-02-27 12:00:00",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/ibotta-inc-ibta-vs-red-violet-inc-rdvt-comparative-analysis",
+            "related_tickers": [
+              "IBTA",
+              "RDVT"
+            ]
+          },
+          {
+            "headline": "Biodesix, Inc. (NASDAQ:BDSX) Stock Upgrade and Financial Performance",
+            "published_at": "2026-02-27 09:00:27",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/biodesix-nasdaqbdsx-stock-upgrade-financial-performance",
+            "related_tickers": []
+          },
+          {
+            "headline": "Avidity Biosciences, Inc. (NASDAQ:RNA / RNAM) Reschedules Special Stockholder Meeting Ahead of Atrium Therapeutics Spin-Off and Novartis Acquisition",
+            "published_at": "2026-02-27 05:03:18",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/avidity-biosciences-reschedules-meeting-atrium-spinoff-novartis-acquisition",
+            "related_tickers": [
+              "RNAM"
+            ]
+          },
+          {
+            "headline": "Diversified Energy Company (NYSE:DEC) Reports Record Year",
+            "published_at": "2026-02-27 04:00:06",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/diversified-energy-company-dec-achieves-record-financial-results-2025",
+            "related_tickers": []
+          },
+          {
+            "headline": "Clipper Realty Inc. (NYSE: CLPR) Faces Financial Challenges in Q4 2025",
+            "published_at": "2026-02-27 03:00:08",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/clipper-realty-inc-clpr-q4-2025-earnings-miss",
+            "related_tickers": [
+              "NYSE",
+              "CLPR"
+            ]
+          },
+          {
+            "headline": "NCR Voyix Corporation (VYX) Sees Optimistic Price Target from Stifel Nicolaus",
+            "published_at": "2026-02-27 00:12:44",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/ncr-voyix-corporation-vyx-bullish-price-target-stifel-nicolaus",
+            "related_tickers": [
+              "NCR",
+              "VYX"
+            ]
+          },
+          {
+            "headline": "Alector, Inc. (NASDAQ:ALEC) Financial and Operational Highlights",
+            "published_at": "2026-02-27 00:08:13",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/alector-inc-alec-financial-operational-highlights",
+            "related_tickers": []
+          },
+          {
+            "headline": "Snowflake Inc. (NYSE:SNOW) Faces Legal Challenges Amid Positive Price Target",
+            "published_at": "2026-02-26 23:11:19",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/snowflake-inc-legal-challenges-positive-price-target",
+            "related_tickers": []
+          },
+          {
+            "headline": "Block, Inc. (NYSE: SQ) Faces Challenges and Embraces AI for Future Growth",
+            "published_at": "2026-02-26 23:04:41",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/block-inc-embraces-ai-for-growth-amid-financial-challenges",
+            "related_tickers": [
+              "NYSE",
+              "SQ",
+              "AI"
+            ]
+          },
+          {
+            "headline": "Snowflake Inc. (NYSE: SNOW) Faces Legal Challenges Amid Market Volatility",
+            "published_at": "2026-02-26 22:18:57",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/snowflake-inc-legal-challenges-market-volatility",
+            "related_tickers": [
+              "NYSE",
+              "SNOW"
+            ]
+          },
+          {
+            "headline": "APi Group Corporation's Stock Performance and Financial Health",
+            "published_at": "2026-02-26 22:12:17",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/api-group-corporation-stock-performance-financial-health",
+            "related_tickers": []
+          },
+          {
+            "headline": "JFrog Ltd (NASDAQ: FROG) Sees Positive Movement with Share Repurchase Program",
+            "published_at": "2026-02-26 21:16:56",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/jfrog-ltd-nasdaq-frog-share-repurchase-program-positive-movement",
+            "related_tickers": [
+              "FROG"
+            ]
+          },
+          {
+            "headline": "GoodRx Holdings Inc. (NASDAQ:GDRX) Stock Update and Financial Overview",
+            "published_at": "2026-02-26 21:10:27",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/goodrx-holdings-nasdaq-gdrx-stock-financial-update",
+            "related_tickers": []
+          },
+          {
+            "headline": "Cullinan Therapeutics, Inc. (NASDAQ: CGEM) Investment Analysis",
+            "published_at": "2026-02-26 21:00:01",
+            "source": "Financial Modeling Prep",
+            "price_impact": 0.8,
+            "breadth": 0.8,
+            "forward_significance": 0.8,
+            "impact_score": 0.51,
+            "source_url": "https://financialmodelingprep.com/market-news/cullinan-therapeutics-cgem-investment-analysis",
+            "related_tickers": [
+              "CGEM"
+            ]
+          }
+        ],
+        "theme_clusters": {
+          "macro": 9,
+          "general": 43,
+          "geopolitics": 4,
+          "earnings": 23,
+          "commodities": 1
+        },
+        "_source_states": {
+          "fmp": "unavailable",
+          "rss": "live"
+        }
+      },
       "source_statuses": {
         "fmp": "unavailable",
-        "rss": "unavailable"
+        "rss": "live"
       }
-    },
-    {
-      "skill_slug": "us-stock-analysis",
-      "status": "unavailable",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "FMP API 키가 없어 종목 분석을 수행할 수 없습니다.",
-      "reason_code": "NO_API_KEY",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {
-        "fmp": "unavailable"
-      }
-    },
-    {
-      "skill_slug": "market-environment-analysis",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "market-breadth-analyzer",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "uptrend-analyzer",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
     },
     {
       "skill_slug": "macro-regime-detector",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
+      "status": "ok",
+      "score_0_100": 57.46,
+      "confidence_0_1": 0.65,
+      "summary_ko": "Macro Regime Detector 프록시 분석 완료: Broadening 레짐, generic 스타일, 우선 후보 NVDA",
+      "reason_code": null,
       "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
+        "mode": "fresh",
+        "fetched_at": "2026-02-27T23:01:49.883045+00:00",
+        "expires_at": "2026-02-28T11:01:49.883045+00:00"
       },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "institutional-flow-tracker",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
+      "analysis_payload": {
+        "mode": "proxy_market_state_v2",
+        "skill_slug": "macro-regime-detector",
+        "family": "market_analysis",
+        "methodology": "macro regime detection",
+        "risk_tilt": "balanced",
+        "horizon_days": 20,
+        "as_of_date": "2026-02-28",
+        "regime": "Broadening",
+        "score_breakdown": {
+          "family": 5.5,
+          "trend": 2.57,
+          "leadership": 7.4,
+          "risk_penalty": 0.0
+        },
+        "market_snapshot": {
+          "spy_return_1d": 0.48,
+          "qqq_return_1d": 0.71,
+          "iwm_return_1d": -0.12,
+          "tlt_return_1d": 0.21,
+          "vix_level": 18.9,
+          "breadth_up_ratio": 0.63,
+          "recession_risk": 0.28
+        },
+        "top_candidates": [
+          {
+            "symbol": "NVDA",
+            "name": "NVIDIA",
+            "sector": "Semiconductors",
+            "daily_return_pct": 2.6,
+            "momentum_20d": 9.3,
+            "ai_factor": 0.91
+          },
+          {
+            "symbol": "AVGO",
+            "name": "Broadcom",
+            "sector": "Semiconductors",
+            "daily_return_pct": 1.9,
+            "momentum_20d": 8.1,
+            "ai_factor": 0.88
+          },
+          {
+            "symbol": "LLY",
+            "name": "Eli Lilly",
+            "sector": "Healthcare",
+            "daily_return_pct": 1.5,
+            "momentum_20d": 7.2,
+            "ai_factor": 0.86
+          },
+          {
+            "symbol": "META",
+            "name": "Meta",
+            "sector": "Technology",
+            "daily_return_pct": 1.7,
+            "momentum_20d": 6.5,
+            "ai_factor": 0.82
+          },
+          {
+            "symbol": "AAPL",
+            "name": "Apple",
+            "sector": "Technology",
+            "daily_return_pct": 1.2,
+            "momentum_20d": 5.9,
+            "ai_factor": 0.78
+          },
+          {
+            "symbol": "MSFT",
+            "name": "Microsoft",
+            "sector": "Technology",
+            "daily_return_pct": 0.9,
+            "momentum_20d": 4.7,
+            "ai_factor": 0.75
+          },
+          {
+            "symbol": "GOOGL",
+            "name": "Alphabet",
+            "sector": "Technology",
+            "daily_return_pct": 1.1,
+            "momentum_20d": 4.4,
+            "ai_factor": 0.74
+          },
+          {
+            "symbol": "AMZN",
+            "name": "Amazon",
+            "sector": "Consumer",
+            "daily_return_pct": 0.6,
+            "momentum_20d": 3.2,
+            "ai_factor": 0.68
+          }
+        ],
+        "execution_notes": [
+          "프록시 분석 결과이므로 실시간 원천 데이터와 교차 검증 필요",
+          "단일 시그널 과신 금지, 포지션 사이징 규칙 준수"
+        ],
+        "score_0_100": 57.46,
+        "confidence_0_1": 0.65,
+        "_source_state": "stale"
       },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "theme-detector",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "economic-calendar-fetcher",
-      "status": "unavailable",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "FMP API 키가 없어 경제 캘린더를 조회할 수 없습니다.",
-      "reason_code": "NO_API_KEY",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
       "source_statuses": {
-        "fmp": "unavailable"
+        "fmp": "stale"
       }
-    },
-    {
-      "skill_slug": "earnings-calendar",
-      "status": "unavailable",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "FMP API 키가 없어 실적 캘린더를 조회할 수 없습니다.",
-      "reason_code": "NO_API_KEY",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {
-        "fmp": "unavailable"
-      }
-    },
-    {
-      "skill_slug": "scenario-analyzer",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "backtest-expert",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "stanley-druckenmiller-investment",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "us-market-bubble-detector",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "options-strategy-advisor",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "portfolio-manager",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "strategy-pivot-designer",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "market-top-detector",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "ftd-detector",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "earnings-trade-analyzer",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "pead-screener",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "vcp-screener",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "canslim-screener",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "value-dividend-screener",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "dividend-growth-pullback-screener",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "kanchi-dividend-sop",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "kanchi-dividend-review-monitor",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "kanchi-dividend-us-tax-accounting",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "pair-trade-screener",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "edge-candidate-agent",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "edge-concept-synthesizer",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "edge-hint-extractor",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "edge-strategy-designer",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "dual-axis-skill-reviewer",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
-    },
-    {
-      "skill_slug": "weekly-trade-strategy",
-      "status": "not_implemented",
-      "score_0_100": null,
-      "confidence_0_1": null,
-      "summary_ko": "v2에서 아직 구현되지 않은 스킬입니다.",
-      "reason_code": "NOT_IMPLEMENTED",
-      "cache_info": {
-        "mode": "none",
-        "fetched_at": null,
-        "expires_at": null
-      },
-      "analysis_payload": {},
-      "source_statuses": {}
     }
   ],
-  "top_picks": [],
+  "top_picks": [
+    {
+      "symbol": "NVDA",
+      "reason": "two-stage top10 analysis · support 1/2 · analyzer pass-or-watch 1/1",
+      "score": 70.7,
+      "decision": "PASS",
+      "primary_skill": "us-stock-analysis",
+      "confirm_votes": 1,
+      "confirm_required": 2,
+      "veto_count": 0,
+      "confirm_hits": [
+        "us-stock-analysis"
+      ],
+      "veto_skills": []
+    },
+    {
+      "symbol": "NONE",
+      "reason": "two-stage top10 analysis · support 1/2 · analyzer pass-or-watch 1/1",
+      "score": 60.98,
+      "decision": "PASS",
+      "primary_skill": "us-stock-analysis",
+      "confirm_votes": 1,
+      "confirm_required": 2,
+      "veto_count": 0,
+      "confirm_hits": [
+        "market-news-analyst"
+      ],
+      "veto_skills": []
+    }
+  ],
+  "pipeline": {
+    "recommender_outputs": [
+      {
+        "skill_slug": "us-stock-analysis",
+        "symbols": [
+          {
+            "symbol": "NVDA",
+            "rank": 1,
+            "percentile": 100.0,
+            "raw_score": 70.0,
+            "reason": "payload_extract"
+          }
+        ]
+      },
+      {
+        "skill_slug": "market-news-analyst",
+        "symbols": [
+          {
+            "symbol": "NYSE",
+            "rank": 1,
+            "percentile": 100.0,
+            "raw_score": 100.0,
+            "reason": "ranked_events"
+          },
+          {
+            "symbol": "TAC",
+            "rank": 2,
+            "percentile": 95.83,
+            "raw_score": 100.0,
+            "reason": "ranked_events"
+          },
+          {
+            "symbol": "ABCL",
+            "rank": 3,
+            "percentile": 91.67,
+            "raw_score": 76.76,
+            "reason": "ranked_events"
+          },
+          {
+            "symbol": "AI",
+            "rank": 4,
+            "percentile": 87.5,
+            "raw_score": 76.26,
+            "reason": "ranked_events"
+          },
+          {
+            "symbol": "MP",
+            "rank": 5,
+            "percentile": 83.33,
+            "raw_score": 75.76,
+            "reason": "ranked_events"
+          },
+          {
+            "symbol": "EV",
+            "rank": 6,
+            "percentile": 79.17,
+            "raw_score": 74.76,
+            "reason": "ranked_events"
+          },
+          {
+            "symbol": "JOBY",
+            "rank": 7,
+            "percentile": 75.0,
+            "raw_score": 73.76,
+            "reason": "ranked_events"
+          },
+          {
+            "symbol": "NONE",
+            "rank": 8,
+            "percentile": 70.83,
+            "raw_score": 70.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "DCI",
+            "rank": 9,
+            "percentile": 66.67,
+            "raw_score": 62.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "STNE",
+            "rank": 10,
+            "percentile": 62.5,
+            "raw_score": 61.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "ADT",
+            "rank": 11,
+            "percentile": 58.33,
+            "raw_score": 60.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "US",
+            "rank": 12,
+            "percentile": 54.17,
+            "raw_score": 59.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "DK",
+            "rank": 13,
+            "percentile": 50.0,
+            "raw_score": 58.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "PLC",
+            "rank": 14,
+            "percentile": 45.83,
+            "raw_score": 57.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "XPOF",
+            "rank": 15,
+            "percentile": 41.67,
+            "raw_score": 56.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "VISN",
+            "rank": 16,
+            "percentile": 37.5,
+            "raw_score": 55.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "SBA",
+            "rank": 17,
+            "percentile": 33.33,
+            "raw_score": 54.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "SBAC",
+            "rank": 18,
+            "percentile": 29.17,
+            "raw_score": 53.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "RPID",
+            "rank": 19,
+            "percentile": 25.0,
+            "raw_score": 52.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "SHAK",
+            "rank": 20,
+            "percentile": 20.83,
+            "raw_score": 51.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "LP",
+            "rank": 21,
+            "percentile": 16.67,
+            "raw_score": 50.0,
+            "reason": "payload_extract"
+          },
+          {
+            "symbol": "ARQT",
+            "rank": 22,
+            "percentile": 12.5,
+            "raw_score": 43.5,
+            "reason": "ranked_events"
+          },
+          {
+            "symbol": "NIC",
+            "rank": 23,
+            "percentile": 8.33,
+            "raw_score": 32.62,
+            "reason": "ranked_events"
+          },
+          {
+            "symbol": "QURE",
+            "rank": 24,
+            "percentile": 4.17,
+            "raw_score": 30.12,
+            "reason": "ranked_events"
+          },
+          {
+            "symbol": "LNG",
+            "rank": 25,
+            "percentile": 0.0,
+            "raw_score": 28.62,
+            "reason": "ranked_events"
+          }
+        ]
+      }
+    ],
+    "recommender_intersection": {
+      "symbols": [],
+      "support_count_by_symbol": {},
+      "dropped_by_stage": [
+        "recommender_intersection_empty"
+      ]
+    },
+    "recommender_union_top10": {
+      "symbols": [
+        {
+          "symbol": "NVDA",
+          "rank": 1,
+          "composite_score": 100.0,
+          "support_count": 1,
+          "normalized_by_skill": {
+            "us-stock-analysis": 100.0
+          },
+          "reasons": [
+            "us-stock-analysis:payload_extract"
+          ]
+        },
+        {
+          "symbol": "NYSE",
+          "rank": 2,
+          "composite_score": 100.0,
+          "support_count": 1,
+          "normalized_by_skill": {
+            "market-news-analyst": 100.0
+          },
+          "reasons": [
+            "market-news-analyst:ranked_events"
+          ]
+        },
+        {
+          "symbol": "TAC",
+          "rank": 3,
+          "composite_score": 95.83,
+          "support_count": 1,
+          "normalized_by_skill": {
+            "market-news-analyst": 95.83
+          },
+          "reasons": [
+            "market-news-analyst:ranked_events"
+          ]
+        },
+        {
+          "symbol": "ABCL",
+          "rank": 4,
+          "composite_score": 91.67,
+          "support_count": 1,
+          "normalized_by_skill": {
+            "market-news-analyst": 91.67
+          },
+          "reasons": [
+            "market-news-analyst:ranked_events"
+          ]
+        },
+        {
+          "symbol": "AI",
+          "rank": 5,
+          "composite_score": 87.5,
+          "support_count": 1,
+          "normalized_by_skill": {
+            "market-news-analyst": 87.5
+          },
+          "reasons": [
+            "market-news-analyst:ranked_events"
+          ]
+        },
+        {
+          "symbol": "MP",
+          "rank": 6,
+          "composite_score": 83.33,
+          "support_count": 1,
+          "normalized_by_skill": {
+            "market-news-analyst": 83.33
+          },
+          "reasons": [
+            "market-news-analyst:ranked_events"
+          ]
+        },
+        {
+          "symbol": "EV",
+          "rank": 7,
+          "composite_score": 79.17,
+          "support_count": 1,
+          "normalized_by_skill": {
+            "market-news-analyst": 79.17
+          },
+          "reasons": [
+            "market-news-analyst:ranked_events"
+          ]
+        },
+        {
+          "symbol": "JOBY",
+          "rank": 8,
+          "composite_score": 75.0,
+          "support_count": 1,
+          "normalized_by_skill": {
+            "market-news-analyst": 75.0
+          },
+          "reasons": [
+            "market-news-analyst:ranked_events"
+          ]
+        },
+        {
+          "symbol": "NONE",
+          "rank": 9,
+          "composite_score": 70.83,
+          "support_count": 1,
+          "normalized_by_skill": {
+            "market-news-analyst": 70.83
+          },
+          "reasons": [
+            "market-news-analyst:payload_extract"
+          ]
+        },
+        {
+          "symbol": "DCI",
+          "rank": 10,
+          "composite_score": 66.67,
+          "support_count": 1,
+          "normalized_by_skill": {
+            "market-news-analyst": 66.67
+          },
+          "reasons": [
+            "market-news-analyst:payload_extract"
+          ]
+        }
+      ],
+      "source_union_count": 26
+    },
+    "analysis_targets": {
+      "intersection_symbols": [],
+      "top10_symbols": [
+        "NVDA",
+        "NYSE",
+        "TAC",
+        "ABCL",
+        "AI",
+        "MP",
+        "EV",
+        "JOBY",
+        "NONE",
+        "DCI"
+      ]
+    },
+    "analyzer_outputs": [
+      {
+        "skill_slug": "macro-regime-detector",
+        "evaluations": [
+          {
+            "symbol": "NVDA",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 64.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "NYSE",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "TAC",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "ABCL",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "AI",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "MP",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "EV",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "JOBY",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "NONE",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 64.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "DCI",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          }
+        ]
+      }
+    ],
+    "analyzer_outputs_by_target": [
+      {
+        "skill_slug": "macro-regime-detector",
+        "target_group": "intersection",
+        "evaluations": []
+      },
+      {
+        "skill_slug": "macro-regime-detector",
+        "target_group": "top10",
+        "evaluations": [
+          {
+            "symbol": "NVDA",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 64.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "NYSE",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "TAC",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "ABCL",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "AI",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "MP",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "EV",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "JOBY",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "NONE",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 64.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol matched"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "DCI",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "REJECT",
+            "score": 42.35,
+            "reasons": [
+              "base 57.5",
+              "confidence 0.65",
+              "symbol not matched"
+            ],
+            "risk_flags": []
+          }
+        ]
+      }
+    ],
+    "final_intersection": {
+      "symbols": [],
+      "final_reasons": [
+        "recommender 2개 strict intersection 0개",
+        "recommender union normalized top10 10개",
+        "analyzer 1개 policy=pass_or_watch",
+        "analysis filtered intersection 0개",
+        "analysis filtered top10 2개",
+        "drop: recommender_intersection_empty"
+      ],
+      "policy_used": "pass_or_watch",
+      "comparison": {
+        "enabled": true,
+        "strict_all_pass": {
+          "symbols": [],
+          "count": 0,
+          "by_target": {
+            "intersection": [],
+            "top10": []
+          }
+        },
+        "watch_inclusive": {
+          "symbols": [
+            "NONE",
+            "NVDA"
+          ],
+          "count": 2,
+          "by_target": {
+            "intersection": [],
+            "top10": [
+              "NONE",
+              "NVDA"
+            ]
+          }
+        },
+        "watch_only_delta": [
+          "NONE",
+          "NVDA"
+        ]
+      },
+      "post_analyzer_by_recommender": [
+        {
+          "recommender_skill": "us-stock-analysis",
+          "symbols": [
+            "NVDA"
+          ],
+          "count": 1
+        },
+        {
+          "recommender_skill": "market-news-analyst",
+          "symbols": [
+            "NONE"
+          ],
+          "count": 1
+        }
+      ],
+      "per_skill_traces": [],
+      "ranking": []
+    },
+    "final_summary": {
+      "intersection_symbols": [],
+      "top5_from_top10": [
+        {
+          "symbol": "NVDA",
+          "support_count": 1,
+          "analyzer_avg_score": 64.35,
+          "volatility_proxy": 2.6,
+          "final_score": 70.7
+        },
+        {
+          "symbol": "NONE",
+          "support_count": 1,
+          "analyzer_avg_score": 64.35,
+          "volatility_proxy": 35.0,
+          "final_score": 60.98
+        }
+      ],
+      "policy_used": "pass_or_watch",
+      "dropped_by_stage": [
+        "recommender_intersection_empty"
+      ]
+    }
+  },
   "warnings": []
 }

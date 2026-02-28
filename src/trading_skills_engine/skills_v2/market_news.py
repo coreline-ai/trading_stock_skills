@@ -22,24 +22,38 @@ class MarketNewsAnalyzer(SkillAnalyzer):
 
         cached = context.cache_store.get_fresh(cache_key)
         if cached:
-            return self._build_ok(cached.payload, CacheStore.cache_info("fresh", cached), "live", "live")
+            source_states = cached.payload.get("_source_states", {}) if isinstance(cached.payload, dict) else {}
+            fmp_state = str(source_states.get("fmp", "live"))
+            rss_state = str(source_states.get("rss", "live"))
+            if context.fmp_news is None and fmp_state == "live":
+                fmp_state = "unavailable"
+            if not (context.fmp_news is not None and fmp_state != "live"):
+                return self._build_ok(cached.payload, CacheStore.cache_info("fresh", cached), fmp_state, rss_state)
+
+        rss_news, rss_warnings = _safe_fetch_rss(context=context, max_items=max_items)
+        context.warnings.extend(rss_warnings)
 
         if context.fmp_news is None:
+            payload = self._compose_payload(fmp_news=[], rss_news=rss_news, max_items=max_items)
+            if payload["ranked_events"]:
+                rss_state = "live" if rss_news else "unavailable"
+                cached_payload = _with_source_states(payload, fmp_state="unavailable", rss_state=rss_state)
+                saved = context.cache_store.set(cache_key, cached_payload, ttl_hours=6)
+                return self._build_ok(payload, CacheStore.cache_info("fresh", saved), "unavailable", rss_state)
+
             stale = context.cache_store.get_stale(cache_key)
             if stale:
-                context.warnings.append(f"{self.slug}: NO_API_KEY -> stale cache 사용")
-                return self._build_ok(stale.payload, CacheStore.cache_info("stale", stale), "stale", "stale")
+                context.warnings.append(f"{self.slug}: NO_API_KEY_AND_EMPTY_RSS -> stale cache 사용")
+                return self._build_ok(stale.payload, CacheStore.cache_info("stale", stale), "unavailable", "stale")
             return unavailable_result(
                 skill_slug=self.slug,
-                summary_ko="FMP API 키가 없어 뉴스 분석을 수행할 수 없습니다.",
-                reason_code="NO_API_KEY",
+                summary_ko="FMP API 키가 없고 RSS 데이터도 없어 뉴스 분석을 수행할 수 없습니다.",
+                reason_code="NO_API_KEY_AND_EMPTY_RSS",
                 source_statuses={"fmp": "unavailable", "rss": "unavailable"},
             )
 
         try:
             fmp_news = context.fmp_news.get_market_news(limit=max_items)
-            rss_news, rss_warnings = context.rss_client.fetch(max_items=max_items)
-            context.warnings.extend(rss_warnings)
 
             payload = self._compose_payload(fmp_news=fmp_news, rss_news=rss_news, max_items=max_items)
             if not payload["ranked_events"]:
@@ -54,8 +68,9 @@ class MarketNewsAnalyzer(SkillAnalyzer):
                     source_statuses={"fmp": "unavailable", "rss": "unavailable"},
                 )
 
-            saved = context.cache_store.set(cache_key, payload, ttl_hours=6)
             rss_state = "live" if rss_news else "unavailable"
+            cached_payload = _with_source_states(payload, fmp_state="live", rss_state=rss_state)
+            saved = context.cache_store.set(cache_key, cached_payload, ttl_hours=6)
             return self._build_ok(payload, CacheStore.cache_info("fresh", saved), "live", rss_state)
         except Exception:
             stale = context.cache_store.get_stale(cache_key)
@@ -135,6 +150,8 @@ class MarketNewsAnalyzer(SkillAnalyzer):
         rss_state: str,
     ) -> SkillRunResultV2:
         ranked_events = payload.get("ranked_events", [])
+        source_payload = dict(payload)
+        source_payload["_source_states"] = {"fmp": fmp_state, "rss": rss_state}
         avg_impact = sum(item.get("impact_score", 0) for item in ranked_events[:10]) / max(1, min(10, len(ranked_events)))
         score = min(100.0, 45 + avg_impact * 8)
         confidence = min(0.95, 0.5 + min(0.4, len(ranked_events) / 120))
@@ -146,9 +163,22 @@ class MarketNewsAnalyzer(SkillAnalyzer):
             confidence_0_1=round(confidence, 2),
             summary_ko=f"FMP/RSS 뉴스 {len(ranked_events)}건을 임팩트 스코어로 랭킹했습니다.",
             cache_info=CacheInfo(**cache_info),
-            analysis_payload=payload,
+            analysis_payload=source_payload,
             source_statuses={"fmp": fmp_state, "rss": rss_state},
         )
+
+
+def _safe_fetch_rss(context: AnalyzerContext, max_items: int) -> tuple[list[dict[str, Any]], list[str]]:
+    try:
+        return context.rss_client.fetch(max_items=max_items)
+    except Exception:
+        return [], ["RSS fetch failed: internal error"]
+
+
+def _with_source_states(payload: dict[str, Any], fmp_state: str, rss_state: str) -> dict[str, Any]:
+    copied = dict(payload)
+    copied["_source_states"] = {"fmp": fmp_state, "rss": rss_state}
+    return copied
 
 
 def _to_int(value: Any, default: int) -> int:

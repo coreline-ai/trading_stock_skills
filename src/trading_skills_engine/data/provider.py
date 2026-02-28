@@ -37,7 +37,9 @@ class MarketDataProvider:
         quote_map = {item.get("symbol"): item for item in quotes if isinstance(item, dict)}
 
         def _change(symbol: str, fallback: float) -> float:
-            raw = quote_map.get(symbol, {}).get("changesPercentage")
+            raw = quote_map.get(symbol, {}).get("changePercentage")
+            if raw is None:
+                raw = quote_map.get(symbol, {}).get("changesPercentage")
             try:
                 return float(raw)
             except (TypeError, ValueError):
@@ -46,7 +48,9 @@ class MarketDataProvider:
         updated_symbols: list[SymbolSignal] = []
         for symbol in state.symbols:
             quote = quote_map.get(symbol.symbol, {})
-            daily = quote.get("changesPercentage")
+            daily = quote.get("changePercentage")
+            if daily is None:
+                daily = quote.get("changesPercentage")
             price = quote.get("price")
             prev = quote.get("previousClose")
             try:

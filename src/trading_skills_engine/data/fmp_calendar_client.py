@@ -19,21 +19,16 @@ class FMPCalendarClient:
 
     def get_economic_calendar(self, start: date, end: date, country: str = "US") -> list[dict[str, Any]]:
         data = self.client._get(
-            "/economic_calendar",
+            "/economic-calendar",
             {"from": start.isoformat(), "to": end.isoformat(), "country": country},
         )
         return data if isinstance(data, list) else []
 
     def get_earnings_calendar(self, start: date, end: date) -> list[dict[str, Any]]:
         data = self.client._get(
-            "/earning_calendar",
+            "/earnings-calendar",
             {"from": start.isoformat(), "to": end.isoformat()},
         )
         if isinstance(data, list):
             return data
-        # fallback endpoint variation
-        data_alt = self.client._get(
-            "/earnings-calendar",
-            {"from": start.isoformat(), "to": end.isoformat()},
-        )
-        return data_alt if isinstance(data_alt, list) else []
+        return []

@@ -68,7 +68,51 @@ def sample_snapshot_path(tmp_path: Path) -> Path:
 
 
 @pytest.fixture()
-def app(sample_snapshot_path: Path):
+def sample_v2_report_path(tmp_path: Path) -> Path:
+    payload = {
+        "run_id": "test-run-id",
+        "as_of_date": "2026-02-26",
+        "data_sources": {"fmp": "stale", "rss": "live"},
+        "results": [
+            {
+                "skill_slug": "market-news-analyst",
+                "status": "ok",
+                "score_0_100": 67.2,
+                "confidence_0_1": 0.7,
+                "summary_ko": "RSS 기반 뉴스 랭킹을 생성했습니다.",
+                "reason_code": None,
+                "cache_info": {"mode": "fresh", "fetched_at": None, "expires_at": None},
+                "analysis_payload": {
+                    "ranked_events": [
+                        {
+                            "headline": "Fed signals cautious stance",
+                            "published_at": "2026-02-26T00:00:00+00:00",
+                            "source": "Federal Reserve",
+                            "price_impact": 1.2,
+                            "breadth": 1.3,
+                            "forward_significance": 1.1,
+                            "impact_score": 1.72,
+                            "source_url": "https://example.com",
+                            "related_tickers": ["SPY"],
+                        }
+                    ],
+                    "theme_clusters": {"macro": 1},
+                },
+                "source_statuses": {"fmp": "stale", "rss": "live"},
+            }
+        ],
+        "top_picks": [{"symbol": "SPY", "reason": "v2 skill consensus", "score": 12.3}],
+        "warnings": [],
+    }
+
+    path = tmp_path / "latest_skill_runs_v2.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    return path
+
+
+@pytest.fixture()
+def app(sample_snapshot_path: Path, sample_v2_report_path: Path, monkeypatch):
+    monkeypatch.setenv("SKILL_RUN_REPORT_V2_PATH", str(sample_v2_report_path))
     return create_app(snapshot_path=sample_snapshot_path)
 
 

@@ -20,6 +20,13 @@ def test_mobile_layout_structure_regression(client):
     assert any("스킬 선택" in title for title in titles)
     assert any("스킬 실행 결과" in title for title in titles)
     assert any("추천 종목" in title for title in titles)
+    assert any("요약 TOP5" in title for title in titles)
+    assert any("추천 스킬별 결과 테이블" in title for title in titles)
+    assert any("추천 교집합 테이블" in title for title in titles)
+    assert any("추천 합집합 정규화 TOP10 테이블" in title for title in titles)
+    assert any("분석 스킬별 평가 테이블 (타겟 분리)" in title for title in titles)
+    assert any("최종 결과 요약 (교집합 + TOP5)" in title for title in titles)
+    assert "WATCH 포함 교집합 사용" in soup.get_text(" ")
 
     cards = soup.find_all("article")
     assert len(cards) >= 1
