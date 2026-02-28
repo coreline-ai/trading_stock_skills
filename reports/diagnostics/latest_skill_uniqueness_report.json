@@ -1,0 +1,2670 @@
+{
+  "summary": {
+    "as_of_date": "2026-02-28",
+    "recommender_count": 22,
+    "analyzer_count": 16,
+    "recommender_duplicate_groups": 0,
+    "analyzer_duplicate_groups": 0,
+    "recommender_missing_count": 0,
+    "analyzer_missing_count": 0,
+    "passed": true
+  },
+  "recommender_duplicate_groups": [],
+  "analyzer_duplicate_groups": [],
+  "recommender_missing": [],
+  "analyzer_missing": [],
+  "recommender_outputs": {
+    "sector-analyst": [
+      {
+        "symbol": "NVDA",
+        "score": 78.11,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 77.29,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 74.46,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 62.84,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 59.62,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 59.56,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 54.45,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 53.37,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "breadth-chart-analyst": [
+      {
+        "symbol": "NVDA",
+        "score": 81.36,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 79.9,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 76.91,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 64.74,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 60.9,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 57.42,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 53.06,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 47.72,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "technical-analyst": [
+      {
+        "symbol": "NVDA",
+        "score": 92.21,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 87.58,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 81.58,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 71.58,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 65.46,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 61.2,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 54.42,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "market-news-analyst": [
+      {
+        "symbol": "IPAC",
+        "score": 72.76,
+        "reason": "ranked_events",
+        "decision": null
+      }
+    ],
+    "us-stock-analysis": [
+      {
+        "symbol": "NVDA",
+        "score": 59.74,
+        "reason": "ticker",
+        "decision": null
+      }
+    ],
+    "market-breadth-analyzer": [
+      {
+        "symbol": "NVDA",
+        "score": 70.11,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 64.56,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 60.66,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 57.14,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 53.06,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 47.99,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 46.94,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 40.28,
+        "reason": "leaders_score",
+        "decision": null
+      }
+    ],
+    "uptrend-analyzer": [
+      {
+        "symbol": "NVDA",
+        "score": 82.17,
+        "reason": "leaders_derived",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 78.72,
+        "reason": "leaders_derived",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 76.24,
+        "reason": "leaders_derived",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 74.06,
+        "reason": "leaders_derived",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 71.31,
+        "reason": "leaders_derived",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 68.26,
+        "reason": "leaders_derived",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 67.44,
+        "reason": "leaders_derived",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 63.35,
+        "reason": "leaders_derived",
+        "decision": null
+      }
+    ],
+    "institutional-flow-tracker": [
+      {
+        "symbol": "NVDA",
+        "score": 79.0,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 74.45,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 73.93,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 60.71,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 57.14,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 53.88,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 53.01,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 44.84,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "theme-detector": [
+      {
+        "symbol": "NVDA",
+        "score": 100.0,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 92.13,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 80.69,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 76.89,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 67.65,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 56.65,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 47.23,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 39.48,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "earnings-calendar": [
+      {
+        "symbol": "BABA",
+        "score": 35.04,
+        "reason": "earnings",
+        "decision": null
+      },
+      {
+        "symbol": "BILI",
+        "score": 35.04,
+        "reason": "earnings",
+        "decision": null
+      },
+      {
+        "symbol": "COST",
+        "score": 35.04,
+        "reason": "earnings",
+        "decision": null
+      },
+      {
+        "symbol": "TGT",
+        "score": 35.04,
+        "reason": "earnings",
+        "decision": null
+      },
+      {
+        "symbol": "RIOT",
+        "score": 35.04,
+        "reason": "earnings",
+        "decision": null
+      }
+    ],
+    "portfolio-manager": [
+      {
+        "symbol": "NVDA",
+        "score": 65.34,
+        "reason": "targets",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 63.29,
+        "reason": "targets",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 61.75,
+        "reason": "targets",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 60.01,
+        "reason": "targets",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 58.37,
+        "reason": "targets",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 56.33,
+        "reason": "targets",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 55.58,
+        "reason": "targets",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 52.95,
+        "reason": "targets",
+        "decision": null
+      }
+    ],
+    "market-top-detector": [
+      {
+        "symbol": "XOM",
+        "score": 100.0,
+        "reason": "candidates_score",
+        "decision": null
+      },
+      {
+        "symbol": "TSLA",
+        "score": 100.0,
+        "reason": "candidates_score",
+        "decision": null
+      },
+      {
+        "symbol": "COST",
+        "score": 100.0,
+        "reason": "candidates_score",
+        "decision": null
+      },
+      {
+        "symbol": "JPM",
+        "score": 100.0,
+        "reason": "candidates_score",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 100.0,
+        "reason": "candidates_score",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 98.14,
+        "reason": "candidates_score",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 97.8,
+        "reason": "candidates_score",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 95.32,
+        "reason": "candidates_score",
+        "decision": null
+      }
+    ],
+    "ftd-detector": [
+      {
+        "symbol": "NVDA",
+        "score": 51.92,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 47.26,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 44.04,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 41.62,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 38.3,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 34.28,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 33.64,
+        "reason": "leaders_score",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 28.4,
+        "reason": "leaders_score",
+        "decision": null
+      }
+    ],
+    "earnings-trade-analyzer": [
+      {
+        "symbol": "NVDA",
+        "score": 75.39,
+        "reason": "candidates_setup",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 72.78,
+        "reason": "candidates_setup",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 70.86,
+        "reason": "candidates_setup",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 69.0,
+        "reason": "candidates_setup",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 67.32,
+        "reason": "candidates_setup",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 64.71,
+        "reason": "candidates_setup",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 64.02,
+        "reason": "candidates_setup",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 60.96,
+        "reason": "candidates_setup",
+        "decision": null
+      }
+    ],
+    "pead-screener": [
+      {
+        "symbol": "NVDA",
+        "score": 100.0,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 94.08,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 84.06,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 75.42,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 67.99,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 59.26,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 51.67,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 40.93,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "vcp-screener": [
+      {
+        "symbol": "NVDA",
+        "score": 100.0,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 98.87,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 87.11,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 81.41,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 70.08,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 58.02,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 48.95,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "canslim-screener": [
+      {
+        "symbol": "NVDA",
+        "score": 98.07,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 90.27,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 81.18,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 71.55,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 62.75,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 52.43,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 45.95,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 35.23,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "value-dividend-screener": [
+      {
+        "symbol": "COST",
+        "score": 79.9,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 78.29,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 67.86,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "TSLA",
+        "score": 62.77,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "XOM",
+        "score": 59.21,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "JPM",
+        "score": 54.86,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 43.3,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 43.24,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "dividend-growth-pullback-screener": [
+      {
+        "symbol": "COST",
+        "score": 69.0,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "TSLA",
+        "score": 68.78,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 66.2,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "XOM",
+        "score": 61.96,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "JPM",
+        "score": 58.0,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 54.42,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 52.87,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 47.86,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "kanchi-dividend-sop": [
+      {
+        "symbol": "COST",
+        "score": 79.32,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 77.35,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 65.67,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "TSLA",
+        "score": 63.44,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "XOM",
+        "score": 59.74,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "JPM",
+        "score": 53.29,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 46.45,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 43.1,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "pair-trade-screener": [
+      {
+        "symbol": "COST",
+        "score": 92.75,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "TSLA",
+        "score": 91.47,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "XOM",
+        "score": 85.38,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 78.6,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "JPM",
+        "score": 72.28,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 51.22,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 44.49,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "LLY",
+        "score": 37.09,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ],
+    "weekly-trade-strategy": [
+      {
+        "symbol": "LLY",
+        "score": 71.26,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AMZN",
+        "score": 60.43,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AVGO",
+        "score": 59.07,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "NVDA",
+        "score": 57.25,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "COST",
+        "score": 50.71,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "AAPL",
+        "score": 50.36,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "META",
+        "score": 50.35,
+        "reason": "top_candidates",
+        "decision": null
+      },
+      {
+        "symbol": "MSFT",
+        "score": 50.25,
+        "reason": "top_candidates",
+        "decision": null
+      }
+    ]
+  },
+  "analyzer_outputs": {
+    "market-environment-analysis": [
+      {
+        "symbol": "NVDA",
+        "score": 53.48,
+        "reason": "base 75.1 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "LLY",
+        "score": 73.82,
+        "reason": "base 75.1 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 53.48,
+        "reason": "base 75.1 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "META",
+        "score": 53.48,
+        "reason": "base 75.1 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 76.4,
+        "reason": "base 75.1 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 53.48,
+        "reason": "base 75.1 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 69.41,
+        "reason": "base 75.1 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 67.72,
+        "reason": "base 75.1 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 53.48,
+        "reason": "base 75.1 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BABA",
+        "score": 53.48,
+        "reason": "base 75.1 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BILI",
+        "score": 53.48,
+        "reason": "base 75.1 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "COST",
+        "score": 77.34,
+        "reason": "base 75.1 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 53.48,
+        "reason": "base 75.1 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 53.48,
+        "reason": "base 75.1 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "XOM",
+        "score": 73.81,
+        "reason": "base 75.1 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 71.16,
+        "reason": "base 75.1 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "JPM",
+        "score": 69.77,
+        "reason": "base 75.1 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      }
+    ],
+    "macro-regime-detector": [
+      {
+        "symbol": "NVDA",
+        "score": 82.6,
+        "reason": "base 71.5 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "LLY",
+        "score": 77.09,
+        "reason": "base 71.5 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 79.74,
+        "reason": "base 71.5 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "META",
+        "score": 74.3,
+        "reason": "base 71.5 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 63.18,
+        "reason": "base 71.5 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 71.54,
+        "reason": "base 71.5 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 68.69,
+        "reason": "base 71.5 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 66.33,
+        "reason": "base 71.5 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 48.17,
+        "reason": "base 71.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BABA",
+        "score": 48.17,
+        "reason": "base 71.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BILI",
+        "score": 48.17,
+        "reason": "base 71.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "COST",
+        "score": 48.17,
+        "reason": "base 71.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TGT",
+        "score": 48.17,
+        "reason": "base 71.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 48.17,
+        "reason": "base 71.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "XOM",
+        "score": 48.17,
+        "reason": "base 71.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 48.17,
+        "reason": "base 71.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "JPM",
+        "score": 48.17,
+        "reason": "base 71.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "WATCH"
+      }
+    ],
+    "economic-calendar-fetcher": [
+      {
+        "symbol": "NVDA",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "LLY",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "META",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BABA",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BILI",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "COST",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TGT",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "XOM",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "JPM",
+        "score": 58.34,
+        "reason": "base 100.0 | confidence 0.63 | symbol_signal absent",
+        "decision": "WATCH"
+      }
+    ],
+    "scenario-analyzer": [
+      {
+        "symbol": "NVDA",
+        "score": 43.35,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "LLY",
+        "score": 71.83,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 43.35,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "META",
+        "score": 43.35,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 70.43,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 43.35,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 63.73,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 59.51,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 43.35,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BABA",
+        "score": 43.35,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BILI",
+        "score": 43.35,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "COST",
+        "score": 71.55,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 43.35,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 43.35,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "XOM",
+        "score": 62.81,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 62.85,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "JPM",
+        "score": 59.91,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      }
+    ],
+    "backtest-expert": [
+      {
+        "symbol": "NVDA",
+        "score": 43.36,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "LLY",
+        "score": 71.84,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 43.36,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "META",
+        "score": 43.36,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 70.44,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 43.36,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 61.74,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 59.52,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 43.36,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BABA",
+        "score": 43.36,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BILI",
+        "score": 43.36,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "COST",
+        "score": 71.56,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 43.36,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 43.36,
+        "reason": "base 59.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "XOM",
+        "score": 62.82,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 62.86,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "JPM",
+        "score": 61.92,
+        "reason": "base 59.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      }
+    ],
+    "stanley-druckenmiller-investment": [
+      {
+        "symbol": "NVDA",
+        "score": 74.09,
+        "reason": "base 57.5 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "LLY",
+        "score": 74.75,
+        "reason": "base 57.5 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 69.31,
+        "reason": "base 57.5 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "META",
+        "score": 62.07,
+        "reason": "base 57.5 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 67.35,
+        "reason": "base 57.5 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 59.43,
+        "reason": "base 57.5 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 62.65,
+        "reason": "base 57.5 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 42.27,
+        "reason": "base 57.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 42.27,
+        "reason": "base 57.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BABA",
+        "score": 42.27,
+        "reason": "base 57.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BILI",
+        "score": 42.27,
+        "reason": "base 57.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "COST",
+        "score": 62.47,
+        "reason": "base 57.5 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TGT",
+        "score": 42.27,
+        "reason": "base 57.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 42.27,
+        "reason": "base 57.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "XOM",
+        "score": 42.27,
+        "reason": "base 57.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 42.27,
+        "reason": "base 57.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "JPM",
+        "score": 42.27,
+        "reason": "base 57.5 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      }
+    ],
+    "us-market-bubble-detector": [
+      {
+        "symbol": "NVDA",
+        "score": 45.37,
+        "reason": "base 65.3 | confidence 0.72 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "LLY",
+        "score": 67.85,
+        "reason": "base 65.3 | confidence 0.72 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 45.37,
+        "reason": "base 65.3 | confidence 0.72 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "META",
+        "score": 45.37,
+        "reason": "base 65.3 | confidence 0.72 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 72.45,
+        "reason": "base 65.3 | confidence 0.72 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 45.37,
+        "reason": "base 65.3 | confidence 0.72 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 63.75,
+        "reason": "base 65.3 | confidence 0.72 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 61.53,
+        "reason": "base 65.3 | confidence 0.72 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 45.37,
+        "reason": "base 65.3 | confidence 0.72 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BABA",
+        "score": 45.37,
+        "reason": "base 65.3 | confidence 0.72 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BILI",
+        "score": 45.37,
+        "reason": "base 65.3 | confidence 0.72 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "COST",
+        "score": 73.57,
+        "reason": "base 65.3 | confidence 0.72 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 45.37,
+        "reason": "base 65.3 | confidence 0.72 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 45.37,
+        "reason": "base 65.3 | confidence 0.72 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "XOM",
+        "score": 68.83,
+        "reason": "base 65.3 | confidence 0.72 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 64.87,
+        "reason": "base 65.3 | confidence 0.72 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "JPM",
+        "score": 65.93,
+        "reason": "base 65.3 | confidence 0.72 | symbol matched",
+        "decision": "PASS"
+      }
+    ],
+    "options-strategy-advisor": [
+      {
+        "symbol": "NVDA",
+        "score": 44.1,
+        "reason": "base 61.8 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "LLY",
+        "score": 72.58,
+        "reason": "base 61.8 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 44.1,
+        "reason": "base 61.8 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "META",
+        "score": 44.1,
+        "reason": "base 61.8 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 71.18,
+        "reason": "base 61.8 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 44.1,
+        "reason": "base 61.8 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 62.48,
+        "reason": "base 61.8 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 60.26,
+        "reason": "base 61.8 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 44.1,
+        "reason": "base 61.8 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BABA",
+        "score": 44.1,
+        "reason": "base 61.8 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BILI",
+        "score": 44.1,
+        "reason": "base 61.8 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "COST",
+        "score": 72.3,
+        "reason": "base 61.8 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 44.1,
+        "reason": "base 61.8 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 44.1,
+        "reason": "base 61.8 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "XOM",
+        "score": 65.56,
+        "reason": "base 61.8 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 59.6,
+        "reason": "base 61.8 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "JPM",
+        "score": 64.66,
+        "reason": "base 61.8 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      }
+    ],
+    "strategy-pivot-designer": [
+      {
+        "symbol": "NVDA",
+        "score": 45.02,
+        "reason": "base 62.7 | confidence 0.76 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "LLY",
+        "score": 75.5,
+        "reason": "base 62.7 | confidence 0.76 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 45.02,
+        "reason": "base 62.7 | confidence 0.76 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "META",
+        "score": 45.02,
+        "reason": "base 62.7 | confidence 0.76 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 74.1,
+        "reason": "base 62.7 | confidence 0.76 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 62.18,
+        "reason": "base 62.7 | confidence 0.76 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 63.4,
+        "reason": "base 62.7 | confidence 0.76 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 45.02,
+        "reason": "base 62.7 | confidence 0.76 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 45.02,
+        "reason": "base 62.7 | confidence 0.76 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BABA",
+        "score": 45.02,
+        "reason": "base 62.7 | confidence 0.76 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BILI",
+        "score": 45.02,
+        "reason": "base 62.7 | confidence 0.76 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "COST",
+        "score": 69.22,
+        "reason": "base 62.7 | confidence 0.76 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 45.02,
+        "reason": "base 62.7 | confidence 0.76 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 45.02,
+        "reason": "base 62.7 | confidence 0.76 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "XOM",
+        "score": 64.48,
+        "reason": "base 62.7 | confidence 0.76 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 64.52,
+        "reason": "base 62.7 | confidence 0.76 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "JPM",
+        "score": 63.58,
+        "reason": "base 62.7 | confidence 0.76 | symbol matched",
+        "decision": "WATCH"
+      }
+    ],
+    "kanchi-dividend-review-monitor": [
+      {
+        "symbol": "NVDA",
+        "score": 44.74,
+        "reason": "base 62.9 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "LLY",
+        "score": 71.22,
+        "reason": "base 62.9 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 44.74,
+        "reason": "base 62.9 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "META",
+        "score": 44.74,
+        "reason": "base 62.9 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 71.82,
+        "reason": "base 62.9 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 44.74,
+        "reason": "base 62.9 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 63.12,
+        "reason": "base 62.9 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 60.9,
+        "reason": "base 62.9 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 44.74,
+        "reason": "base 62.9 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BABA",
+        "score": 44.74,
+        "reason": "base 62.9 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BILI",
+        "score": 44.74,
+        "reason": "base 62.9 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "COST",
+        "score": 72.94,
+        "reason": "base 62.9 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 44.74,
+        "reason": "base 62.9 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 44.74,
+        "reason": "base 62.9 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "XOM",
+        "score": 68.2,
+        "reason": "base 62.9 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 60.24,
+        "reason": "base 62.9 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "JPM",
+        "score": 65.3,
+        "reason": "base 62.9 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      }
+    ],
+    "kanchi-dividend-us-tax-accounting": [
+      {
+        "symbol": "NVDA",
+        "score": 47.17,
+        "reason": "base 68.3 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "LLY",
+        "score": 69.65,
+        "reason": "base 68.3 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 47.17,
+        "reason": "base 68.3 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "META",
+        "score": 47.17,
+        "reason": "base 68.3 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 74.25,
+        "reason": "base 68.3 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 62.33,
+        "reason": "base 68.3 | confidence 0.75 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 65.55,
+        "reason": "base 68.3 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 63.33,
+        "reason": "base 68.3 | confidence 0.75 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 47.17,
+        "reason": "base 68.3 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BABA",
+        "score": 47.17,
+        "reason": "base 68.3 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "BILI",
+        "score": 47.17,
+        "reason": "base 68.3 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "COST",
+        "score": 75.37,
+        "reason": "base 68.3 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 47.17,
+        "reason": "base 68.3 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 47.17,
+        "reason": "base 68.3 | confidence 0.75 | symbol_signal absent",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "XOM",
+        "score": 70.63,
+        "reason": "base 68.3 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 66.67,
+        "reason": "base 68.3 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "JPM",
+        "score": 67.73,
+        "reason": "base 68.3 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      }
+    ],
+    "edge-candidate-agent": [
+      {
+        "symbol": "NVDA",
+        "score": 63.4,
+        "reason": "base 55.4 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "LLY",
+        "score": 74.06,
+        "reason": "base 55.4 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 60.62,
+        "reason": "base 55.4 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "META",
+        "score": 41.58,
+        "reason": "base 55.4 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 68.66,
+        "reason": "base 55.4 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 41.58,
+        "reason": "base 55.4 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 63.96,
+        "reason": "base 55.4 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 41.58,
+        "reason": "base 55.4 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 41.58,
+        "reason": "base 55.4 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BABA",
+        "score": 41.58,
+        "reason": "base 55.4 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BILI",
+        "score": 41.58,
+        "reason": "base 55.4 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "COST",
+        "score": 65.78,
+        "reason": "base 55.4 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 41.58,
+        "reason": "base 55.4 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 41.58,
+        "reason": "base 55.4 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "XOM",
+        "score": 59.04,
+        "reason": "base 55.4 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 41.58,
+        "reason": "base 55.4 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "JPM",
+        "score": 64.14,
+        "reason": "base 55.4 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      }
+    ],
+    "edge-concept-synthesizer": [
+      {
+        "symbol": "NVDA",
+        "score": 60.8,
+        "reason": "base 54.4 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "LLY",
+        "score": 71.46,
+        "reason": "base 54.4 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 66.02,
+        "reason": "base 54.4 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "META",
+        "score": 40.98,
+        "reason": "base 54.4 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 70.06,
+        "reason": "base 54.4 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 40.98,
+        "reason": "base 54.4 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 61.36,
+        "reason": "base 54.4 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 40.98,
+        "reason": "base 54.4 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 40.98,
+        "reason": "base 54.4 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BABA",
+        "score": 40.98,
+        "reason": "base 54.4 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BILI",
+        "score": 40.98,
+        "reason": "base 54.4 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "COST",
+        "score": 65.18,
+        "reason": "base 54.4 | confidence 0.73 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 40.98,
+        "reason": "base 54.4 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 40.98,
+        "reason": "base 54.4 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "XOM",
+        "score": 56.44,
+        "reason": "base 54.4 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 40.98,
+        "reason": "base 54.4 | confidence 0.73 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "JPM",
+        "score": 63.54,
+        "reason": "base 54.4 | confidence 0.73 | symbol matched",
+        "decision": "WATCH"
+      }
+    ],
+    "edge-hint-extractor": [
+      {
+        "symbol": "NVDA",
+        "score": 61.82,
+        "reason": "base 56.0 | confidence 0.75 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "LLY",
+        "score": 74.48,
+        "reason": "base 56.0 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 63.04,
+        "reason": "base 56.0 | confidence 0.75 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "META",
+        "score": 42.0,
+        "reason": "base 56.0 | confidence 0.75 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 69.08,
+        "reason": "base 56.0 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 42.0,
+        "reason": "base 56.0 | confidence 0.75 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 64.38,
+        "reason": "base 56.0 | confidence 0.75 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 42.0,
+        "reason": "base 56.0 | confidence 0.75 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 42.0,
+        "reason": "base 56.0 | confidence 0.75 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BABA",
+        "score": 42.0,
+        "reason": "base 56.0 | confidence 0.75 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BILI",
+        "score": 42.0,
+        "reason": "base 56.0 | confidence 0.75 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "COST",
+        "score": 66.2,
+        "reason": "base 56.0 | confidence 0.75 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 42.0,
+        "reason": "base 56.0 | confidence 0.75 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 42.0,
+        "reason": "base 56.0 | confidence 0.75 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "XOM",
+        "score": 63.46,
+        "reason": "base 56.0 | confidence 0.75 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 42.0,
+        "reason": "base 56.0 | confidence 0.75 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "JPM",
+        "score": 60.56,
+        "reason": "base 56.0 | confidence 0.75 | symbol matched",
+        "decision": "WATCH"
+      }
+    ],
+    "edge-strategy-designer": [
+      {
+        "symbol": "NVDA",
+        "score": 41.68,
+        "reason": "base 55.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "LLY",
+        "score": 74.16,
+        "reason": "base 55.6 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 62.72,
+        "reason": "base 55.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "META",
+        "score": 41.68,
+        "reason": "base 55.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 68.76,
+        "reason": "base 55.6 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 41.68,
+        "reason": "base 55.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 62.06,
+        "reason": "base 55.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 57.84,
+        "reason": "base 55.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 41.68,
+        "reason": "base 55.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BABA",
+        "score": 41.68,
+        "reason": "base 55.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BILI",
+        "score": 41.68,
+        "reason": "base 55.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "COST",
+        "score": 65.88,
+        "reason": "base 55.6 | confidence 0.74 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 41.68,
+        "reason": "base 55.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 41.68,
+        "reason": "base 55.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "XOM",
+        "score": 61.14,
+        "reason": "base 55.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 41.68,
+        "reason": "base 55.6 | confidence 0.74 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "JPM",
+        "score": 64.24,
+        "reason": "base 55.6 | confidence 0.74 | symbol matched",
+        "decision": "WATCH"
+      }
+    ],
+    "dual-axis-skill-reviewer": [
+      {
+        "symbol": "NVDA",
+        "score": 41.34,
+        "reason": "base 55.7 | confidence 0.72 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "LLY",
+        "score": 69.82,
+        "reason": "base 55.7 | confidence 0.72 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AVGO",
+        "score": 41.34,
+        "reason": "base 55.7 | confidence 0.72 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "META",
+        "score": 41.34,
+        "reason": "base 55.7 | confidence 0.72 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "AMZN",
+        "score": 68.42,
+        "reason": "base 55.7 | confidence 0.72 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "AAPL",
+        "score": 58.5,
+        "reason": "base 55.7 | confidence 0.72 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "MSFT",
+        "score": 59.72,
+        "reason": "base 55.7 | confidence 0.72 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "GOOGL",
+        "score": 41.34,
+        "reason": "base 55.7 | confidence 0.72 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "IPAC",
+        "score": 41.34,
+        "reason": "base 55.7 | confidence 0.72 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BABA",
+        "score": 41.34,
+        "reason": "base 55.7 | confidence 0.72 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "BILI",
+        "score": 41.34,
+        "reason": "base 55.7 | confidence 0.72 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "COST",
+        "score": 69.54,
+        "reason": "base 55.7 | confidence 0.72 | symbol matched",
+        "decision": "PASS"
+      },
+      {
+        "symbol": "TGT",
+        "score": 41.34,
+        "reason": "base 55.7 | confidence 0.72 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "RIOT",
+        "score": 41.34,
+        "reason": "base 55.7 | confidence 0.72 | symbol_signal absent",
+        "decision": "REJECT"
+      },
+      {
+        "symbol": "XOM",
+        "score": 62.8,
+        "reason": "base 55.7 | confidence 0.72 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "TSLA",
+        "score": 56.84,
+        "reason": "base 55.7 | confidence 0.72 | symbol matched",
+        "decision": "WATCH"
+      },
+      {
+        "symbol": "JPM",
+        "score": 61.9,
+        "reason": "base 55.7 | confidence 0.72 | symbol matched",
+        "decision": "WATCH"
+      }
+    ]
+  }
+}

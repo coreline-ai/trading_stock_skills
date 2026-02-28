@@ -111,7 +111,8 @@ _SLUG_OVERRIDES: dict[str, dict[str, object]] = {
         "style": "cross_asset_regime",
         "recommendation_role": "analysis_only",
         "consensus_weight": 0.75,
-        "signals": ("rate_sensitive", "risk_off"),
+        "axis_weights": {"defensive_score": 0.5, "stability_score": 0.35, "value_score": 0.15},
+        "signals": ("rate_sensitive", "risk_off", "breadth_sensitive"),
     },
     "market-breadth-analyzer": {
         "style": "breadth_factor",
@@ -125,7 +126,8 @@ _SLUG_OVERRIDES: dict[str, dict[str, object]] = {
     "macro-regime-detector": {
         "style": "macro_regime",
         "recommendation_role": "analysis_only",
-        "signals": ("rate_sensitive", "risk_off"),
+        "axis_weights": {"trend_score": 0.45, "breakout_score": 0.3, "quality_score": 0.25},
+        "signals": ("rate_sensitive", "event_driven", "risk_on"),
         "consensus_weight": 0.8,
     },
     "institutional-flow-tracker": {

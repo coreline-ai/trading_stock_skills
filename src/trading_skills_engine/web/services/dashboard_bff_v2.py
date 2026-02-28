@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -142,6 +143,7 @@ class DashboardBFFV2:
 
         top_picks = _normalize_top_picks(report.get("top_picks", []))
         pipeline_tables = _normalize_pipeline(report.get("pipeline", {}))
+        _decorate_pipeline_tables(pipeline_tables, catalog_by_slug)
         symbol_name_ko = _build_symbol_name_ko_map(
             top_picks=top_picks,
             pipeline_tables=pipeline_tables,
@@ -179,6 +181,8 @@ class DashboardBFFV2:
                 "selected_analyzer_count": selected_analyzer_count,
                 "max_recommender": 5,
                 "max_analyzer": 3,
+                "single_ticker": "",
+                "multi_tickers": "",
             },
             "risk_badges": ["투자 권유 아님", "무효화 레벨 확인"],
             "recommendation_mode": inferred_mode,
@@ -359,6 +363,7 @@ def _normalize_pipeline(raw_pipeline: Any) -> dict[str, Any]:
             "final_intersection": {"symbols": [], "final_reasons": [], "policy_used": "all_pass", "comparison": {}, "post_analyzer_by_recommender": [], "per_skill_traces": [], "ranking": []},
             "final_summary": {"intersection_symbols": [], "top5_from_top10": [], "policy_used": "all_pass", "dropped_by_stage": []},
             "counts": {"recommender_skills": 0, "recommender_intersection": 0, "recommender_top10": 0, "analyzer_skills": 0, "final_symbols": 0, "final_top5": 0},
+            "diagnostics": {"target_groups_identical": False, "uniform_score_items": [], "messages": []},
         }
 
     recommender_outputs = raw_pipeline.get("recommender_outputs")
@@ -383,23 +388,51 @@ def _normalize_pipeline(raw_pipeline: Any) -> dict[str, Any]:
     for output in analyzer_outputs_by_target_raw:
         if not isinstance(output, dict):
             continue
-        evaluations = output.get("evaluations")
-        evaluations = evaluations if isinstance(evaluations, list) else []
+        evaluations_raw = output.get("evaluations")
+        evaluations_raw = evaluations_raw if isinstance(evaluations_raw, list) else []
+        evaluations: list[dict[str, Any]] = []
+        for row in evaluations_raw:
+            if not isinstance(row, dict):
+                continue
+            decision = _normalize_decision(row.get("decision"))
+            reasons = _to_str_list(row.get("reasons"))
+            risk_flags = _to_str_list(row.get("risk_flags"))
+            reasons_ko = [_humanize_analyzer_reason(item) for item in reasons]
+            if not reasons_ko:
+                reasons_ko = ["종목별 근거 데이터가 없어 거시 공통 평가로 처리됨"]
+            evaluations.append(
+                {
+                    **row,
+                    "decision": decision,
+                    "decision_ko": _decision_label_ko(decision),
+                    "score": round(_to_float(row.get("score"), 0.0), 2),
+                    "reasons": reasons,
+                    "reasons_ko": reasons_ko,
+                    "risk_flags": risk_flags,
+                    "risk_flags_ko": [_humanize_risk_flag(item) for item in risk_flags],
+                }
+            )
         pass_count = sum(
             1
             for row in evaluations
-            if isinstance(row, dict) and str(row.get("decision") or "").upper() == "PASS"
+            if str(row.get("decision") or "").upper() == "PASS"
         )
         watch_count = sum(
             1
             for row in evaluations
-            if isinstance(row, dict) and str(row.get("decision") or "").upper() == "WATCH"
+            if str(row.get("decision") or "").upper() == "WATCH"
         )
         reject_count = sum(
             1
             for row in evaluations
-            if isinstance(row, dict) and str(row.get("decision") or "").upper() == "REJECT"
+            if str(row.get("decision") or "").upper() == "REJECT"
         )
+        score_values = [
+            round(_to_float(row.get("score"), 0.0), 2)
+            for row in evaluations
+            if isinstance(row, dict)
+        ]
+        uniform_score = len(score_values) >= 2 and len(set(score_values)) == 1
         analyzer_outputs_by_target.append(
             {
                 **output,
@@ -409,6 +442,8 @@ def _normalize_pipeline(raw_pipeline: Any) -> dict[str, Any]:
                     "pass": pass_count,
                     "watch": watch_count,
                     "reject": reject_count,
+                    "uniform_score": uniform_score,
+                    "uniform_value": (score_values[0] if uniform_score else None),
                 },
             }
         )
@@ -439,6 +474,11 @@ def _normalize_pipeline(raw_pipeline: Any) -> dict[str, Any]:
     final_symbols = final_intersection.get("symbols")
     top10_symbols = recommender_union_top10.get("symbols")
     top5_rows = final_summary.get("top5_from_top10")
+    diagnostics = _build_pipeline_diagnostics(
+        analysis_targets=analysis_targets,
+        recommender_union_top10=recommender_union_top10,
+        analyzer_outputs_by_target=analyzer_outputs_by_target,
+    )
     return {
         "recommender_outputs": recommender_outputs,
         "recommender_intersection": recommender_intersection,
@@ -448,6 +488,7 @@ def _normalize_pipeline(raw_pipeline: Any) -> dict[str, Any]:
         "analyzer_outputs_by_target": analyzer_outputs_by_target,
         "final_intersection": final_intersection,
         "final_summary": final_summary,
+        "diagnostics": diagnostics,
         "counts": {
             "recommender_skills": len(recommender_outputs),
             "recommender_intersection": len(symbols) if isinstance(symbols, list) else 0,
@@ -456,6 +497,242 @@ def _normalize_pipeline(raw_pipeline: Any) -> dict[str, Any]:
             "recommender_top10": len(top10_symbols) if isinstance(top10_symbols, list) else 0,
             "final_top5": len(top5_rows) if isinstance(top5_rows, list) else 0,
         },
+    }
+
+
+def _decorate_pipeline_tables(
+    pipeline_tables: dict[str, Any],
+    catalog_by_slug: dict[str, dict[str, Any]],
+) -> None:
+    union_top10 = pipeline_tables.get("recommender_union_top10")
+    if isinstance(union_top10, dict):
+        rows = union_top10.get("symbols")
+        if isinstance(rows, list):
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                normalized = row.get("normalized_by_skill")
+                normalized_items: list[dict[str, Any]] = []
+                if isinstance(normalized, dict):
+                    for slug, raw_percentile in normalized.items():
+                        skill_slug = str(slug or "").strip()
+                        if not skill_slug:
+                            continue
+                        display_name = str(
+                            catalog_by_slug.get(skill_slug, {}).get("display_name") or skill_slug
+                        )
+                        normalized_items.append(
+                            {
+                                "skill_slug": skill_slug,
+                                "display_name": display_name,
+                                "percentile": round(_to_float(raw_percentile, 0.0), 2),
+                            }
+                        )
+                normalized_items.sort(
+                    key=lambda item: (
+                        -float(item.get("percentile", 0.0)),
+                        str(item.get("skill_slug", "")),
+                    )
+                )
+                row["normalized_items"] = normalized_items
+
+                reason_items: list[dict[str, Any]] = []
+                seen_reason_keys: set[tuple[str, str]] = set()
+                reasons = row.get("reasons")
+                if isinstance(reasons, list):
+                    for raw_reason in reasons:
+                        text = str(raw_reason or "").strip()
+                        if not text:
+                            continue
+                        if ":" in text:
+                            raw_slug, raw_source = text.split(":", 1)
+                        else:
+                            raw_slug, raw_source = "", text
+                        skill_slug = raw_slug.strip()
+                        source_key = raw_source.strip()
+                        if not source_key:
+                            continue
+                        dedup_key = (skill_slug, source_key)
+                        if dedup_key in seen_reason_keys:
+                            continue
+                        seen_reason_keys.add(dedup_key)
+                        display_name = (
+                            str(catalog_by_slug.get(skill_slug, {}).get("display_name") or skill_slug)
+                            if skill_slug
+                            else "unknown"
+                        )
+                        reason_items.append(
+                            {
+                                "skill_slug": skill_slug,
+                                "display_name": display_name,
+                                "source_key": source_key,
+                                "source_label": _humanize_reason_source(source_key),
+                            }
+                        )
+                row["reason_items"] = reason_items
+
+
+def _humanize_reason_source(source_key: str) -> str:
+    key = str(source_key or "").strip().lower()
+    mapping = {
+        "top_candidates": "상위 후보 기반",
+        "top_candidates_score": "상위 후보 점수값 기반",
+        "top_candidates_derived": "상위 후보 파생 점수 기반",
+        "leaders_score": "리더 후보 점수 기반",
+        "leaders_derived": "리더 후보 파생 점수 기반",
+        "candidates_setup": "후보 Setup 점수 기반",
+        "candidates_score": "후보 점수 기반",
+        "candidates_derived": "후보 파생 점수 기반",
+        "ticker": "직접 티커",
+        "targets": "포트폴리오 타깃 기반",
+        "ranked_events": "뉴스 연관 티커",
+        "earnings": "실적 일정 기반",
+        "payload_extract": "페이로드 추출",
+    }
+    return mapping.get(key, key or "-")
+
+
+def _decision_label_ko(decision: str) -> str:
+    mapping = {
+        "PASS": "통과",
+        "WATCH": "관찰",
+        "REJECT": "제외",
+    }
+    return mapping.get(str(decision or "").upper(), "-")
+
+
+def _humanize_risk_flag(flag: str) -> str:
+    key = str(flag or "").strip().lower()
+    mapping = {
+        "low_skill_score": "스킬 기본 점수 낮음",
+        "low_confidence": "신뢰도 낮음",
+        "symbol_signal_absent": "종목별 신호 부족(거시 공통)",
+    }
+    return mapping.get(key, key or "-")
+
+
+def _humanize_analyzer_reason(reason: str) -> str:
+    text = str(reason or "").strip()
+    if not text:
+        return "-"
+
+    if text == "symbol matched":
+        return "분석 스킬 후보에 포함됨"
+    if text == "symbol not matched":
+        return "분석 스킬 후보에 미포함"
+    if text == "symbol_signal absent":
+        return "종목별 신호가 없어 공통 점수 기반으로 평가"
+
+    m = re.match(r"^base\s+([0-9]+(?:\.[0-9]+)?)$", text)
+    if m:
+        return f"기본 점수 {m.group(1)}"
+
+    m = re.match(r"^confidence\s+([0-9]+(?:\.[0-9]+)?)$", text)
+    if m:
+        return f"신뢰도 {m.group(1)}"
+
+    m = re.match(r"^rank_bonus\s+([0-9]+(?:\.[0-9]+)?)$", text)
+    if m:
+        return f"랭크 가산점 {m.group(1)}"
+
+    m = re.match(r"^ai_factor\s+([0-9]+(?:\.[0-9]+)?)$", text)
+    if m:
+        return f"AI 팩터 {m.group(1)}"
+
+    m = re.match(r"^momentum_20d\s+([\-]?[0-9]+(?:\.[0-9]+)?)$", text)
+    if m:
+        return f"20일 모멘텀 {m.group(1)}"
+
+    m = re.match(r"^recommender_strength\s+([\-]?[0-9]+(?:\.[0-9]+)?)$", text)
+    if m:
+        return f"추천 단계 강도 {m.group(1)}"
+
+    m = re.match(r"^strength_adjust\s+([\-]?[0-9]+(?:\.[0-9]+)?)$", text)
+    if m:
+        return f"강도 보정 {m.group(1)}"
+
+    m = re.match(r"^style\s+([a-z0-9_\-]+)$", text)
+    if m:
+        style = m.group(1)
+        style_map = {
+            "cross_asset_regime": "스타일 교차자산 레짐",
+            "macro_regime": "스타일 매크로 레짐",
+        }
+        return style_map.get(style, f"스타일 {style}")
+
+    m = re.match(
+        r"^style_weights\s+rank\s+([0-9]+(?:\.[0-9]+)?)\s+ai\s+([0-9]+(?:\.[0-9]+)?)\s+momentum\s+([0-9]+(?:\.[0-9]+)?)$",
+        text,
+    )
+    if m:
+        return f"스타일 가중치 rank {m.group(1)} / ai {m.group(2)} / momentum {m.group(3)}"
+
+    return text
+
+
+def _build_pipeline_diagnostics(
+    analysis_targets: dict[str, Any],
+    recommender_union_top10: dict[str, Any],
+    analyzer_outputs_by_target: list[dict[str, Any]],
+) -> dict[str, Any]:
+    intersection_symbols = analysis_targets.get("intersection_symbols")
+    top10_symbols = analysis_targets.get("top10_symbols")
+    intersection_symbols = intersection_symbols if isinstance(intersection_symbols, list) else []
+    top10_symbols = top10_symbols if isinstance(top10_symbols, list) else []
+
+    target_groups_identical = bool(intersection_symbols) and set(intersection_symbols) == set(top10_symbols)
+
+    top10_rows = recommender_union_top10.get("symbols")
+    top10_rows = top10_rows if isinstance(top10_rows, list) else []
+    empty_normalized_rows = 0
+    empty_reason_rows = 0
+    for row in top10_rows:
+        if not isinstance(row, dict):
+            continue
+        if not row.get("normalized_by_skill"):
+            empty_normalized_rows += 1
+        if not row.get("reasons"):
+            empty_reason_rows += 1
+
+    uniform_score_items: list[dict[str, Any]] = []
+    for output in analyzer_outputs_by_target:
+        if not isinstance(output, dict):
+            continue
+        evaluations = output.get("evaluations")
+        evaluations = evaluations if isinstance(evaluations, list) else []
+        scores = [
+            round(_to_float(row.get("score"), 0.0), 2)
+            for row in evaluations
+            if isinstance(row, dict) and row.get("score") is not None
+        ]
+        if len(scores) >= 2 and len(set(scores)) == 1:
+            uniform_score_items.append(
+                {
+                    "skill_slug": str(output.get("skill_slug") or ""),
+                    "target_group": str(output.get("target_group") or ""),
+                    "score": scores[0],
+                    "count": len(scores),
+                }
+            )
+
+    messages: list[str] = []
+    if target_groups_identical:
+        messages.append("교집합 대상과 TOP10 대상이 동일해 두 표가 유사하게 보일 수 있습니다.")
+    if empty_normalized_rows > 0:
+        messages.append(f"TOP10 표에서 스킬별 정규화 점수가 비어 있는 행이 {empty_normalized_rows}개 있습니다.")
+    if empty_reason_rows > 0:
+        messages.append(f"TOP10 표에서 근거가 비어 있는 행이 {empty_reason_rows}개 있습니다.")
+    for item in uniform_score_items:
+        messages.append(
+            f"{item['skill_slug']}({item['target_group']}) 점수가 {item['count']}종목 모두 {item['score']}로 동일합니다. (종목별 근거가 없는 거시/이벤트형 스킬에서 발생할 수 있음)"
+        )
+
+    return {
+        "target_groups_identical": target_groups_identical,
+        "empty_normalized_rows": empty_normalized_rows,
+        "empty_reason_rows": empty_reason_rows,
+        "uniform_score_items": uniform_score_items,
+        "messages": messages,
     }
 
 
@@ -620,21 +897,3 @@ def _build_symbol_name_ko_map(
         if ko:
             symbol_name_ko[symbol] = ko
     return symbol_name_ko
-
-    symbols = final_intersection.get("symbols")
-    if isinstance(symbols, list):
-        fallback: list[dict[str, Any]] = []
-        for symbol in symbols[:5]:
-            parsed = str(symbol or "").upper().strip()
-            if not parsed:
-                continue
-            fallback.append(
-                {
-                    "symbol": parsed,
-                    "final_score": 0.0,
-                    "support_count": 0,
-                    "analyzer_avg_score": 0.0,
-                }
-            )
-        return fallback
-    return []

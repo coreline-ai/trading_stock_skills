@@ -25,3 +25,11 @@ def test_recommendation_capability_is_trait_driven():
     assert is_recommendation_capable("macro-regime-detector") is False
     assert is_recommendation_capable("economic-calendar-fetcher") is False
     assert is_recommendation_capable("dual-axis-skill-reviewer") is False
+
+
+def test_market_environment_and_macro_regime_use_distinct_trait_profiles():
+    env_trait = get_skill_trait("market-environment-analysis")
+    macro_trait = get_skill_trait("macro-regime-detector")
+    assert env_trait is not None and macro_trait is not None
+    assert env_trait.axis_weights != macro_trait.axis_weights
+    assert env_trait.signals != macro_trait.signals

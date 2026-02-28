@@ -157,6 +157,10 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
             if slug not in selected:
                 selected.append(slug)
 
+        single_ticker = _first(parsed, "single_ticker", "").strip()
+        multi_tickers = _first(parsed, "multi_tickers", "").strip()
+        watchlist_symbols = _parse_watchlist_symbols(f"{single_ticker}\n{multi_tickers}")
+
         filtered_params = {
             "top-picks": {
                 "recommender_skills": ",".join(role_valid_recommenders),
@@ -165,6 +169,7 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
                 "analyzer_pass_policy": "all_pass",
                 "fallback_to_watch_on_empty": True,
                 "comparison_mode": False,
+                "watchlist_symbols": ",".join(watchlist_symbols),
             }
         }
 
@@ -178,7 +183,6 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
         }
 
         top_picks_mode = "two_stage_intersection"
-        watchlist_symbols: list[str] = []
         top_picks_limit = 5
 
         orchestrator_v2 = SkillEngineOrchestratorV2()

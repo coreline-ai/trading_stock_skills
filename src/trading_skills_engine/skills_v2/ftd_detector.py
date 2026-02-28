@@ -11,6 +11,7 @@ from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV
 
 class FTDDetectorAnalyzer(SkillAnalyzer):
     slug = "ftd-detector"
+    _CACHE_REVISION = 2
 
     def run(self, params: dict[str, Any], context: AnalyzerContext) -> SkillRunResultV2:
         min_index_gain = _to_float(params.get("min_index_gain"), 1.0)
@@ -22,6 +23,7 @@ class FTDDetectorAnalyzer(SkillAnalyzer):
                 "as_of": context.as_of_date.isoformat(),
                 "min_index_gain": min_index_gain,
                 "min_breadth": min_breadth,
+                "cache_revision": self._CACHE_REVISION,
             },
         )
 
@@ -54,6 +56,11 @@ class FTDDetectorAnalyzer(SkillAnalyzer):
             base += 6
 
         score = max(0.0, min(100.0, base))
+        leaders = sorted(
+            state.symbols,
+            key=lambda x: (x.momentum_20d * 2.2 + x.daily_return_pct * 1.6 + x.ai_factor * 30.0),
+            reverse=True,
+        )[:8]
         payload = {
             "has_ftd_signal": has_ftd,
             "score_components": conditions,
@@ -69,6 +76,18 @@ class FTDDetectorAnalyzer(SkillAnalyzer):
                 "breadth_up_ratio": state.breadth_up_ratio,
                 "vix_level": state.vix_level,
             },
+            "leaders": [
+                {
+                    "symbol": item.symbol,
+                    "name": item.name,
+                    "sector": item.sector,
+                    "score": round(item.momentum_20d * 2.2 + item.daily_return_pct * 1.6 + item.ai_factor * 30.0, 2),
+                    "momentum_20d": round(item.momentum_20d, 2),
+                    "daily_return_pct": round(item.daily_return_pct, 2),
+                    "ai_factor": round(item.ai_factor, 3),
+                }
+                for item in leaders
+            ],
         }
 
         saved = context.cache_store.set(cache_key, payload, ttl_hours=8)

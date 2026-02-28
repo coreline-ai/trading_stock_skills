@@ -11,10 +11,18 @@ from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV
 
 class MarketBreadthAnalyzer(SkillAnalyzer):
     slug = "market-breadth-analyzer"
+    _CACHE_REVISION = 2
 
     def run(self, params: dict[str, Any], context: AnalyzerContext) -> SkillRunResultV2:
         min_breadth = _to_float(params.get("min_breadth"), 0.55)
-        cache_key = _cache_key(self.slug, {"as_of": context.as_of_date.isoformat(), "min_breadth": min_breadth})
+        cache_key = _cache_key(
+            self.slug,
+            {
+                "as_of": context.as_of_date.isoformat(),
+                "min_breadth": min_breadth,
+                "cache_revision": self._CACHE_REVISION,
+            },
+        )
 
         cached = context.cache_store.get_fresh(cache_key)
         if cached:
@@ -28,7 +36,12 @@ class MarketBreadthAnalyzer(SkillAnalyzer):
         macro = max(0.0, min(1.0, 1.0 - state.recession_risk))
         trend = max(0.0, min(1.0, (state.spy_return_1d + state.qqq_return_1d + 2.0) / 4.0))
         small_cap = max(0.0, min(1.0, (state.iwm_return_1d + 2.0) / 4.0))
-        leadership = _leadership_score(state.symbols)
+        leaders = sorted(
+            state.symbols,
+            key=lambda x: (x.ai_factor * 100 + x.momentum_20d + x.daily_return_pct * 0.5),
+            reverse=True,
+        )[:8]
+        leadership = _leadership_score(leaders)
 
         factor_scores = {
             "participation": round(participation * 100, 2),
@@ -51,6 +64,18 @@ class MarketBreadthAnalyzer(SkillAnalyzer):
                 "breadth_up_ratio": state.breadth_up_ratio,
                 "recession_risk": state.recession_risk,
             },
+            "leaders": [
+                {
+                    "symbol": item.symbol,
+                    "name": item.name,
+                    "sector": item.sector,
+                    "momentum_20d": round(item.momentum_20d, 2),
+                    "daily_return_pct": round(item.daily_return_pct, 2),
+                    "ai_factor": round(item.ai_factor, 3),
+                    "score": round(item.ai_factor * 45.0 + item.momentum_20d * 2.8 + item.daily_return_pct * 1.2, 2),
+                }
+                for item in leaders
+            ],
             "above_threshold": state.breadth_up_ratio >= min_breadth,
             "regime_hint": _regime_hint(breadth_score),
         }
@@ -75,10 +100,9 @@ class MarketBreadthAnalyzer(SkillAnalyzer):
         )
 
 
-def _leadership_score(symbols: list[Any]) -> float:
-    if not symbols:
+def _leadership_score(leaders: list[Any]) -> float:
+    if not leaders:
         return 0.5
-    leaders = sorted(symbols, key=lambda x: (x.ai_factor * 100 + x.momentum_20d), reverse=True)[:5]
     avg_momentum = sum(max(-10.0, min(15.0, item.momentum_20d)) for item in leaders) / max(1, len(leaders))
     return max(0.0, min(1.0, (avg_momentum + 10.0) / 25.0))
 

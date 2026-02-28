@@ -1,6 +1,12 @@
 from __future__ import annotations
 
 
+def test_healthz_endpoint_returns_ok(client):
+    response = client.get("/healthz")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
 def test_dashboard_template_renders_required_sections(client):
     response = client.get("/dashboard")
     assert response.status_code == 200
@@ -10,6 +16,9 @@ def test_dashboard_template_renders_required_sections(client):
     assert "선택한 스킬 실행" in html
     assert "종목추천 스킬" in html
     assert "분석 스킬" in html
+    assert "티커 필터 (선택)" in html
+    assert "개별 티커" in html
+    assert "멀티 티커" in html
     assert "스킬 실행 결과" in html
     assert "추천 종목 (선택 스킬 기반)" in html
     assert "요약 TOP5" in html

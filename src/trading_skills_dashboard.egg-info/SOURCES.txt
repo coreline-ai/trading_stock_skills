@@ -6,6 +6,9 @@ src/trading_skills_dashboard.egg-info/dependency_links.txt
 src/trading_skills_dashboard.egg-info/requires.txt
 src/trading_skills_dashboard.egg-info/top_level.txt
 src/trading_skills_engine/__init__.py
+src/trading_skills_engine/config/__init__.py
+src/trading_skills_engine/config/env.py
+src/trading_skills_engine/config/fmp_runtime.py
 src/trading_skills_engine/core/__init__.py
 src/trading_skills_engine/core/models.py
 src/trading_skills_engine/data/__init__.py
@@ -13,6 +16,7 @@ src/trading_skills_engine/data/cache_store.py
 src/trading_skills_engine/data/fmp_calendar_client.py
 src/trading_skills_engine/data/fmp_client.py
 src/trading_skills_engine/data/fmp_news_client.py
+src/trading_skills_engine/data/fmp_usage_tracker.py
 src/trading_skills_engine/data/provider.py
 src/trading_skills_engine/data/rss_client.py
 src/trading_skills_engine/engine/__init__.py
@@ -35,6 +39,7 @@ src/trading_skills_engine/skills_v2/market_top_detector.py
 src/trading_skills_engine/skills_v2/portfolio_manager.py
 src/trading_skills_engine/skills_v2/proxy.py
 src/trading_skills_engine/skills_v2/registry.py
+src/trading_skills_engine/skills_v2/traits.py
 src/trading_skills_engine/skills_v2/uptrend.py
 src/trading_skills_engine/skills_v2/us_stock_analysis.py
 src/trading_skills_engine/web/__init__.py
@@ -53,4 +58,6 @@ tests/test_dashboard_template.py
 tests/test_dashboard_visual_regression.py
 tests/test_engine_api.py
 tests/test_engine_api_v2.py
+tests/test_fmp_runtime.py
 tests/test_skill_engine_full.py
+tests/test_skill_traits.py

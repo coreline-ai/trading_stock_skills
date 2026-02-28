@@ -11,10 +11,18 @@ from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV
 
 class UptrendAnalyzer(SkillAnalyzer):
     slug = "uptrend-analyzer"
+    _CACHE_REVISION = 2
 
     def run(self, params: dict[str, Any], context: AnalyzerContext) -> SkillRunResultV2:
         min_momentum = _to_float(params.get("min_momentum"), 2.0)
-        cache_key = _cache_key(self.slug, {"as_of": context.as_of_date.isoformat(), "min_momentum": min_momentum})
+        cache_key = _cache_key(
+            self.slug,
+            {
+                "as_of": context.as_of_date.isoformat(),
+                "min_momentum": min_momentum,
+                "cache_revision": self._CACHE_REVISION,
+            },
+        )
 
         cached = context.cache_store.get_fresh(cache_key)
         if cached:
@@ -42,6 +50,16 @@ class UptrendAnalyzer(SkillAnalyzer):
                     "symbol": item.symbol,
                     "name": item.name,
                     "sector": item.sector,
+                    "momentum_20d": round(item.momentum_20d, 2),
+                    "daily_return_pct": round(item.daily_return_pct, 2),
+                    "ai_factor": round(item.ai_factor, 3),
+                }
+                for item in leaders
+            ],
+            "top_candidates": [
+                {
+                    "symbol": item.symbol,
+                    "composite_score": round(item.ai_factor * 55.0 + item.momentum_20d * 2.4 + item.daily_return_pct * 1.1, 2),
                     "momentum_20d": round(item.momentum_20d, 2),
                     "daily_return_pct": round(item.daily_return_pct, 2),
                     "ai_factor": round(item.ai_factor, 3),

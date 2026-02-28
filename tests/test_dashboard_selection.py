@@ -100,3 +100,31 @@ def test_dashboard_run_trims_role_caps(tmp_path: Path, monkeypatch):
     pipeline = payload.get("pipeline") or {}
     assert len(pipeline.get("recommender_outputs", [])) <= 5
     assert len(pipeline.get("analyzer_outputs", [])) <= 3
+
+
+def test_dashboard_run_applies_single_and_multi_ticker_filter(tmp_path: Path, monkeypatch):
+    report_path = tmp_path / "latest_skill_runs_v2.json"
+    monkeypatch.setenv("SKILL_RUN_REPORT_V2_PATH", str(report_path))
+
+    app = create_app()
+    with TestClient(app) as isolated_client:
+        response = isolated_client.post(
+            "/dashboard/run",
+            data={
+                "recommender_skills": ["vcp-screener"],
+                "analyzer_skills": ["macro-regime-detector"],
+                "single_ticker": "NVDA",
+                "multi_tickers": "AVGO, LLY\nMSFT",
+            },
+            follow_redirects=False,
+        )
+        assert response.status_code == 303
+
+    payload = json.loads(report_path.read_text(encoding="utf-8"))
+    pipeline = payload.get("pipeline") or {}
+    allowed = {"NVDA", "AVGO", "LLY", "MSFT"}
+    for output in pipeline.get("recommender_outputs", []):
+        for row in output.get("symbols", []):
+            assert row.get("symbol") in allowed
+    for symbol in pipeline.get("analysis_targets", {}).get("top10_symbols", []):
+        assert symbol in allowed

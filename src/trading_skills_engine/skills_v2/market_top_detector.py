@@ -11,6 +11,7 @@ from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV
 
 class MarketTopDetectorAnalyzer(SkillAnalyzer):
     slug = "market-top-detector"
+    _CACHE_REVISION = 2
 
     def run(self, params: dict[str, Any], context: AnalyzerContext) -> SkillRunResultV2:
         vix_alert = _to_float(params.get("vix_alert"), 24.0)
@@ -22,6 +23,7 @@ class MarketTopDetectorAnalyzer(SkillAnalyzer):
                 "as_of": context.as_of_date.isoformat(),
                 "vix_alert": vix_alert,
                 "breadth_floor": breadth_floor,
+                "cache_revision": self._CACHE_REVISION,
             },
         )
 
@@ -53,6 +55,14 @@ class MarketTopDetectorAnalyzer(SkillAnalyzer):
 
         risk_points = max(0.0, min(100.0, risk_points))
         safety_score = round(100.0 - risk_points, 2)
+        defensive_candidates = sorted(
+            state.symbols,
+            key=lambda x: (
+                (100.0 - abs(x.daily_return_pct) * 4.0 - abs(x.momentum_20d) * 0.8)
+                + (100.0 - x.ai_factor * 100.0) * 0.22
+            ),
+            reverse=True,
+        )[:8]
 
         payload = {
             "top_risk_score_0_100": round(risk_points, 2),
@@ -67,6 +77,22 @@ class MarketTopDetectorAnalyzer(SkillAnalyzer):
                 "breadth_up_ratio": state.breadth_up_ratio,
                 "recession_risk": state.recession_risk,
             },
+            "candidates": [
+                {
+                    "symbol": item.symbol,
+                    "name": item.name,
+                    "sector": item.sector,
+                    "score": round(
+                        (100.0 - abs(item.daily_return_pct) * 4.0 - abs(item.momentum_20d) * 0.8)
+                        + (100.0 - item.ai_factor * 100.0) * 0.22,
+                        2,
+                    ),
+                    "momentum_20d": round(item.momentum_20d, 2),
+                    "daily_return_pct": round(item.daily_return_pct, 2),
+                    "ai_factor": round(item.ai_factor, 3),
+                }
+                for item in defensive_candidates
+            ],
         }
 
         saved = context.cache_store.set(cache_key, payload, ttl_hours=8)

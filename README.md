@@ -7,20 +7,48 @@
 ## Quick Start
 
 ```bash
-python -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
 python scripts/run_full_engine.py
-uvicorn trading_skills_engine.web.app:app --reload
+scripts/dashboard_server.sh restart
 ```
 
 Open:
-- `http://127.0.0.1:8000/dashboard`
-- `POST http://127.0.0.1:8000/api/v1/engine/run`
-- `GET  http://127.0.0.1:8000/api/v1/skills`
-- `POST http://127.0.0.1:8000/api/v2/skills/run`
-- `GET  http://127.0.0.1:8000/api/v2/skills`
-- `GET  http://127.0.0.1:8000/api/v2/engine/status`
+- `http://127.0.0.1:8001/dashboard`
+- `GET  http://127.0.0.1:8001/healthz`
+- `POST http://127.0.0.1:8001/api/v1/engine/run`
+- `GET  http://127.0.0.1:8001/api/v1/skills`
+- `POST http://127.0.0.1:8001/api/v2/skills/run`
+- `GET  http://127.0.0.1:8001/api/v2/skills`
+- `GET  http://127.0.0.1:8001/api/v2/engine/status`
+
+### Reliable Dev Runtime
+
+```bash
+# start / stop / restart / status / check
+scripts/dashboard_server.sh restart
+scripts/dashboard_server.sh status
+```
+
+- 기본 포트: `8001`
+- 로그: `/tmp/trading_skills_8001.log`
+- 상태 체크: `GET /healthz`
+
+코드 수정 후 회귀 + 런타임 확인(권장):
+
+```bash
+scripts/verify_after_change.sh
+```
+
+전체 38개 스킬 중복/누락 자동 감사 리포트:
+
+```bash
+scripts/run_full_skill_uniqueness_report.py
+```
+
+- JSON: `reports/diagnostics/latest_skill_uniqueness_report.json`
+- HTML: `reports/diagnostics/latest_skill_uniqueness_report.html`
 
 ## Data Flow
 

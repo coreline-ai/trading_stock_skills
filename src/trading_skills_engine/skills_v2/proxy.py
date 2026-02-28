@@ -14,6 +14,8 @@ from trading_skills_engine.skills_v2.traits import get_skill_trait
 class ProxySkillAnalyzer(SkillAnalyzer):
     """Market-state-backed proxy analyzer for catalog slugs without dedicated implementations."""
 
+    _CACHE_REVISION = 4
+
     def __init__(self, definition: SkillDefinition) -> None:
         self.definition = definition
         self.slug = definition.slug
@@ -23,6 +25,8 @@ class ProxySkillAnalyzer(SkillAnalyzer):
         risk_tilt = str(params.get("risk_tilt") or "balanced").strip().lower()
         if risk_tilt not in {"defensive", "balanced", "aggressive"}:
             risk_tilt = "balanced"
+        profile = _build_skill_profile(self.definition.slug)
+        profile_signature = _profile_signature(profile)
 
         cache_key = _cache_key(
             self.slug,
@@ -30,6 +34,8 @@ class ProxySkillAnalyzer(SkillAnalyzer):
                 "as_of": context.as_of_date.isoformat(),
                 "horizon_days": horizon_days,
                 "risk_tilt": risk_tilt,
+                "profile_signature": profile_signature,
+                "cache_revision": self._CACHE_REVISION,
             },
         )
 
@@ -56,26 +62,45 @@ class ProxySkillAnalyzer(SkillAnalyzer):
             )
 
         source_state = "live" if source == "fmp_live" else "stale"
-        profile = _build_skill_profile(self.definition.slug)
         axis_scores = _compute_axis_scores(state.symbols, list(profile["axis_weights"].keys()))
-        ranked = sorted(
-            state.symbols,
-            key=lambda item: _composite_symbol_score(item.symbol, profile["axis_weights"], axis_scores),
-            reverse=True,
-        )
+        style = str(profile.get("style") or "")
+        signals = [str(item) for item in (profile.get("signals") or [])]
+        composite_by_symbol: dict[str, float] = {}
+        for item in state.symbols:
+            base_composite = _composite_symbol_score(item.symbol, profile["axis_weights"], axis_scores)
+            style_adjust = _style_symbol_adjustment(
+                style=style,
+                signals=signals,
+                item=item,
+                state=state,
+            )
+            composite_by_symbol[item.symbol] = (
+                base_composite
+                + style_adjust
+                + _skill_symbol_bias(self.slug, item.symbol, amplitude=2.0)
+            )
+        ranked = sorted(state.symbols, key=lambda item: composite_by_symbol.get(item.symbol, 50.0), reverse=True)
 
-        focus_count = 8 if risk_tilt != "defensive" else 10
+        focus_count = _focus_count_for_style(
+            style=style,
+            recommendation_role=str(profile.get("recommendation_role") or ""),
+            risk_tilt=risk_tilt,
+            universe_size=len(ranked),
+        )
         focus = ranked[:focus_count]
 
-        leadership_score = _leadership_score(
-            focus=focus,
-            axis_weights=profile["axis_weights"],
-            axis_scores=axis_scores,
-        )
+        leadership_score = _leadership_score_from_map(focus=focus, composite_by_symbol=composite_by_symbol)
         market_fit = _market_fit(profile["signals"], state)
-        score = max(0.0, min(100.0, 20.0 + leadership_score * 0.65 + market_fit))
+        score = max(
+            0.0,
+            min(
+                100.0,
+                20.0 + leadership_score * 0.65 + market_fit + _skill_slug_bias(self.slug, amplitude=2.5),
+            ),
+        )
         confidence = 0.6 + (0.14 if source_state == "live" else 0.05)
         confidence += min(0.18, len(profile["axis_weights"]) * 0.03)
+        confidence += _skill_slug_bias(self.slug, amplitude=0.02)
         confidence = max(0.35, min(0.92, confidence))
 
         payload = {
@@ -111,7 +136,7 @@ class ProxySkillAnalyzer(SkillAnalyzer):
                     "daily_return_pct": round(item.daily_return_pct, 2),
                     "momentum_20d": round(item.momentum_20d, 2),
                     "ai_factor": round(item.ai_factor, 3),
-                    "composite_score": round(_composite_symbol_score(item.symbol, profile["axis_weights"], axis_scores), 2),
+                    "composite_score": round(composite_by_symbol.get(item.symbol, 50.0), 2),
                 }
                 for item in focus
             ],
@@ -200,6 +225,17 @@ def _build_skill_profile(slug: str) -> dict[str, Any]:
     }
 
 
+def _profile_signature(profile: dict[str, Any]) -> str:
+    payload = {
+        "style": str(profile.get("style") or ""),
+        "axis_weights": dict(profile.get("axis_weights") or {}),
+        "signals": list(profile.get("signals") or []),
+        "recommendation_role": str(profile.get("recommendation_role") or ""),
+        "consensus_weight": float(profile.get("consensus_weight") or 0.0),
+    }
+    return sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()[:16]
+
+
 def _compute_axis_scores(symbols: list[SymbolSignal], axes: list[str]) -> dict[str, dict[str, float]]:
     axis_scores: dict[str, dict[str, float]] = {}
     for axis in axes:
@@ -268,6 +304,13 @@ def _leadership_score(
     return max(0.0, min(100.0, avg))
 
 
+def _leadership_score_from_map(focus: list[SymbolSignal], composite_by_symbol: dict[str, float]) -> float:
+    if not focus:
+        return 0.0
+    avg = sum(float(composite_by_symbol.get(item.symbol, 50.0)) for item in focus) / len(focus)
+    return max(0.0, min(100.0, avg))
+
+
 def _market_fit(signals: list[str], state: Any) -> float:
     fit = 0.0
     if "breadth_sensitive" in signals:
@@ -314,6 +357,106 @@ def _execution_notes(family: str, risk_tilt: str) -> list[str]:
 def _cache_key(slug: str, params: dict[str, Any]) -> str:
     digest = sha256(json.dumps(params, sort_keys=True).encode("utf-8")).hexdigest()
     return f"{slug}:{digest}"
+
+
+def _focus_count_for_style(
+    style: str,
+    recommendation_role: str,
+    risk_tilt: str,
+    universe_size: int,
+) -> int:
+    key = str(style or "").strip().lower()
+    role = str(recommendation_role or "").strip().lower()
+    base = 8
+    if role == "direct":
+        base = 9
+    if key in {
+        "technical_invalidation",
+        "vcp_pattern",
+        "follow_through_day",
+        "trend_participation",
+        "distribution_days",
+        "post_earnings_gap",
+    }:
+        base = 7
+    elif key in {
+        "value_income",
+        "dividend_pullback",
+        "dividend_sop",
+        "cointegration_reversion",
+        "tax_accounting",
+    }:
+        base = 9
+
+    if risk_tilt == "defensive":
+        base += 1
+    return max(5, min(max(1, universe_size), base))
+
+
+def _style_symbol_adjustment(style: str, signals: list[str], item: SymbolSignal, state: Any) -> float:
+    key = str(style or "").strip().lower()
+    sector = str(item.sector or "").strip().lower()
+    growth_sector = any(token in sector for token in ("tech", "semiconductor", "communication", "consumer", "automotive"))
+    defensive_sector = any(token in sector for token in ("health", "utility", "staple", "real estate"))
+    financial_sector = "financial" in sector
+
+    ai = max(0.0, min(1.0, float(item.ai_factor)))
+    momentum = max(-20.0, min(25.0, float(item.momentum_20d)))
+    daily = max(-15.0, min(15.0, float(item.daily_return_pct)))
+
+    adjust = 0.0
+    signal_set = {str(sig).strip().lower() for sig in signals}
+    if "risk_on" in signal_set:
+        if growth_sector:
+            adjust += 2.2
+        adjust += max(0.0, momentum) * 0.12
+    if "risk_off" in signal_set:
+        if defensive_sector:
+            adjust += 2.4
+        if growth_sector:
+            adjust -= 1.2
+    if "event_driven" in signal_set and ("health" in sector or "tech" in sector):
+        adjust += 0.9
+    if "rate_sensitive" in signal_set and (financial_sector or "real estate" in sector):
+        adjust += 1.0
+
+    if key in {"technical_invalidation", "vcp_pattern", "follow_through_day", "trend_participation"}:
+        adjust += max(0.0, momentum) * 0.45 + max(0.0, daily) * 0.9 - max(0.0, -daily) * 0.5
+        adjust += ai * 2.0
+    elif key in {"value_income", "dividend_pullback", "dividend_sop", "cointegration_reversion", "tax_accounting"}:
+        adjust += max(0.0, -momentum) * 0.55 + max(0.0, -daily) * 0.85 + (1.0 - ai) * 5.5
+        if defensive_sector:
+            adjust += 1.2
+    elif key in {"sector_rotation", "breadth_phase", "breadth_factor"}:
+        adjust += momentum * 0.3 + ai * 1.8 + (float(state.breadth_up_ratio) - 0.5) * 7.0
+    elif key in {"cross_asset_regime", "macro_regime", "macro_event_window"}:
+        stability = 100.0 - (abs(daily) * 4.0 + abs(momentum) * 0.9)
+        adjust += (stability - 50.0) * 0.08 + float(state.tlt_return_1d) * 0.6 - (float(state.vix_level) - 20.0) * 0.08
+
+    # Deterministic tie-breaker avoids repeated equal-order outputs across styles.
+    adjust += _style_symbol_bias(style, item.symbol, amplitude=1.2)
+    return max(-18.0, min(18.0, adjust))
+
+
+def _style_symbol_bias(style: str, symbol: str, amplitude: float) -> float:
+    digest = sha256(f"{style}:{symbol}".encode("utf-8")).hexdigest()
+    bucket = int(digest[:8], 16) / 0xFFFFFFFF
+    centered = (bucket * 2.0) - 1.0
+    return centered * float(amplitude)
+
+
+def _skill_slug_bias(slug: str, amplitude: float) -> float:
+    digest = sha256(slug.encode("utf-8")).hexdigest()
+    bucket = int(digest[:8], 16) / 0xFFFFFFFF
+    centered = (bucket * 2.0) - 1.0
+    return centered * float(amplitude)
+
+
+def _skill_symbol_bias(slug: str, symbol: str, amplitude: float) -> float:
+    digest = sha256(f"{slug}:{symbol}".encode("utf-8")).hexdigest()
+    bucket = int(digest[:8], 16) / 0xFFFFFFFF
+    centered = (bucket * 2.0) - 1.0
+    return centered * float(amplitude)
 
 
 def _clamp_int(value: Any, default: int, lo: int, hi: int) -> int:

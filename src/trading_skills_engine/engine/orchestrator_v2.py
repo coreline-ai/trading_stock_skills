@@ -858,11 +858,60 @@ class SkillEngineOrchestratorV2:
         for idx, row in enumerate(payload.get("top_candidates", [])[: top_n * 3]):
             if not isinstance(row, dict):
                 continue
-            score = _to_float(
-                row.get("composite_score"),
-                _to_float(row.get("score"), max(0.0, 80.0 - idx)),
-            )
-            _put(row.get("symbol"), score, "top_candidates")
+            if row.get("composite_score") is not None:
+                score = _to_float(row.get("composite_score"), 0.0)
+                reason = "top_candidates"
+            elif row.get("score") is not None:
+                score = _to_float(row.get("score"), 0.0)
+                reason = "top_candidates_score"
+            else:
+                ai = max(0.0, min(1.0, _to_float(row.get("ai_factor"), 0.5)))
+                momentum = max(-15.0, min(20.0, _to_float(row.get("momentum_20d"), 0.0)))
+                daily = max(-12.0, min(12.0, _to_float(row.get("daily_return_pct"), 0.0)))
+                # Avoid synthetic fixed ladder (80,79,...) when upstream score fields are missing.
+                score = 45.0 + ai * 30.0 + momentum * 1.4 + daily * 1.1 - idx * 0.3
+                reason = "top_candidates_derived"
+            _put(row.get("symbol"), max(0.0, min(100.0, score)), reason)
+
+        for idx, row in enumerate(payload.get("leaders", [])[: top_n * 3]):
+            if not isinstance(row, dict):
+                continue
+            if row.get("score") is not None:
+                score = _to_float(row.get("score"), 0.0)
+                reason = "leaders_score"
+            else:
+                ai = max(0.0, min(1.0, _to_float(row.get("ai_factor"), 0.5)))
+                momentum = max(-15.0, min(20.0, _to_float(row.get("momentum_20d"), 0.0)))
+                daily = max(-12.0, min(12.0, _to_float(row.get("daily_return_pct"), 0.0)))
+                score = 42.0 + ai * 28.0 + momentum * 1.3 + daily * 1.0 - idx * 0.35
+                reason = "leaders_derived"
+            _put(row.get("symbol"), max(0.0, min(100.0, score)), reason)
+
+        for idx, row in enumerate(payload.get("targets", [])[: top_n * 3]):
+            if not isinstance(row, dict):
+                continue
+            weight = max(0.0, min(100.0, _to_float(row.get("target_weight_pct"), 0.0)))
+            ai = max(0.0, min(1.0, _to_float(row.get("ai_factor"), 0.5)))
+            momentum = max(-15.0, min(20.0, _to_float(row.get("momentum_20d"), 0.0)))
+            score = 38.0 + weight * 0.7 + ai * 12.0 + momentum * 0.6 - idx * 0.25
+            _put(row.get("symbol"), max(0.0, min(100.0, score)), "targets")
+
+        for idx, row in enumerate(payload.get("candidates", [])[: top_n * 3]):
+            if not isinstance(row, dict):
+                continue
+            if row.get("setup_score") is not None:
+                score = _to_float(row.get("setup_score"), 0.0)
+                reason = "candidates_setup"
+            elif row.get("score") is not None:
+                score = _to_float(row.get("score"), 0.0)
+                reason = "candidates_score"
+            else:
+                ai = max(0.0, min(1.0, _to_float(row.get("ai_factor"), 0.5)))
+                momentum = max(-15.0, min(20.0, _to_float(row.get("momentum_20d"), 0.0)))
+                daily = max(-12.0, min(12.0, _to_float(row.get("daily_return_pct"), 0.0)))
+                score = 41.0 + ai * 24.0 + momentum * 1.2 + daily * 0.9 - idx * 0.3
+                reason = "candidates_derived"
+            _put(row.get("symbol") or row.get("ticker"), max(0.0, min(100.0, score)), reason)
 
         for idx, row in enumerate(payload.get("earnings", [])[: top_n * 3]):
             if not isinstance(row, dict):
@@ -878,7 +927,14 @@ class SkillEngineOrchestratorV2:
                 _put(related, min(100.0, 45.0 + impact * 12.0 - idx * 0.5), "ranked_events")
 
         for idx, symbol in enumerate(_extract_symbols_from_payload(payload)[: top_n * 3]):
-            _put(symbol, max(0.0, 70.0 - idx), "payload_extract")
+            sanitized = _sanitize_symbol(symbol)
+            if not sanitized:
+                continue
+            # payload_extract is a low-priority backfill and must not overwrite
+            # richer sources like top_candidates/earnings/ranked_events.
+            if sanitized in ranked:
+                continue
+            _put(sanitized, max(0.0, 38.0 - idx), "payload_extract")
 
         sorted_rows = sorted(ranked.items(), key=lambda item: item[1][0], reverse=True)[:top_n]
         return [(symbol, score_reason[0], score_reason[1]) for symbol, score_reason in sorted_rows]
@@ -920,25 +976,85 @@ class SkillEngineOrchestratorV2:
         result: SkillRunResultV2,
         source_recommender: str | None = None,
         target_group: str | None = None,
+        symbol_strength_0_100: float | None = None,
     ) -> AnalyzerEvaluationV2:
+        del symbol_strength_0_100
         payload = result.analysis_payload if isinstance(result.analysis_payload, dict) else {}
         matched_symbols = set(_extract_symbols_from_payload(payload))
+        candidate_rows = payload.get("top_candidates")
+        candidate_rows = candidate_rows if isinstance(candidate_rows, list) else []
+        candidate_rank: dict[str, int] = {}
+        candidate_ai: dict[str, float] = {}
+        candidate_momentum: dict[str, float] = {}
+        for idx, row in enumerate(candidate_rows[:50]):
+            if not isinstance(row, dict):
+                continue
+            row_symbol = _sanitize_symbol(row.get("symbol"))
+            if not row_symbol:
+                continue
+            if row_symbol not in candidate_rank:
+                candidate_rank[row_symbol] = idx
+            candidate_ai[row_symbol] = _to_float(row.get("ai_factor"), 0.5)
+            candidate_momentum[row_symbol] = _to_float(row.get("momentum_20d"), 0.0)
+
+        has_payload_symbol_signals = (
+            symbol in matched_symbols
+            or symbol in candidate_rank
+            or symbol in candidate_ai
+            or symbol in candidate_momentum
+        )
+        style = ""
+        if (trait := get_skill_trait(result.skill_slug)) is not None:
+            style = trait.style
+        style_weights = _analyzer_style_weights(style)
         base_score = _to_float(result.score_0_100, 50.0)
         confidence = _to_float(result.confidence_0_1, 0.5)
-        match_bonus = 14.0 if symbol in matched_symbols else -8.0
-        score = base_score * 0.65 + confidence * 100.0 * 0.2 + match_bonus
+        # Macro/event analyzers often have no symbol-level payload; avoid uniform hard penalty.
+        match_bonus = (10.0 if symbol in matched_symbols else -10.0) if has_payload_symbol_signals else 0.0
+
+        rank_idx = candidate_rank.get(symbol)
+        if rank_idx is None:
+            rank_score = 0.0
+        else:
+            # Earlier rank in top_candidates gets higher contribution.
+            rank_score = max(0.0, 16.0 - float(rank_idx) * 2.0)
+        ai_score = max(0.0, min(1.0, candidate_ai.get(symbol, 0.5))) * 10.0
+        momentum = max(-12.0, min(12.0, candidate_momentum.get(symbol, 0.0)))
+        momentum_score = momentum * 0.4
+        score = (
+            base_score * 0.42 * style_weights["base"]
+            + confidence * 100.0 * 0.18 * style_weights["confidence"]
+            + match_bonus * style_weights["match"]
+            + rank_score * style_weights["rank"]
+            + ai_score * style_weights["ai"]
+            + momentum_score * style_weights["momentum"]
+        )
         score = max(0.0, min(100.0, score))
 
         reasons: list[str] = [
             f"base {base_score:.1f}",
             f"confidence {confidence:.2f}",
-            "symbol matched" if symbol in matched_symbols else "symbol not matched",
+            (
+                "symbol matched"
+                if symbol in matched_symbols
+                else ("symbol not matched" if has_payload_symbol_signals else "symbol_signal absent")
+            ),
+            f"rank_bonus {rank_score:.1f}" if rank_idx is not None else "rank_bonus 0.0",
+            f"ai_factor {candidate_ai.get(symbol, 0.5):.2f}",
+            f"momentum_20d {candidate_momentum.get(symbol, 0.0):.2f}",
         ]
+        if style:
+            reasons.append(f"style {style}")
+            reasons.append(
+                f"style_weights rank {style_weights['rank']:.2f} ai {style_weights['ai']:.2f} momentum {style_weights['momentum']:.2f}"
+            )
         risk_flags: list[str] = []
         if base_score < 40.0:
             risk_flags.append("low_skill_score")
         if confidence < 0.45:
             risk_flags.append("low_confidence")
+        if not has_payload_symbol_signals:
+            risk_flags.append("symbol_signal_absent")
 
         if score >= 65.0:
             decision = "PASS"
@@ -1065,6 +1181,37 @@ class SkillEngineOrchestratorV2:
 def _max_state(current: str, incoming: str) -> str:
     order = {"unavailable": 0, "stale": 1, "live": 2}
     return incoming if order.get(incoming, 0) > order.get(current, 0) else current
+
+
+def _analyzer_style_weights(style: str) -> dict[str, float]:
+    key = str(style or "").strip().lower()
+    presets: dict[str, dict[str, float]] = {
+        # 환경/자산배분 성격: 모멘텀보다는 안정성/컨텍스트 가중
+        "cross_asset_regime": {
+            "base": 1.08,
+            "confidence": 1.12,
+            "match": 1.0,
+            "rank": 0.78,
+            "ai": 0.86,
+            "momentum": 0.35,
+        },
+        # 매크로 레짐 성격: 추세/랭크 기여를 더 반영
+        "macro_regime": {
+            "base": 1.0,
+            "confidence": 1.0,
+            "match": 1.0,
+            "rank": 1.08,
+            "ai": 1.0,
+            "momentum": 0.82,
+        },
+    }
+    base = {"base": 1.0, "confidence": 1.0, "match": 1.0, "rank": 1.0, "ai": 1.0, "momentum": 1.0}
+    selected = presets.get(key)
+    if not selected:
+        return base
+    merged = dict(base)
+    merged.update(selected)
+    return merged
 
 
 def _sanitize_selected_skills(raw_slugs: list[str]) -> list[str]:

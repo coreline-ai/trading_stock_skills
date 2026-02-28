@@ -1,9 +1,9 @@
 {
-  "run_id": "7a059d73-ef00-4133-a4ca-d65cab3309c4",
+  "run_id": "3cc54d44-a4c8-4851-97dd-ca2229688eda",
   "as_of_date": "2026-02-28",
   "data_sources": {
     "fmp": "stale",
-    "rss": "live"
+    "rss": "unavailable"
   },
   "results": [
     {
@@ -67,812 +67,632 @@
       }
     },
     {
-      "skill_slug": "market-news-analyst",
+      "skill_slug": "portfolio-manager",
       "status": "ok",
-      "score_0_100": 69.2,
-      "confidence_0_1": 0.9,
-      "summary_ko": "FMP/RSS 뉴스 60건을 임팩트 스코어로 랭킹했습니다.",
+      "score_0_100": 75.0,
+      "confidence_0_1": 0.64,
+      "summary_ko": "balanced 프로필 기준 목표 포트폴리오 8종목을 제안했습니다.",
       "reason_code": null,
       "cache_info": {
         "mode": "fresh",
-        "fetched_at": "2026-02-27T23:34:48.728079+00:00",
-        "expires_at": "2026-02-28T05:34:48.728079+00:00"
+        "fetched_at": "2026-02-27T22:34:16.587768+00:00",
+        "expires_at": "2026-02-28T10:34:16.587768+00:00"
       },
       "analysis_payload": {
-        "ranked_events": [
+        "risk_profile": "balanced",
+        "cash_buffer_pct": 16.08,
+        "equity_allocation_pct": 83.92,
+        "targets": [
           {
-            "headline": "MasTec, Inc. (NYSE:MTZ) Demonstrates Impressive Q4 2025 Earnings and Growth Potential",
-            "published_at": "2026-02-27 22:03:01",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.9,
-            "breadth": 1.5,
-            "forward_significance": 1.7,
-            "impact_score": 4.84,
-            "source_url": "https://financialmodelingprep.com/market-news/mastec-inc-mtz-q4-2025-earnings-strong-performance-growth-outlook",
-            "related_tickers": []
+            "symbol": "NVDA",
+            "name": "NVIDIA",
+            "sector": "Semiconductors",
+            "target_weight_pct": 15.48,
+            "momentum_20d": 9.3,
+            "ai_factor": 0.91
           },
           {
-            "headline": "TransAlta Co. (NYSE: TAC) Quarterly Earnings Preview and Strategic Partnership Highlights",
-            "published_at": "2026-02-26 17:00:07",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.9,
-            "breadth": 1.5,
-            "forward_significance": 1.7,
-            "impact_score": 4.84,
-            "source_url": "https://financialmodelingprep.com/market-news/transalta-co-quarterly-earnings-strategic-partnership-highlights",
-            "related_tickers": [
-              "NYSE",
-              "TAC"
-            ]
+            "symbol": "AVGO",
+            "name": "Broadcom",
+            "sector": "Semiconductors",
+            "target_weight_pct": 14.46,
+            "momentum_20d": 8.1,
+            "ai_factor": 0.88
           },
           {
-            "headline": "AbCellera Biologics Inc. (NASDAQ: ABCL) Demonstrates Financial Resilience and Growth",
-            "published_at": "2026-02-27 20:00:15",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.4,
-            "breadth": 1.5,
-            "forward_significance": 1.3,
-            "impact_score": 2.73,
-            "source_url": "https://financialmodelingprep.com/market-news/abcellera-biologics-financial-growth-insider-confidence",
-            "related_tickers": [
-              "ABCL"
-            ]
+            "symbol": "LLY",
+            "name": "Eli Lilly",
+            "sector": "Healthcare",
+            "target_weight_pct": 13.73,
+            "momentum_20d": 7.2,
+            "ai_factor": 0.86
           },
           {
-            "headline": "Pearson plc (NYSE:PSO) Showcases Financial Health and Strategic Focus on AI",
-            "published_at": "2026-02-27 10:04:31",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.4,
-            "breadth": 1.5,
-            "forward_significance": 1.3,
-            "impact_score": 2.73,
-            "source_url": "https://financialmodelingprep.com/market-news/pearson-plc-financial-health-strategic-ai-focus",
-            "related_tickers": [
-              "AI"
-            ]
+            "symbol": "META",
+            "name": "Meta",
+            "sector": "Technology",
+            "target_weight_pct": 12.89,
+            "momentum_20d": 6.5,
+            "ai_factor": 0.82
           },
           {
-            "headline": "MP Materials Corp. (NYSE: MP) Financial Overview and Strategic Moves",
-            "published_at": "2026-02-26 22:05:36",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.4,
-            "breadth": 1.5,
-            "forward_significance": 1.3,
-            "impact_score": 2.73,
-            "source_url": "https://financialmodelingprep.com/market-news/mp-materials-corp-financial-overview-strategic-moves",
-            "related_tickers": [
-              "MP",
-              "NYSE",
-              "MP"
-            ]
+            "symbol": "AAPL",
+            "name": "Apple",
+            "sector": "Technology",
+            "target_weight_pct": 12.1,
+            "momentum_20d": 5.9,
+            "ai_factor": 0.78
           },
           {
-            "headline": "Baidu Posts Profit Beat As AI Cloud Growth Accelerates, But Shares Fall",
-            "published_at": "2026-02-26 17:40:01",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.4,
-            "breadth": 1.5,
-            "forward_significance": 1.3,
-            "impact_score": 2.73,
-            "source_url": "https://financialmodelingprep.com/market-news/baidu-posts-profit-beat-as-ai-cloud-growth-accelerates-but-shares-fall",
-            "related_tickers": [
-              "AI"
-            ]
+            "symbol": "MSFT",
+            "name": "Microsoft",
+            "sector": "Technology",
+            "target_weight_pct": 11.09,
+            "momentum_20d": 4.7,
+            "ai_factor": 0.75
           },
           {
-            "headline": "Stellantis Posts Massive 2025 Loss Amid EV Strategy Reset and Writedowns",
-            "published_at": "2026-02-26 17:35:16",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.4,
-            "breadth": 1.5,
-            "forward_significance": 1.3,
-            "impact_score": 2.73,
-            "source_url": "https://financialmodelingprep.com/market-news/stellantis-posts-massive--loss-amid-ev-strategy-reset-and-writedowns",
-            "related_tickers": [
-              "EV"
-            ]
+            "symbol": "GOOGL",
+            "name": "Alphabet",
+            "sector": "Technology",
+            "target_weight_pct": 10.8,
+            "momentum_20d": 4.4,
+            "ai_factor": 0.74
           },
           {
-            "headline": "Stella-Jones Inc. (OTC:STLJF) Financial Overview and Strategic Investments",
-            "published_at": "2026-02-26 15:00:03",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.4,
-            "breadth": 1.5,
-            "forward_significance": 1.3,
-            "impact_score": 2.73,
-            "source_url": "https://financialmodelingprep.com/market-news/stella-jones-inc-financial-overview-strategic-investments",
-            "related_tickers": []
-          },
-          {
-            "headline": "Joby Aviation Inc (NYSE: JOBY) Sees Positive Financial Performance and Strategic Partnerships",
-            "published_at": "2026-02-26 12:03:58",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.4,
-            "breadth": 1.5,
-            "forward_significance": 1.3,
-            "impact_score": 2.73,
-            "source_url": "https://financialmodelingprep.com/market-news/joby-aviation-surpasses-earnings-expectations-partners-with-uber",
-            "related_tickers": [
-              "NYSE",
-              "JOBY"
-            ]
-          },
-          {
-            "headline": "BorgWarner Inc. (NYSE:BWA): A Leader in Sustainable Mobility Solutions",
-            "published_at": "2026-02-27 21:00:03",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 1.4,
-            "forward_significance": 1.3,
-            "impact_score": 1.46,
-            "source_url": "https://financialmodelingprep.com/market-news/borgwarner-inc-nyse-bwa-sustainable-mobility-leader",
-            "related_tickers": []
-          },
-          {
-            "headline": "Warner Brothers Discovery's Stock Downgrade and Market Dynamics",
-            "published_at": "2026-02-27 08:00:10",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 1.4,
-            "forward_significance": 1.3,
-            "impact_score": 1.46,
-            "source_url": "https://financialmodelingprep.com/market-news/warner-brothers-discovery-stock-downgrade-market-dynamics",
-            "related_tickers": []
-          },
-          {
-            "headline": "Warner Bros. Discovery Beats Q4 EBITDA Estimates Amid Competing Takeover Bids",
-            "published_at": "2026-02-26 17:34:13",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 1.4,
-            "forward_significance": 1.3,
-            "impact_score": 1.46,
-            "source_url": "https://financialmodelingprep.com/market-news/warner-bros-discovery-beats-q-ebitda-estimates-amid-competing-takeover-bids",
-            "related_tickers": []
-          },
-          {
-            "headline": "Donaldson Company, Inc. (NYSE: DCI) Sees Upward Trend in Price Targets Amidst Financial Fluctuations",
-            "published_at": "2026-02-26 12:00:00",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 1.4,
-            "forward_significance": 1.3,
-            "impact_score": 1.46,
-            "source_url": "https://financialmodelingprep.com/market-news/donaldson-company-dci-price-targets-rise-amid-financial-changes",
-            "related_tickers": [
-              "NYSE",
-              "DCI"
-            ]
-          },
-          {
-            "headline": "Dell Shares Surge 15% on AI-Driven Earnings Beat and Upbeat 2027 Forecast",
-            "published_at": "2026-02-27 17:10:57",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/dell-shares-surge--on-aidriven-earnings-beat-and-upbeat--forecast",
-            "related_tickers": [
-              "AI"
-            ]
-          },
-          {
-            "headline": "Elastic Beats Q3 Estimates but Shares Fall 15% on Q4 Guidance",
-            "published_at": "2026-02-27 17:09:06",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/elastic-beats-q-estimates-but-shares-fall--on-q-guidance",
-            "related_tickers": []
-          },
-          {
-            "headline": "Intuit Beats Q2 Expectations but Q3 Guidance Disappoints",
-            "published_at": "2026-02-27 17:08:18",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/intuit-beats-q-expectations-but-q-guidance-disappoints",
-            "related_tickers": []
-          },
-          {
-            "headline": "StoneCo Ltd. (NASDAQ: STNE) Earnings Preview: Key Financial Insights",
-            "published_at": "2026-02-27 17:00:06",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/stoneco-ltd-nasdaq-stne-earnings-preview-q4-2025-financial-insights",
-            "related_tickers": [
-              "STNE"
-            ]
-          },
-          {
-            "headline": "ADT Inc. (NYSE: ADT) Earnings Preview and Financial Analysis",
-            "published_at": "2026-02-27 16:00:05",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/adt-inc-nyse-adt-q4-earnings-preview-financial-analysis",
-            "related_tickers": [
-              "ADT",
-              "NYSE",
-              "ADT"
-            ]
-          },
-          {
-            "headline": "Delek US Holdings, Inc. (NYSE: DK) Surpasses Earnings Expectations",
-            "published_at": "2026-02-27 15:04:43",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/delek-us-holdings-surpasses-earnings-expectations",
-            "related_tickers": [
-              "US",
-              "NYSE",
-              "DK"
-            ]
-          },
-          {
-            "headline": "EchoStar Corporation (NASDAQ:SATS) Quarterly Earnings Insight",
-            "published_at": "2026-02-27 15:00:04",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/echostar-corporation-nasdaq-sats-quarterly-earnings-insight",
-            "related_tickers": []
-          },
-          {
-            "headline": "Melrose Industries PLC (OTC:MLSPF) Earnings Report Highlights",
-            "published_at": "2026-02-27 14:03:41",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/melrose-industries-plc-earnings-report-highlights",
-            "related_tickers": [
-              "PLC"
-            ]
-          },
-          {
-            "headline": "Berkshire Hathaway Inc. (NYSE:BRK-B) Quarterly Earnings and Leadership Transition",
-            "published_at": "2026-02-27 14:00:06",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/berkshire-hathaway-earnings-leadership-transition",
-            "related_tickers": []
-          },
-          {
-            "headline": "Carter's, Inc. (NYSE:CRI) Exceeds Revenue Estimates in Q4 Earnings Report",
-            "published_at": "2026-02-27 13:07:00",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/carters-inc-exceeds-q4-revenue-estimates",
-            "related_tickers": []
-          },
-          {
-            "headline": "Berkshire Hathaway Inc. (NYSE:BRK-A) Quarterly Earnings Preview and Financial Health Analysis",
-            "published_at": "2026-02-27 13:00:05",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/berkshire-hathaway-earnings-preview-financial-analysis-2026",
-            "related_tickers": []
-          },
-          {
-            "headline": "Xponential Fitness, Inc. (NYSE: XPOF) Earnings Report Analysis",
-            "published_at": "2026-02-27 02:00:06",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/xponential-fitness-xpof-earnings-miss-revenue-beat-analysis",
-            "related_tickers": [
-              "NYSE",
-              "XPOF"
-            ]
-          },
-          {
-            "headline": "Vistance Networks, Inc. (NASDAQ: VISN) Earnings Report Highlights",
-            "published_at": "2026-02-27 01:00:06",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/vistance-networks-visn-q1-earnings-report",
-            "related_tickers": [
-              "VISN"
-            ]
-          },
-          {
-            "headline": "SBA Communications Corporation (NASDAQ: SBAC) Earnings Report Highlights",
-            "published_at": "2026-02-27 00:04:33",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/sba-communications-sbac-q4-earnings-miss-estimates-revenue-grows",
-            "related_tickers": [
-              "SBA",
-              "SBAC"
-            ]
-          },
-          {
-            "headline": "Rapid Micro Biosystems, Inc. (NASDAQ: RPID) Quarterly Earnings Preview",
-            "published_at": "2026-02-26 22:00:07",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/rapid-micro-biosystems-q4-full-year-2025-earnings-preview",
-            "related_tickers": [
-              "RPID"
-            ]
-          },
-          {
-            "headline": "Shake Shack Inc. (NYSE: SHAK) Earnings Overview",
-            "published_at": "2026-02-26 21:05:34",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/shake-shack-inc-shak-earnings-overview",
-            "related_tickers": [
-              "NYSE",
-              "SHAK"
-            ]
-          },
-          {
-            "headline": "Global Partners LP Unit (GLP)'s Upcoming Quarterly Earnings: A Financial Analysis",
-            "published_at": "2026-02-26 18:00:04",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/global-partners-lp-glp-quarterly-earnings-financial-analysis",
-            "related_tickers": [
-              "LP"
-            ]
-          },
-          {
-            "headline": "Hormel Sees Limited Earnings Impact From Turkey Business Sale",
-            "published_at": "2026-02-26 17:38:48",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/hormel-sees-limited-earnings-impact-from-turkey-business-sale",
-            "related_tickers": []
-          },
-          {
-            "headline": "Krispy Kreme Shares Surge 30% After Q4 Earnings and Revenue Beat",
-            "published_at": "2026-02-26 17:36:19",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/krispy-kreme-shares-surge--after-q-earnings-and-revenue-beat",
-            "related_tickers": []
-          },
-          {
-            "headline": "SBA Communications Corporation (NASDAQ:SBAC) Earnings Preview",
-            "published_at": "2026-02-26 14:00:04",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/sba-communications-earnings-preview-insights-financial-health",
-            "related_tickers": [
-              "SBA"
-            ]
-          },
-          {
-            "headline": "Arcutis Biotherapeutics Inc. (NASDAQ: ARQT) Surpasses Earnings Expectations and Shows Strong Revenue Growth",
-            "published_at": "2026-02-26 13:05:46",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/arcutis-biotherapeutics-beats-earnings-shows-strong-growth-q4-2025",
-            "related_tickers": [
-              "ARQT"
-            ]
-          },
-          {
-            "headline": "MP Materials Corp. (NYSE:MP) Earnings Preview and Financial Challenges",
-            "published_at": "2026-02-26 12:00:06",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/mp-materials-corp-earnings-preview-financial-challenges",
-            "related_tickers": [
-              "MP"
-            ]
-          },
-          {
-            "headline": "Nordex (OTC:NRDXF) Surpasses Earnings Expectations and Eyes U.S. Market Expansion",
-            "published_at": "2026-02-26 11:00:05",
-            "source": "Financial Modeling Prep",
-            "price_impact": 1.3,
-            "breadth": 0.8,
-            "forward_significance": 1.2,
-            "impact_score": 1.25,
-            "source_url": "https://financialmodelingprep.com/market-news/nordex-surpasses-earnings-expectations-eyes-us-market-expansion",
-            "related_tickers": []
-          },
-          {
-            "headline": "Frontline Ltd. (NYSE:FRO) Financial Performance Analysis",
-            "published_at": "2026-02-27 22:00:05",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/frontline-ltd-nyse-fro-financial-performance-analysis",
-            "related_tickers": []
-          },
-          {
-            "headline": "NIC Inc. (NASDAQ:NIC) Sees Positive Momentum Amidst Slight Dip",
-            "published_at": "2026-02-27 21:00:03",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/nic-inc-nasdaq-nic-positive-momentum-growth-financials",
-            "related_tickers": [
-              "NIC"
-            ]
-          },
-          {
-            "headline": "Autodesk Shares Rise After Q4 Beat and Strong Fiscal 2027 Outlook",
-            "published_at": "2026-02-27 17:11:59",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/autodesk-shares-rise-after-q-beat-and-strong-fiscal--outlook",
-            "related_tickers": []
-          },
-          {
-            "headline": "Duolingo Shares Drop 18% After Soft 2026 Outlook Despite Q4 Beat",
-            "published_at": "2026-02-27 17:10:11",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/duolingo-shares-drop--after-soft--outlook-despite-q-beat",
-            "related_tickers": []
-          },
-          {
-            "headline": "Monster Beverage Tops Q4 Estimates but Shares Slip on Rising Costs",
-            "published_at": "2026-02-27 17:07:24",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/monster-beverage-tops-q-estimates-but-shares-slip-on-rising-costs",
-            "related_tickers": []
-          },
-          {
-            "headline": "London Stock Exchange Group's Financial Performance Analysis",
-            "published_at": "2026-02-27 12:04:47",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/london-stock-exchange-group-financial-performance-analysis",
-            "related_tickers": []
-          },
-          {
-            "headline": "uniQure N.V. (NASDAQ: QURE) Faces Legal Challenges Amid Financial Struggles",
-            "published_at": "2026-02-27 12:00:04",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/uniQure-NV-NASDAQ-QURE-Legal-Challenges-Financial-Struggles",
-            "related_tickers": [
-              "QURE"
-            ]
-          },
-          {
-            "headline": "Collegium Pharmaceutical's Efficient Capital Utilization Stands Out in the Pharmaceutical Industry",
-            "published_at": "2026-02-27 12:00:02",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/collegium-pharmaceutical-capital-utilization-pharma-industry",
-            "related_tickers": []
-          },
-          {
-            "headline": "Delek US Holdings, Inc. (NYSE: DK) Overview and Analysts' Expectations",
-            "published_at": "2026-02-27 12:00:01",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/delek-us-holdings-analyst-expectations-market-outlook",
-            "related_tickers": [
-              "US",
-              "NYSE",
-              "DK"
-            ]
-          },
-          {
-            "headline": "Golar LNG Limited (NASDAQ:GLNG) - A Promising Investment in the LNG Sector",
-            "published_at": "2026-02-27 12:00:00",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/golar-lng-limited-nasdaq-glng-promising-investment-lng-sector",
-            "related_tickers": [
-              "LNG",
-              "LNG"
-            ]
-          },
-          {
-            "headline": "Ibotta, Inc. (IBTA) vs. Red Violet, Inc. (RDVT): A Comparative Analysis",
-            "published_at": "2026-02-27 12:00:00",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/ibotta-inc-ibta-vs-red-violet-inc-rdvt-comparative-analysis",
-            "related_tickers": [
-              "IBTA",
-              "RDVT"
-            ]
-          },
-          {
-            "headline": "Biodesix, Inc. (NASDAQ:BDSX) Stock Upgrade and Financial Performance",
-            "published_at": "2026-02-27 09:00:27",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/biodesix-nasdaqbdsx-stock-upgrade-financial-performance",
-            "related_tickers": []
-          },
-          {
-            "headline": "Avidity Biosciences, Inc. (NASDAQ:RNA / RNAM) Reschedules Special Stockholder Meeting Ahead of Atrium Therapeutics Spin-Off and Novartis Acquisition",
-            "published_at": "2026-02-27 05:03:18",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/avidity-biosciences-reschedules-meeting-atrium-spinoff-novartis-acquisition",
-            "related_tickers": [
-              "RNAM"
-            ]
-          },
-          {
-            "headline": "Diversified Energy Company (NYSE:DEC) Reports Record Year",
-            "published_at": "2026-02-27 04:00:06",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/diversified-energy-company-dec-achieves-record-financial-results-2025",
-            "related_tickers": []
-          },
-          {
-            "headline": "Clipper Realty Inc. (NYSE: CLPR) Faces Financial Challenges in Q4 2025",
-            "published_at": "2026-02-27 03:00:08",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/clipper-realty-inc-clpr-q4-2025-earnings-miss",
-            "related_tickers": [
-              "NYSE",
-              "CLPR"
-            ]
-          },
-          {
-            "headline": "NCR Voyix Corporation (VYX) Sees Optimistic Price Target from Stifel Nicolaus",
-            "published_at": "2026-02-27 00:12:44",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/ncr-voyix-corporation-vyx-bullish-price-target-stifel-nicolaus",
-            "related_tickers": [
-              "NCR",
-              "VYX"
-            ]
-          },
-          {
-            "headline": "Alector, Inc. (NASDAQ:ALEC) Financial and Operational Highlights",
-            "published_at": "2026-02-27 00:08:13",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/alector-inc-alec-financial-operational-highlights",
-            "related_tickers": []
-          },
-          {
-            "headline": "Snowflake Inc. (NYSE:SNOW) Faces Legal Challenges Amid Positive Price Target",
-            "published_at": "2026-02-26 23:11:19",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/snowflake-inc-legal-challenges-positive-price-target",
-            "related_tickers": []
-          },
-          {
-            "headline": "Block, Inc. (NYSE: SQ) Faces Challenges and Embraces AI for Future Growth",
-            "published_at": "2026-02-26 23:04:41",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/block-inc-embraces-ai-for-growth-amid-financial-challenges",
-            "related_tickers": [
-              "NYSE",
-              "SQ",
-              "AI"
-            ]
-          },
-          {
-            "headline": "Snowflake Inc. (NYSE: SNOW) Faces Legal Challenges Amid Market Volatility",
-            "published_at": "2026-02-26 22:18:57",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/snowflake-inc-legal-challenges-market-volatility",
-            "related_tickers": [
-              "NYSE",
-              "SNOW"
-            ]
-          },
-          {
-            "headline": "APi Group Corporation's Stock Performance and Financial Health",
-            "published_at": "2026-02-26 22:12:17",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/api-group-corporation-stock-performance-financial-health",
-            "related_tickers": []
-          },
-          {
-            "headline": "JFrog Ltd (NASDAQ: FROG) Sees Positive Movement with Share Repurchase Program",
-            "published_at": "2026-02-26 21:16:56",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/jfrog-ltd-nasdaq-frog-share-repurchase-program-positive-movement",
-            "related_tickers": [
-              "FROG"
-            ]
-          },
-          {
-            "headline": "GoodRx Holdings Inc. (NASDAQ:GDRX) Stock Update and Financial Overview",
-            "published_at": "2026-02-26 21:10:27",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/goodrx-holdings-nasdaq-gdrx-stock-financial-update",
-            "related_tickers": []
-          },
-          {
-            "headline": "Cullinan Therapeutics, Inc. (NASDAQ: CGEM) Investment Analysis",
-            "published_at": "2026-02-26 21:00:01",
-            "source": "Financial Modeling Prep",
-            "price_impact": 0.8,
-            "breadth": 0.8,
-            "forward_significance": 0.8,
-            "impact_score": 0.51,
-            "source_url": "https://financialmodelingprep.com/market-news/cullinan-therapeutics-cgem-investment-analysis",
-            "related_tickers": [
-              "CGEM"
-            ]
+            "symbol": "AMZN",
+            "name": "Amazon",
+            "sector": "Consumer",
+            "target_weight_pct": 9.45,
+            "momentum_20d": 3.2,
+            "ai_factor": 0.68
           }
         ],
-        "theme_clusters": {
-          "macro": 9,
-          "general": 43,
-          "geopolitics": 4,
-          "earnings": 23,
-          "commodities": 1
-        },
-        "_source_states": {
-          "fmp": "unavailable",
-          "rss": "live"
-        }
+        "risk_controls": [
+          "단일 종목 최대 비중 20%",
+          "손절 -7% / 이익 보호 트레일링 병행",
+          "VIX 급등 시 현금 비중 단계적 확대"
+        ]
       },
       "source_statuses": {
-        "fmp": "unavailable",
-        "rss": "live"
+        "fmp": "stale"
+      }
+    },
+    {
+      "skill_slug": "market-top-detector",
+      "status": "ok",
+      "score_0_100": 100.0,
+      "confidence_0_1": 0.63,
+      "summary_ko": "시장 상단 리스크 낮음 (risk 0.0)",
+      "reason_code": null,
+      "cache_info": {
+        "mode": "fresh",
+        "fetched_at": "2026-02-28T06:42:44.794288+00:00",
+        "expires_at": "2026-02-28T14:42:44.794288+00:00"
+      },
+      "analysis_payload": {
+        "top_risk_score_0_100": 0.0,
+        "safety_score_0_100": 100.0,
+        "risk_level": "낮음",
+        "signals": [],
+        "snapshot": {
+          "spy_return_1d": 0.48,
+          "qqq_return_1d": 0.71,
+          "iwm_return_1d": -0.12,
+          "vix_level": 18.9,
+          "breadth_up_ratio": 0.63,
+          "recession_risk": 0.28
+        },
+        "candidates": [
+          {
+            "symbol": "XOM",
+            "name": "Exxon Mobil",
+            "sector": "Energy",
+            "score": 107.1,
+            "momentum_20d": 1.4,
+            "daily_return_pct": -0.2,
+            "ai_factor": 0.59
+          },
+          {
+            "symbol": "TSLA",
+            "name": "Tesla",
+            "sector": "Automotive",
+            "score": 106.78,
+            "momentum_20d": -1.5,
+            "daily_return_pct": -0.7,
+            "ai_factor": 0.51
+          },
+          {
+            "symbol": "COST",
+            "name": "Costco",
+            "sector": "Consumer",
+            "score": 104.76,
+            "momentum_20d": 2.5,
+            "daily_return_pct": 0.4,
+            "ai_factor": 0.62
+          },
+          {
+            "symbol": "JPM",
+            "name": "JPMorgan",
+            "sector": "Financials",
+            "score": 104.4,
+            "momentum_20d": 2.9,
+            "daily_return_pct": 0.3,
+            "ai_factor": 0.64
+          },
+          {
+            "symbol": "AMZN",
+            "name": "Amazon",
+            "sector": "Consumer",
+            "score": 102.08,
+            "momentum_20d": 3.2,
+            "daily_return_pct": 0.6,
+            "ai_factor": 0.68
+          },
+          {
+            "symbol": "MSFT",
+            "name": "Microsoft",
+            "sector": "Technology",
+            "score": 98.14,
+            "momentum_20d": 4.7,
+            "daily_return_pct": 0.9,
+            "ai_factor": 0.75
+          },
+          {
+            "symbol": "GOOGL",
+            "name": "Alphabet",
+            "sector": "Technology",
+            "score": 97.8,
+            "momentum_20d": 4.4,
+            "daily_return_pct": 1.1,
+            "ai_factor": 0.74
+          },
+          {
+            "symbol": "AAPL",
+            "name": "Apple",
+            "sector": "Technology",
+            "score": 95.32,
+            "momentum_20d": 5.9,
+            "daily_return_pct": 1.2,
+            "ai_factor": 0.78
+          }
+        ]
+      },
+      "source_statuses": {
+        "fmp": "stale"
+      }
+    },
+    {
+      "skill_slug": "ftd-detector",
+      "status": "ok",
+      "score_0_100": 74.0,
+      "confidence_0_1": 0.6,
+      "summary_ko": "FTD 신호 미확인",
+      "reason_code": null,
+      "cache_info": {
+        "mode": "fresh",
+        "fetched_at": "2026-02-28T06:42:44.794475+00:00",
+        "expires_at": "2026-02-28T14:42:44.794475+00:00"
+      },
+      "analysis_payload": {
+        "has_ftd_signal": false,
+        "score_components": {
+          "breadth_ok": true,
+          "index_ok": false,
+          "volatility_ok": true
+        },
+        "thresholds": {
+          "min_index_gain": 1.0,
+          "min_breadth": 0.55,
+          "max_vix": 25.0
+        },
+        "snapshot": {
+          "spy_return_1d": 0.48,
+          "qqq_return_1d": 0.71,
+          "iwm_return_1d": -0.12,
+          "breadth_up_ratio": 0.63,
+          "vix_level": 18.9
+        },
+        "leaders": [
+          {
+            "symbol": "NVDA",
+            "name": "NVIDIA",
+            "sector": "Semiconductors",
+            "score": 51.92,
+            "momentum_20d": 9.3,
+            "daily_return_pct": 2.6,
+            "ai_factor": 0.91
+          },
+          {
+            "symbol": "AVGO",
+            "name": "Broadcom",
+            "sector": "Semiconductors",
+            "score": 47.26,
+            "momentum_20d": 8.1,
+            "daily_return_pct": 1.9,
+            "ai_factor": 0.88
+          },
+          {
+            "symbol": "LLY",
+            "name": "Eli Lilly",
+            "sector": "Healthcare",
+            "score": 44.04,
+            "momentum_20d": 7.2,
+            "daily_return_pct": 1.5,
+            "ai_factor": 0.86
+          },
+          {
+            "symbol": "META",
+            "name": "Meta",
+            "sector": "Technology",
+            "score": 41.62,
+            "momentum_20d": 6.5,
+            "daily_return_pct": 1.7,
+            "ai_factor": 0.82
+          },
+          {
+            "symbol": "AAPL",
+            "name": "Apple",
+            "sector": "Technology",
+            "score": 38.3,
+            "momentum_20d": 5.9,
+            "daily_return_pct": 1.2,
+            "ai_factor": 0.78
+          },
+          {
+            "symbol": "MSFT",
+            "name": "Microsoft",
+            "sector": "Technology",
+            "score": 34.28,
+            "momentum_20d": 4.7,
+            "daily_return_pct": 0.9,
+            "ai_factor": 0.75
+          },
+          {
+            "symbol": "GOOGL",
+            "name": "Alphabet",
+            "sector": "Technology",
+            "score": 33.64,
+            "momentum_20d": 4.4,
+            "daily_return_pct": 1.1,
+            "ai_factor": 0.74
+          },
+          {
+            "symbol": "AMZN",
+            "name": "Amazon",
+            "sector": "Consumer",
+            "score": 28.4,
+            "momentum_20d": 3.2,
+            "daily_return_pct": 0.6,
+            "ai_factor": 0.68
+          }
+        ]
+      },
+      "source_statuses": {
+        "fmp": "stale"
+      }
+    },
+    {
+      "skill_slug": "earnings-trade-analyzer",
+      "status": "ok",
+      "score_0_100": 86.46,
+      "confidence_0_1": 0.58,
+      "summary_ko": "실적 트레이드 후보 12건을 우선순위화했습니다.",
+      "reason_code": null,
+      "cache_info": {
+        "mode": "fresh",
+        "fetched_at": "2026-02-27T22:34:16.589285+00:00",
+        "expires_at": "2026-02-28T10:34:16.589285+00:00"
+      },
+      "analysis_payload": {
+        "mode": "proxy_from_market_state",
+        "candidates": [
+          {
+            "date": "2026-03-01",
+            "ticker": "NVDA",
+            "company": "NVIDIA",
+            "timing": "AMC",
+            "market_cap": 0.0,
+            "setup_score": 75.39,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          },
+          {
+            "date": "2026-03-02",
+            "ticker": "AVGO",
+            "company": "Broadcom",
+            "timing": "BMO",
+            "market_cap": 0.0,
+            "setup_score": 72.78,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          },
+          {
+            "date": "2026-03-03",
+            "ticker": "LLY",
+            "company": "Eli Lilly",
+            "timing": "AMC",
+            "market_cap": 0.0,
+            "setup_score": 70.86,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          },
+          {
+            "date": "2026-03-04",
+            "ticker": "META",
+            "company": "Meta",
+            "timing": "BMO",
+            "market_cap": 0.0,
+            "setup_score": 69.0,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          },
+          {
+            "date": "2026-03-05",
+            "ticker": "AAPL",
+            "company": "Apple",
+            "timing": "AMC",
+            "market_cap": 0.0,
+            "setup_score": 67.32,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          },
+          {
+            "date": "2026-03-06",
+            "ticker": "MSFT",
+            "company": "Microsoft",
+            "timing": "BMO",
+            "market_cap": 0.0,
+            "setup_score": 64.71,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          },
+          {
+            "date": "2026-03-07",
+            "ticker": "GOOGL",
+            "company": "Alphabet",
+            "timing": "AMC",
+            "market_cap": 0.0,
+            "setup_score": 64.02,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          },
+          {
+            "date": "2026-03-01",
+            "ticker": "AMZN",
+            "company": "Amazon",
+            "timing": "BMO",
+            "market_cap": 0.0,
+            "setup_score": 60.96,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          },
+          {
+            "date": "2026-03-02",
+            "ticker": "JPM",
+            "company": "JPMorgan",
+            "timing": "AMC",
+            "market_cap": 0.0,
+            "setup_score": 59.82,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          },
+          {
+            "date": "2026-03-03",
+            "ticker": "COST",
+            "company": "Costco",
+            "timing": "BMO",
+            "market_cap": 0.0,
+            "setup_score": 58.8,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          },
+          {
+            "date": "2026-03-04",
+            "ticker": "XOM",
+            "company": "Exxon Mobil",
+            "timing": "AMC",
+            "market_cap": 0.0,
+            "setup_score": 56.37,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          },
+          {
+            "date": "2026-03-05",
+            "ticker": "TSLA",
+            "company": "Tesla",
+            "timing": "BMO",
+            "market_cap": 0.0,
+            "setup_score": 49.95,
+            "setup_note": "FMP 미연결 상태에서 모멘텀/AI factor 기반 프록시 후보",
+            "source_url": ""
+          }
+        ],
+        "window_days": 7,
+        "min_market_cap": 5000000000
+      },
+      "source_statuses": {
+        "fmp": "stale"
+      }
+    },
+    {
+      "skill_slug": "market-environment-analysis",
+      "status": "ok",
+      "score_0_100": 75.09,
+      "confidence_0_1": 0.75,
+      "summary_ko": "Market Environment Analysis 프록시 분석 완료: Broadening 레짐, cross_asset_regime 스타일, 우선 후보 COST",
+      "reason_code": null,
+      "cache_info": {
+        "mode": "fresh",
+        "fetched_at": "2026-02-28T07:08:28.631075+00:00",
+        "expires_at": "2026-02-28T19:08:28.631075+00:00"
+      },
+      "analysis_payload": {
+        "mode": "proxy_market_state_v2",
+        "skill_slug": "market-environment-analysis",
+        "family": "market_analysis",
+        "methodology": "cross-asset briefing",
+        "profile": {
+          "style": "cross_asset_regime",
+          "axis_weights": {
+            "defensive_score": 0.5,
+            "stability_score": 0.35,
+            "value_score": 0.15
+          },
+          "signals": [
+            "rate_sensitive",
+            "risk_off",
+            "breadth_sensitive"
+          ],
+          "recommendation_role": "analysis_only",
+          "consensus_weight": 0.75
+        },
+        "recommendation_role": "analysis_only",
+        "consensus_weight": 0.75,
+        "risk_tilt": "balanced",
+        "horizon_days": 20,
+        "as_of_date": "2026-02-28",
+        "regime": "Broadening",
+        "score_breakdown": {
+          "leadership": 71.18,
+          "market_fit": 7.72
+        },
+        "market_snapshot": {
+          "spy_return_1d": 0.48,
+          "qqq_return_1d": 0.71,
+          "iwm_return_1d": -0.12,
+          "tlt_return_1d": 0.21,
+          "vix_level": 18.9,
+          "breadth_up_ratio": 0.63,
+          "recession_risk": 0.28
+        },
+        "top_candidates": [
+          {
+            "symbol": "COST",
+            "name": "Costco",
+            "sector": "Consumer",
+            "daily_return_pct": 0.4,
+            "momentum_20d": 2.5,
+            "ai_factor": 0.62,
+            "composite_score": 101.98
+          },
+          {
+            "symbol": "AMZN",
+            "name": "Amazon",
+            "sector": "Consumer",
+            "daily_return_pct": 0.6,
+            "momentum_20d": 3.2,
+            "ai_factor": 0.68,
+            "composite_score": 92.73
+          },
+          {
+            "symbol": "XOM",
+            "name": "Exxon Mobil",
+            "sector": "Energy",
+            "daily_return_pct": -0.2,
+            "momentum_20d": 1.4,
+            "ai_factor": 0.59,
+            "composite_score": 80.89
+          },
+          {
+            "symbol": "TSLA",
+            "name": "Tesla",
+            "sector": "Automotive",
+            "daily_return_pct": -0.7,
+            "momentum_20d": -1.5,
+            "ai_factor": 0.51,
+            "composite_score": 77.04
+          },
+          {
+            "symbol": "LLY",
+            "name": "Eli Lilly",
+            "sector": "Healthcare",
+            "daily_return_pct": 1.5,
+            "momentum_20d": 7.2,
+            "ai_factor": 0.86,
+            "composite_score": 65.19
+          },
+          {
+            "symbol": "JPM",
+            "name": "JPMorgan",
+            "sector": "Financials",
+            "daily_return_pct": 0.3,
+            "momentum_20d": 2.9,
+            "ai_factor": 0.64,
+            "composite_score": 65.09
+          },
+          {
+            "symbol": "MSFT",
+            "name": "Microsoft",
+            "sector": "Technology",
+            "daily_return_pct": 0.9,
+            "momentum_20d": 4.7,
+            "ai_factor": 0.75,
+            "composite_score": 46.41
+          },
+          {
+            "symbol": "GOOGL",
+            "name": "Alphabet",
+            "sector": "Technology",
+            "daily_return_pct": 1.1,
+            "momentum_20d": 4.4,
+            "ai_factor": 0.74,
+            "composite_score": 40.16
+          }
+        ],
+        "execution_notes": [
+          "프록시 분석 결과이므로 실시간 원천 데이터와 교차 검증 필요",
+          "단일 시그널 과신 금지, 포지션 사이징 규칙 준수"
+        ],
+        "score_0_100": 75.09,
+        "confidence_0_1": 0.75,
+        "_source_state": "stale"
+      },
+      "source_statuses": {
+        "fmp": "stale"
       }
     },
     {
       "skill_slug": "macro-regime-detector",
       "status": "ok",
-      "score_0_100": 57.46,
-      "confidence_0_1": 0.65,
-      "summary_ko": "Macro Regime Detector 프록시 분석 완료: Broadening 레짐, generic 스타일, 우선 후보 NVDA",
+      "score_0_100": 71.49,
+      "confidence_0_1": 0.73,
+      "summary_ko": "Macro Regime Detector 프록시 분석 완료: Broadening 레짐, macro_regime 스타일, 우선 후보 NVDA",
       "reason_code": null,
       "cache_info": {
         "mode": "fresh",
-        "fetched_at": "2026-02-27T23:01:49.883045+00:00",
-        "expires_at": "2026-02-28T11:01:49.883045+00:00"
+        "fetched_at": "2026-02-28T07:08:28.631753+00:00",
+        "expires_at": "2026-02-28T19:08:28.631753+00:00"
       },
       "analysis_payload": {
         "mode": "proxy_market_state_v2",
         "skill_slug": "macro-regime-detector",
         "family": "market_analysis",
         "methodology": "macro regime detection",
+        "profile": {
+          "style": "macro_regime",
+          "axis_weights": {
+            "trend_score": 0.45,
+            "breakout_score": 0.3,
+            "quality_score": 0.25
+          },
+          "signals": [
+            "rate_sensitive",
+            "event_driven",
+            "risk_on"
+          ],
+          "recommendation_role": "analysis_only",
+          "consensus_weight": 0.8
+        },
+        "recommendation_role": "analysis_only",
+        "consensus_weight": 0.8,
         "risk_tilt": "balanced",
         "horizon_days": 20,
         "as_of_date": "2026-02-28",
         "regime": "Broadening",
         "score_breakdown": {
-          "family": 5.5,
-          "trend": 2.57,
-          "leadership": 7.4,
-          "risk_penalty": 0.0
+          "leadership": 75.29,
+          "market_fit": 4.41
         },
         "market_snapshot": {
           "spy_return_1d": 0.48,
@@ -890,7 +710,8 @@
             "sector": "Semiconductors",
             "daily_return_pct": 2.6,
             "momentum_20d": 9.3,
-            "ai_factor": 0.91
+            "ai_factor": 0.91,
+            "composite_score": 106.67
           },
           {
             "symbol": "AVGO",
@@ -898,7 +719,8 @@
             "sector": "Semiconductors",
             "daily_return_pct": 1.9,
             "momentum_20d": 8.1,
-            "ai_factor": 0.88
+            "ai_factor": 0.88,
+            "composite_score": 98.2
           },
           {
             "symbol": "LLY",
@@ -906,7 +728,8 @@
             "sector": "Healthcare",
             "daily_return_pct": 1.5,
             "momentum_20d": 7.2,
-            "ai_factor": 0.86
+            "ai_factor": 0.86,
+            "composite_score": 88.68
           },
           {
             "symbol": "META",
@@ -914,7 +737,8 @@
             "sector": "Technology",
             "daily_return_pct": 1.7,
             "momentum_20d": 6.5,
-            "ai_factor": 0.82
+            "ai_factor": 0.82,
+            "composite_score": 80.87
           },
           {
             "symbol": "AAPL",
@@ -922,7 +746,8 @@
             "sector": "Technology",
             "daily_return_pct": 1.2,
             "momentum_20d": 5.9,
-            "ai_factor": 0.78
+            "ai_factor": 0.78,
+            "composite_score": 71.55
           },
           {
             "symbol": "MSFT",
@@ -930,7 +755,8 @@
             "sector": "Technology",
             "daily_return_pct": 0.9,
             "momentum_20d": 4.7,
-            "ai_factor": 0.75
+            "ai_factor": 0.75,
+            "composite_score": 61.33
           },
           {
             "symbol": "GOOGL",
@@ -938,7 +764,8 @@
             "sector": "Technology",
             "daily_return_pct": 1.1,
             "momentum_20d": 4.4,
-            "ai_factor": 0.74
+            "ai_factor": 0.74,
+            "composite_score": 52.63
           },
           {
             "symbol": "AMZN",
@@ -946,50 +773,274 @@
             "sector": "Consumer",
             "daily_return_pct": 0.6,
             "momentum_20d": 3.2,
-            "ai_factor": 0.68
+            "ai_factor": 0.68,
+            "composite_score": 42.36
           }
         ],
         "execution_notes": [
           "프록시 분석 결과이므로 실시간 원천 데이터와 교차 검증 필요",
           "단일 시그널 과신 금지, 포지션 사이징 규칙 준수"
         ],
-        "score_0_100": 57.46,
-        "confidence_0_1": 0.65,
+        "score_0_100": 71.49,
+        "confidence_0_1": 0.73,
         "_source_state": "stale"
       },
       "source_statuses": {
         "fmp": "stale"
       }
+    },
+    {
+      "skill_slug": "economic-calendar-fetcher",
+      "status": "ok",
+      "score_0_100": 100.0,
+      "confidence_0_1": 0.63,
+      "summary_ko": "향후 이벤트 16건(High 16, Medium 0, Low 0)을 분석했습니다.",
+      "reason_code": null,
+      "cache_info": {
+        "mode": "fresh",
+        "fetched_at": "2026-02-28T01:06:30.862322+00:00",
+        "expires_at": "2026-02-28T13:06:30.862322+00:00"
+      },
+      "analysis_payload": {
+        "mode": "rss_proxy",
+        "events": [
+          {
+            "datetime": "2026-02-24T19:00:00",
+            "event": "Minutes of the Board's discount rate meetings on January 20 and 28, 2026",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260224a.htm"
+          },
+          {
+            "datetime": "2026-02-24T16:00:00",
+            "event": "Federal Reserve Board issues enforcement action with former employee of First Financial Bank",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20260224a.htm"
+          },
+          {
+            "datetime": "2026-02-23T22:00:00",
+            "event": "Following earlier actions to remove reputation risk from its supervision of banks, Federal Reserve Board requests comment on proposal to codify that removal",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/bcreg20260223a.htm"
+          },
+          {
+            "datetime": "2026-02-19T21:30:00",
+            "event": "Federal Reserve Board announces approval of application by Fulton Financial Corporation",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/orders20260219a.htm"
+          },
+          {
+            "datetime": "2026-02-19T20:00:00",
+            "event": "Federal Reserve Board announces it will hold a hybrid public outreach meeting on Thursday, March 26, as part of its review of regulations under the Economic Growth and Regulatory Paperwork Reduction Act (EGRPRA)",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/other20260219a.htm"
+          },
+          {
+            "datetime": "2026-02-18T19:00:00",
+            "event": "Minutes of the Federal Open Market Committee, January 27–28, 2026",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260218a.htm"
+          },
+          {
+            "datetime": "2026-02-12T21:00:00",
+            "event": "Federal Reserve Board announces approval of application by Cooperativa de Ahorro y Credito Elga, Ltda.",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/orders20260212a.htm"
+          },
+          {
+            "datetime": "2026-02-12T16:00:00",
+            "event": "Federal Reserve Board issues enforcement action with former employee of Regions Bank",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20260212a.htm"
+          },
+          {
+            "datetime": "2026-02-04T21:30:00",
+            "event": "Federal Reserve Board finalizes hypothetical scenarios for its annual stress test and votes to maintain the current stress test-related capital requirements until public feedback can be considered",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/bcreg20260204a.htm"
+          },
+          {
+            "datetime": "2026-01-30T21:00:00",
+            "event": "Federal Reserve Board announces approval of application by Cornerstone Capital Bancorp, Inc.",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/orders20260130a.htm"
+          },
+          {
+            "datetime": "2026-01-29T18:30:00",
+            "event": "Federal Reserve Board announces appointment of seven members, including four new members, to its Insurance Policy Advisory Committee (IPAC)",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/other20260129a.htm"
+          },
+          {
+            "datetime": "2026-01-28T19:00:00",
+            "event": "Federal Reserve issues FOMC statement",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm"
+          },
+          {
+            "datetime": "2026-01-28T19:00:00",
+            "event": "Federal Open Market Committee reaffirms its \"Statement on Longer-Run Goals and Monetary Policy Strategy\"",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128b.htm"
+          },
+          {
+            "datetime": "2026-01-16T18:45:00",
+            "event": "Federal Reserve Board announces approval of application by Banco Inter, S.A.",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/orders20260116a.htm"
+          },
+          {
+            "datetime": "2026-01-15T16:00:00",
+            "event": "Federal Reserve Board issues enforcement action with former employee of PrimeLending",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20260115a.htm"
+          },
+          {
+            "datetime": "2026-01-13T22:30:00",
+            "event": "Federal Reserve Board announces approval of application by Fifth Third Bancorp",
+            "impact": "High",
+            "consensus": "",
+            "previous": "",
+            "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/orders20260113a.htm"
+          }
+        ],
+        "impact_summary": {
+          "High": 16,
+          "Medium": 0,
+          "Low": 0
+        },
+        "_source_state": "stale"
+      },
+      "source_statuses": {
+        "fmp": "stale",
+        "rss": "unavailable"
+      }
     }
   ],
   "top_picks": [
     {
-      "symbol": "NVDA",
-      "reason": "two-stage top10 analysis · support 1/2 · analyzer pass-or-watch 1/1",
-      "score": 70.7,
+      "symbol": "AMZN",
+      "reason": "two-stage top10 analysis · support 4/5 · analyzer pass-or-watch 3/3",
+      "score": 132.6,
       "decision": "PASS",
       "primary_skill": "us-stock-analysis",
-      "confirm_votes": 1,
-      "confirm_required": 2,
+      "confirm_votes": 4,
+      "confirm_required": 5,
       "veto_count": 0,
       "confirm_hits": [
-        "us-stock-analysis"
+        "portfolio-manager",
+        "market-top-detector",
+        "ftd-detector",
+        "earnings-trade-analyzer"
       ],
-      "veto_skills": []
+      "veto_skills": [
+        "symbol_signal_absent"
+      ]
     },
     {
-      "symbol": "NONE",
-      "reason": "two-stage top10 analysis · support 1/2 · analyzer pass-or-watch 1/1",
-      "score": 60.98,
+      "symbol": "MSFT",
+      "reason": "two-stage top10 analysis · support 4/5 · analyzer pass-or-watch 3/3",
+      "score": 132.11,
       "decision": "PASS",
       "primary_skill": "us-stock-analysis",
-      "confirm_votes": 1,
-      "confirm_required": 2,
+      "confirm_votes": 4,
+      "confirm_required": 5,
       "veto_count": 0,
       "confirm_hits": [
-        "market-news-analyst"
+        "portfolio-manager",
+        "market-top-detector",
+        "ftd-detector",
+        "earnings-trade-analyzer"
       ],
-      "veto_skills": []
+      "veto_skills": [
+        "symbol_signal_absent"
+      ]
+    },
+    {
+      "symbol": "NVDA",
+      "reason": "two-stage top10 analysis · support 4/5 · analyzer pass-or-watch 3/3",
+      "score": 131.07,
+      "decision": "PASS",
+      "primary_skill": "us-stock-analysis",
+      "confirm_votes": 4,
+      "confirm_required": 5,
+      "veto_count": 0,
+      "confirm_hits": [
+        "us-stock-analysis",
+        "portfolio-manager",
+        "ftd-detector",
+        "earnings-trade-analyzer"
+      ],
+      "veto_skills": [
+        "symbol_signal_absent"
+      ]
+    },
+    {
+      "symbol": "GOOGL",
+      "reason": "two-stage top10 analysis · support 4/5 · analyzer pass-or-watch 3/3",
+      "score": 130.97,
+      "decision": "PASS",
+      "primary_skill": "us-stock-analysis",
+      "confirm_votes": 4,
+      "confirm_required": 5,
+      "veto_count": 0,
+      "confirm_hits": [
+        "portfolio-manager",
+        "market-top-detector",
+        "ftd-detector",
+        "earnings-trade-analyzer"
+      ],
+      "veto_skills": [
+        "symbol_signal_absent"
+      ]
+    },
+    {
+      "symbol": "AAPL",
+      "reason": "two-stage top10 analysis · support 4/5 · analyzer pass-or-watch 3/3",
+      "score": 128.54,
+      "decision": "PASS",
+      "primary_skill": "us-stock-analysis",
+      "confirm_votes": 4,
+      "confirm_required": 5,
+      "veto_count": 0,
+      "confirm_hits": [
+        "portfolio-manager",
+        "market-top-detector",
+        "ftd-detector",
+        "earnings-trade-analyzer"
+      ],
+      "veto_skills": [
+        "symbol_signal_absent"
+      ]
     }
   ],
   "pipeline": {
@@ -1001,188 +1052,280 @@
             "symbol": "NVDA",
             "rank": 1,
             "percentile": 100.0,
-            "raw_score": 70.0,
-            "reason": "payload_extract"
+            "raw_score": 59.74,
+            "reason": "ticker"
           }
         ]
       },
       {
-        "skill_slug": "market-news-analyst",
+        "skill_slug": "portfolio-manager",
         "symbols": [
           {
-            "symbol": "NYSE",
+            "symbol": "NVDA",
+            "rank": 1,
+            "percentile": 100.0,
+            "raw_score": 65.34,
+            "reason": "targets"
+          },
+          {
+            "symbol": "AVGO",
+            "rank": 2,
+            "percentile": 85.71,
+            "raw_score": 63.29,
+            "reason": "targets"
+          },
+          {
+            "symbol": "LLY",
+            "rank": 3,
+            "percentile": 71.43,
+            "raw_score": 61.75,
+            "reason": "targets"
+          },
+          {
+            "symbol": "META",
+            "rank": 4,
+            "percentile": 57.14,
+            "raw_score": 60.01,
+            "reason": "targets"
+          },
+          {
+            "symbol": "AAPL",
+            "rank": 5,
+            "percentile": 42.86,
+            "raw_score": 58.37,
+            "reason": "targets"
+          },
+          {
+            "symbol": "MSFT",
+            "rank": 6,
+            "percentile": 28.57,
+            "raw_score": 56.33,
+            "reason": "targets"
+          },
+          {
+            "symbol": "GOOGL",
+            "rank": 7,
+            "percentile": 14.29,
+            "raw_score": 55.58,
+            "reason": "targets"
+          },
+          {
+            "symbol": "AMZN",
+            "rank": 8,
+            "percentile": 0.0,
+            "raw_score": 52.95,
+            "reason": "targets"
+          }
+        ]
+      },
+      {
+        "skill_slug": "market-top-detector",
+        "symbols": [
+          {
+            "symbol": "XOM",
             "rank": 1,
             "percentile": 100.0,
             "raw_score": 100.0,
-            "reason": "ranked_events"
+            "reason": "candidates_score"
           },
           {
-            "symbol": "TAC",
+            "symbol": "TSLA",
             "rank": 2,
-            "percentile": 95.83,
+            "percentile": 85.71,
             "raw_score": 100.0,
-            "reason": "ranked_events"
+            "reason": "candidates_score"
           },
           {
-            "symbol": "ABCL",
+            "symbol": "COST",
             "rank": 3,
-            "percentile": 91.67,
-            "raw_score": 76.76,
-            "reason": "ranked_events"
+            "percentile": 71.43,
+            "raw_score": 100.0,
+            "reason": "candidates_score"
           },
           {
-            "symbol": "AI",
+            "symbol": "JPM",
             "rank": 4,
-            "percentile": 87.5,
-            "raw_score": 76.26,
-            "reason": "ranked_events"
+            "percentile": 57.14,
+            "raw_score": 100.0,
+            "reason": "candidates_score"
           },
           {
-            "symbol": "MP",
+            "symbol": "AMZN",
             "rank": 5,
-            "percentile": 83.33,
-            "raw_score": 75.76,
-            "reason": "ranked_events"
+            "percentile": 42.86,
+            "raw_score": 100.0,
+            "reason": "candidates_score"
           },
           {
-            "symbol": "EV",
+            "symbol": "MSFT",
             "rank": 6,
-            "percentile": 79.17,
-            "raw_score": 74.76,
-            "reason": "ranked_events"
+            "percentile": 28.57,
+            "raw_score": 98.14,
+            "reason": "candidates_score"
           },
           {
-            "symbol": "JOBY",
+            "symbol": "GOOGL",
             "rank": 7,
-            "percentile": 75.0,
-            "raw_score": 73.76,
-            "reason": "ranked_events"
+            "percentile": 14.29,
+            "raw_score": 97.8,
+            "reason": "candidates_score"
           },
           {
-            "symbol": "NONE",
+            "symbol": "AAPL",
             "rank": 8,
-            "percentile": 70.83,
-            "raw_score": 70.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "DCI",
-            "rank": 9,
-            "percentile": 66.67,
-            "raw_score": 62.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "STNE",
-            "rank": 10,
-            "percentile": 62.5,
-            "raw_score": 61.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "ADT",
-            "rank": 11,
-            "percentile": 58.33,
-            "raw_score": 60.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "US",
-            "rank": 12,
-            "percentile": 54.17,
-            "raw_score": 59.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "DK",
-            "rank": 13,
-            "percentile": 50.0,
-            "raw_score": 58.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "PLC",
-            "rank": 14,
-            "percentile": 45.83,
-            "raw_score": 57.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "XPOF",
-            "rank": 15,
-            "percentile": 41.67,
-            "raw_score": 56.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "VISN",
-            "rank": 16,
-            "percentile": 37.5,
-            "raw_score": 55.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "SBA",
-            "rank": 17,
-            "percentile": 33.33,
-            "raw_score": 54.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "SBAC",
-            "rank": 18,
-            "percentile": 29.17,
-            "raw_score": 53.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "RPID",
-            "rank": 19,
-            "percentile": 25.0,
-            "raw_score": 52.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "SHAK",
-            "rank": 20,
-            "percentile": 20.83,
-            "raw_score": 51.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "LP",
-            "rank": 21,
-            "percentile": 16.67,
-            "raw_score": 50.0,
-            "reason": "payload_extract"
-          },
-          {
-            "symbol": "ARQT",
-            "rank": 22,
-            "percentile": 12.5,
-            "raw_score": 43.5,
-            "reason": "ranked_events"
-          },
-          {
-            "symbol": "NIC",
-            "rank": 23,
-            "percentile": 8.33,
-            "raw_score": 32.62,
-            "reason": "ranked_events"
-          },
-          {
-            "symbol": "QURE",
-            "rank": 24,
-            "percentile": 4.17,
-            "raw_score": 30.12,
-            "reason": "ranked_events"
-          },
-          {
-            "symbol": "LNG",
-            "rank": 25,
             "percentile": 0.0,
-            "raw_score": 28.62,
-            "reason": "ranked_events"
+            "raw_score": 95.32,
+            "reason": "candidates_score"
+          }
+        ]
+      },
+      {
+        "skill_slug": "ftd-detector",
+        "symbols": [
+          {
+            "symbol": "NVDA",
+            "rank": 1,
+            "percentile": 100.0,
+            "raw_score": 51.92,
+            "reason": "leaders_score"
+          },
+          {
+            "symbol": "AVGO",
+            "rank": 2,
+            "percentile": 85.71,
+            "raw_score": 47.26,
+            "reason": "leaders_score"
+          },
+          {
+            "symbol": "LLY",
+            "rank": 3,
+            "percentile": 71.43,
+            "raw_score": 44.04,
+            "reason": "leaders_score"
+          },
+          {
+            "symbol": "META",
+            "rank": 4,
+            "percentile": 57.14,
+            "raw_score": 41.62,
+            "reason": "leaders_score"
+          },
+          {
+            "symbol": "AAPL",
+            "rank": 5,
+            "percentile": 42.86,
+            "raw_score": 38.3,
+            "reason": "leaders_score"
+          },
+          {
+            "symbol": "MSFT",
+            "rank": 6,
+            "percentile": 28.57,
+            "raw_score": 34.28,
+            "reason": "leaders_score"
+          },
+          {
+            "symbol": "GOOGL",
+            "rank": 7,
+            "percentile": 14.29,
+            "raw_score": 33.64,
+            "reason": "leaders_score"
+          },
+          {
+            "symbol": "AMZN",
+            "rank": 8,
+            "percentile": 0.0,
+            "raw_score": 28.4,
+            "reason": "leaders_score"
+          }
+        ]
+      },
+      {
+        "skill_slug": "earnings-trade-analyzer",
+        "symbols": [
+          {
+            "symbol": "NVDA",
+            "rank": 1,
+            "percentile": 100.0,
+            "raw_score": 75.39,
+            "reason": "candidates_setup"
+          },
+          {
+            "symbol": "AVGO",
+            "rank": 2,
+            "percentile": 90.91,
+            "raw_score": 72.78,
+            "reason": "candidates_setup"
+          },
+          {
+            "symbol": "LLY",
+            "rank": 3,
+            "percentile": 81.82,
+            "raw_score": 70.86,
+            "reason": "candidates_setup"
+          },
+          {
+            "symbol": "META",
+            "rank": 4,
+            "percentile": 72.73,
+            "raw_score": 69.0,
+            "reason": "candidates_setup"
+          },
+          {
+            "symbol": "AAPL",
+            "rank": 5,
+            "percentile": 63.64,
+            "raw_score": 67.32,
+            "reason": "candidates_setup"
+          },
+          {
+            "symbol": "MSFT",
+            "rank": 6,
+            "percentile": 54.55,
+            "raw_score": 64.71,
+            "reason": "candidates_setup"
+          },
+          {
+            "symbol": "GOOGL",
+            "rank": 7,
+            "percentile": 45.45,
+            "raw_score": 64.02,
+            "reason": "candidates_setup"
+          },
+          {
+            "symbol": "AMZN",
+            "rank": 8,
+            "percentile": 36.36,
+            "raw_score": 60.96,
+            "reason": "candidates_setup"
+          },
+          {
+            "symbol": "JPM",
+            "rank": 9,
+            "percentile": 27.27,
+            "raw_score": 59.82,
+            "reason": "candidates_setup"
+          },
+          {
+            "symbol": "COST",
+            "rank": 10,
+            "percentile": 18.18,
+            "raw_score": 58.8,
+            "reason": "candidates_setup"
+          },
+          {
+            "symbol": "XOM",
+            "rank": 11,
+            "percentile": 9.09,
+            "raw_score": 56.37,
+            "reason": "candidates_setup"
+          },
+          {
+            "symbol": "TSLA",
+            "rank": 12,
+            "percentile": 0.0,
+            "raw_score": 49.95,
+            "reason": "candidates_setup"
           }
         ]
       }
@@ -1191,7 +1334,9 @@
       "symbols": [],
       "support_count_by_symbol": {},
       "dropped_by_stage": [
-        "recommender_intersection_empty"
+        "recommender_intersection_empty",
+        "analyzer_filtered_top10_empty[all_pass]",
+        "fallback_pass_or_watch_applied"
       ]
     },
     "recommender_union_top10": {
@@ -1199,142 +1344,381 @@
         {
           "symbol": "NVDA",
           "rank": 1,
-          "composite_score": 100.0,
-          "support_count": 1,
+          "composite_score": 400.0,
+          "support_count": 4,
           "normalized_by_skill": {
-            "us-stock-analysis": 100.0
+            "us-stock-analysis": 100.0,
+            "portfolio-manager": 100.0,
+            "ftd-detector": 100.0,
+            "earnings-trade-analyzer": 100.0
           },
           "reasons": [
-            "us-stock-analysis:payload_extract"
+            "us-stock-analysis:ticker",
+            "portfolio-manager:targets",
+            "ftd-detector:leaders_score",
+            "earnings-trade-analyzer:candidates_setup"
           ]
         },
         {
-          "symbol": "NYSE",
+          "symbol": "AAPL",
           "rank": 2,
-          "composite_score": 100.0,
-          "support_count": 1,
+          "composite_score": 149.36,
+          "support_count": 4,
           "normalized_by_skill": {
-            "market-news-analyst": 100.0
+            "portfolio-manager": 42.86,
+            "market-top-detector": 0.0,
+            "ftd-detector": 42.86,
+            "earnings-trade-analyzer": 63.64
           },
           "reasons": [
-            "market-news-analyst:ranked_events"
+            "portfolio-manager:targets",
+            "market-top-detector:candidates_score",
+            "ftd-detector:leaders_score",
+            "earnings-trade-analyzer:candidates_setup"
           ]
         },
         {
-          "symbol": "TAC",
+          "symbol": "MSFT",
           "rank": 3,
-          "composite_score": 95.83,
-          "support_count": 1,
+          "composite_score": 140.26,
+          "support_count": 4,
           "normalized_by_skill": {
-            "market-news-analyst": 95.83
+            "portfolio-manager": 28.57,
+            "market-top-detector": 28.57,
+            "ftd-detector": 28.57,
+            "earnings-trade-analyzer": 54.55
           },
           "reasons": [
-            "market-news-analyst:ranked_events"
+            "portfolio-manager:targets",
+            "market-top-detector:candidates_score",
+            "ftd-detector:leaders_score",
+            "earnings-trade-analyzer:candidates_setup"
           ]
         },
         {
-          "symbol": "ABCL",
+          "symbol": "GOOGL",
           "rank": 4,
-          "composite_score": 91.67,
-          "support_count": 1,
+          "composite_score": 88.32,
+          "support_count": 4,
           "normalized_by_skill": {
-            "market-news-analyst": 91.67
+            "portfolio-manager": 14.29,
+            "market-top-detector": 14.29,
+            "ftd-detector": 14.29,
+            "earnings-trade-analyzer": 45.45
           },
           "reasons": [
-            "market-news-analyst:ranked_events"
+            "portfolio-manager:targets",
+            "market-top-detector:candidates_score",
+            "ftd-detector:leaders_score",
+            "earnings-trade-analyzer:candidates_setup"
           ]
         },
         {
-          "symbol": "AI",
+          "symbol": "AMZN",
           "rank": 5,
-          "composite_score": 87.5,
-          "support_count": 1,
+          "composite_score": 79.22,
+          "support_count": 4,
           "normalized_by_skill": {
-            "market-news-analyst": 87.5
+            "portfolio-manager": 0.0,
+            "market-top-detector": 42.86,
+            "ftd-detector": 0.0,
+            "earnings-trade-analyzer": 36.36
           },
           "reasons": [
-            "market-news-analyst:ranked_events"
+            "portfolio-manager:targets",
+            "market-top-detector:candidates_score",
+            "ftd-detector:leaders_score",
+            "earnings-trade-analyzer:candidates_setup"
           ]
         },
         {
-          "symbol": "MP",
+          "symbol": "AVGO",
           "rank": 6,
-          "composite_score": 83.33,
-          "support_count": 1,
+          "composite_score": 262.33,
+          "support_count": 3,
           "normalized_by_skill": {
-            "market-news-analyst": 83.33
+            "portfolio-manager": 85.71,
+            "ftd-detector": 85.71,
+            "earnings-trade-analyzer": 90.91
           },
           "reasons": [
-            "market-news-analyst:ranked_events"
+            "portfolio-manager:targets",
+            "ftd-detector:leaders_score",
+            "earnings-trade-analyzer:candidates_setup"
           ]
         },
         {
-          "symbol": "EV",
+          "symbol": "LLY",
           "rank": 7,
-          "composite_score": 79.17,
-          "support_count": 1,
+          "composite_score": 224.68,
+          "support_count": 3,
           "normalized_by_skill": {
-            "market-news-analyst": 79.17
+            "portfolio-manager": 71.43,
+            "ftd-detector": 71.43,
+            "earnings-trade-analyzer": 81.82
           },
           "reasons": [
-            "market-news-analyst:ranked_events"
+            "portfolio-manager:targets",
+            "ftd-detector:leaders_score",
+            "earnings-trade-analyzer:candidates_setup"
           ]
         },
         {
-          "symbol": "JOBY",
+          "symbol": "META",
           "rank": 8,
-          "composite_score": 75.0,
-          "support_count": 1,
+          "composite_score": 187.01,
+          "support_count": 3,
           "normalized_by_skill": {
-            "market-news-analyst": 75.0
+            "portfolio-manager": 57.14,
+            "ftd-detector": 57.14,
+            "earnings-trade-analyzer": 72.73
           },
           "reasons": [
-            "market-news-analyst:ranked_events"
+            "portfolio-manager:targets",
+            "ftd-detector:leaders_score",
+            "earnings-trade-analyzer:candidates_setup"
           ]
         },
         {
-          "symbol": "NONE",
+          "symbol": "XOM",
           "rank": 9,
-          "composite_score": 70.83,
-          "support_count": 1,
+          "composite_score": 109.09,
+          "support_count": 2,
           "normalized_by_skill": {
-            "market-news-analyst": 70.83
+            "market-top-detector": 100.0,
+            "earnings-trade-analyzer": 9.09
           },
           "reasons": [
-            "market-news-analyst:payload_extract"
+            "market-top-detector:candidates_score",
+            "earnings-trade-analyzer:candidates_setup"
           ]
         },
         {
-          "symbol": "DCI",
+          "symbol": "COST",
           "rank": 10,
-          "composite_score": 66.67,
-          "support_count": 1,
+          "composite_score": 89.61,
+          "support_count": 2,
           "normalized_by_skill": {
-            "market-news-analyst": 66.67
+            "market-top-detector": 71.43,
+            "earnings-trade-analyzer": 18.18
           },
           "reasons": [
-            "market-news-analyst:payload_extract"
+            "market-top-detector:candidates_score",
+            "earnings-trade-analyzer:candidates_setup"
           ]
         }
       ],
-      "source_union_count": 26
+      "source_union_count": 12
     },
     "analysis_targets": {
       "intersection_symbols": [],
       "top10_symbols": [
         "NVDA",
-        "NYSE",
-        "TAC",
-        "ABCL",
-        "AI",
-        "MP",
-        "EV",
-        "JOBY",
-        "NONE",
-        "DCI"
+        "AAPL",
+        "MSFT",
+        "GOOGL",
+        "AMZN",
+        "AVGO",
+        "LLY",
+        "META",
+        "XOM",
+        "COST"
       ]
     },
     "analyzer_outputs": [
+      {
+        "skill_slug": "market-environment-analysis",
+        "evaluations": [
+          {
+            "symbol": "NVDA",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 53.48,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "AAPL",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 53.48,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "MSFT",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 69.41,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 4.0",
+              "ai_factor 0.75",
+              "momentum_20d 4.70",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "GOOGL",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 67.72,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 2.0",
+              "ai_factor 0.74",
+              "momentum_20d 4.40",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "AMZN",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 76.4,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 14.0",
+              "ai_factor 0.68",
+              "momentum_20d 3.20",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "AVGO",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 53.48,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "LLY",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 73.82,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 8.0",
+              "ai_factor 0.86",
+              "momentum_20d 7.20",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "META",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 53.48,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "XOM",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 73.81,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 12.0",
+              "ai_factor 0.59",
+              "momentum_20d 1.40",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "COST",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 77.34,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 16.0",
+              "ai_factor 0.62",
+              "momentum_20d 2.50",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          }
+        ]
+      },
       {
         "skill_slug": "macro-regime-detector",
         "evaluations": [
@@ -1342,136 +1726,594 @@
             "symbol": "NVDA",
             "source_recommender": null,
             "target_group": "top10",
-            "decision": "WATCH",
-            "score": 64.35,
+            "decision": "PASS",
+            "score": 82.6,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 16.0",
+              "ai_factor 0.91",
+              "momentum_20d 9.30",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
           },
           {
-            "symbol": "NYSE",
+            "symbol": "AAPL",
             "source_recommender": null,
             "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
+            "decision": "PASS",
+            "score": 71.54,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 8.0",
+              "ai_factor 0.78",
+              "momentum_20d 5.90",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
           },
           {
-            "symbol": "TAC",
+            "symbol": "MSFT",
             "source_recommender": null,
             "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
+            "decision": "PASS",
+            "score": 68.69,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 6.0",
+              "ai_factor 0.75",
+              "momentum_20d 4.70",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
           },
           {
-            "symbol": "ABCL",
+            "symbol": "GOOGL",
             "source_recommender": null,
             "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
+            "decision": "PASS",
+            "score": 66.33,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 4.0",
+              "ai_factor 0.74",
+              "momentum_20d 4.40",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
           },
           {
-            "symbol": "AI",
-            "source_recommender": null,
-            "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
-            "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
-            ],
-            "risk_flags": []
-          },
-          {
-            "symbol": "MP",
-            "source_recommender": null,
-            "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
-            "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
-            ],
-            "risk_flags": []
-          },
-          {
-            "symbol": "EV",
-            "source_recommender": null,
-            "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
-            "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
-            ],
-            "risk_flags": []
-          },
-          {
-            "symbol": "JOBY",
-            "source_recommender": null,
-            "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
-            "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
-            ],
-            "risk_flags": []
-          },
-          {
-            "symbol": "NONE",
+            "symbol": "AMZN",
             "source_recommender": null,
             "target_group": "top10",
             "decision": "WATCH",
-            "score": 64.35,
+            "score": 63.18,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 2.0",
+              "ai_factor 0.68",
+              "momentum_20d 3.20",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
           },
           {
-            "symbol": "DCI",
+            "symbol": "AVGO",
             "source_recommender": null,
             "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
+            "decision": "PASS",
+            "score": 79.74,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 14.0",
+              "ai_factor 0.88",
+              "momentum_20d 8.10",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
+          },
+          {
+            "symbol": "LLY",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 77.09,
+            "reasons": [
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 12.0",
+              "ai_factor 0.86",
+              "momentum_20d 7.20",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "META",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 74.3,
+            "reasons": [
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 10.0",
+              "ai_factor 0.82",
+              "momentum_20d 6.50",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "XOM",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 48.17,
+            "reasons": [
+              "base 71.5",
+              "confidence 0.73",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "COST",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 48.17,
+            "reasons": [
+              "base 71.5",
+              "confidence 0.73",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          }
+        ]
+      },
+      {
+        "skill_slug": "economic-calendar-fetcher",
+        "evaluations": [
+          {
+            "symbol": "NVDA",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "AAPL",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "MSFT",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "GOOGL",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "AMZN",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "AVGO",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "LLY",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "META",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "XOM",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "COST",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
           }
         ]
       }
     ],
     "analyzer_outputs_by_target": [
+      {
+        "skill_slug": "market-environment-analysis",
+        "target_group": "intersection",
+        "evaluations": []
+      },
+      {
+        "skill_slug": "market-environment-analysis",
+        "target_group": "top10",
+        "evaluations": [
+          {
+            "symbol": "NVDA",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 53.48,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "AAPL",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 53.48,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "MSFT",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 69.41,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 4.0",
+              "ai_factor 0.75",
+              "momentum_20d 4.70",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "GOOGL",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 67.72,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 2.0",
+              "ai_factor 0.74",
+              "momentum_20d 4.40",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "AMZN",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 76.4,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 14.0",
+              "ai_factor 0.68",
+              "momentum_20d 3.20",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "AVGO",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 53.48,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "LLY",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 73.82,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 8.0",
+              "ai_factor 0.86",
+              "momentum_20d 7.20",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "META",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 53.48,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "XOM",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 73.81,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 12.0",
+              "ai_factor 0.59",
+              "momentum_20d 1.40",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "COST",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 77.34,
+            "reasons": [
+              "base 75.1",
+              "confidence 0.75",
+              "symbol matched",
+              "rank_bonus 16.0",
+              "ai_factor 0.62",
+              "momentum_20d 2.50",
+              "style cross_asset_regime",
+              "style_weights rank 0.78 ai 0.86 momentum 0.35"
+            ],
+            "risk_flags": []
+          }
+        ]
+      },
       {
         "skill_slug": "macro-regime-detector",
         "target_group": "intersection",
@@ -1485,131 +2327,396 @@
             "symbol": "NVDA",
             "source_recommender": null,
             "target_group": "top10",
-            "decision": "WATCH",
-            "score": 64.35,
+            "decision": "PASS",
+            "score": 82.6,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 16.0",
+              "ai_factor 0.91",
+              "momentum_20d 9.30",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
           },
           {
-            "symbol": "NYSE",
+            "symbol": "AAPL",
             "source_recommender": null,
             "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
+            "decision": "PASS",
+            "score": 71.54,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 8.0",
+              "ai_factor 0.78",
+              "momentum_20d 5.90",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
           },
           {
-            "symbol": "TAC",
+            "symbol": "MSFT",
             "source_recommender": null,
             "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
+            "decision": "PASS",
+            "score": 68.69,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 6.0",
+              "ai_factor 0.75",
+              "momentum_20d 4.70",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
           },
           {
-            "symbol": "ABCL",
+            "symbol": "GOOGL",
             "source_recommender": null,
             "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
+            "decision": "PASS",
+            "score": 66.33,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 4.0",
+              "ai_factor 0.74",
+              "momentum_20d 4.40",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
           },
           {
-            "symbol": "AI",
-            "source_recommender": null,
-            "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
-            "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
-            ],
-            "risk_flags": []
-          },
-          {
-            "symbol": "MP",
-            "source_recommender": null,
-            "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
-            "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
-            ],
-            "risk_flags": []
-          },
-          {
-            "symbol": "EV",
-            "source_recommender": null,
-            "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
-            "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
-            ],
-            "risk_flags": []
-          },
-          {
-            "symbol": "JOBY",
-            "source_recommender": null,
-            "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
-            "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
-            ],
-            "risk_flags": []
-          },
-          {
-            "symbol": "NONE",
+            "symbol": "AMZN",
             "source_recommender": null,
             "target_group": "top10",
             "decision": "WATCH",
-            "score": 64.35,
+            "score": 63.18,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 2.0",
+              "ai_factor 0.68",
+              "momentum_20d 3.20",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
           },
           {
-            "symbol": "DCI",
+            "symbol": "AVGO",
             "source_recommender": null,
             "target_group": "top10",
-            "decision": "REJECT",
-            "score": 42.35,
+            "decision": "PASS",
+            "score": 79.74,
             "reasons": [
-              "base 57.5",
-              "confidence 0.65",
-              "symbol not matched"
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 14.0",
+              "ai_factor 0.88",
+              "momentum_20d 8.10",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
             ],
             "risk_flags": []
+          },
+          {
+            "symbol": "LLY",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 77.09,
+            "reasons": [
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 12.0",
+              "ai_factor 0.86",
+              "momentum_20d 7.20",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "META",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "PASS",
+            "score": 74.3,
+            "reasons": [
+              "base 71.5",
+              "confidence 0.73",
+              "symbol matched",
+              "rank_bonus 10.0",
+              "ai_factor 0.82",
+              "momentum_20d 6.50",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
+            ],
+            "risk_flags": []
+          },
+          {
+            "symbol": "XOM",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 48.17,
+            "reasons": [
+              "base 71.5",
+              "confidence 0.73",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "COST",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 48.17,
+            "reasons": [
+              "base 71.5",
+              "confidence 0.73",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_regime",
+              "style_weights rank 1.08 ai 1.00 momentum 0.82"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          }
+        ]
+      },
+      {
+        "skill_slug": "economic-calendar-fetcher",
+        "target_group": "intersection",
+        "evaluations": []
+      },
+      {
+        "skill_slug": "economic-calendar-fetcher",
+        "target_group": "top10",
+        "evaluations": [
+          {
+            "symbol": "NVDA",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "AAPL",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "MSFT",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "GOOGL",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "AMZN",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "AVGO",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "LLY",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "META",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "XOM",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
+          },
+          {
+            "symbol": "COST",
+            "source_recommender": null,
+            "target_group": "top10",
+            "decision": "WATCH",
+            "score": 58.34,
+            "reasons": [
+              "base 100.0",
+              "confidence 0.63",
+              "symbol_signal absent",
+              "rank_bonus 0.0",
+              "ai_factor 0.50",
+              "momentum_20d 0.00",
+              "style macro_event_window",
+              "style_weights rank 1.00 ai 1.00 momentum 1.00"
+            ],
+            "risk_flags": [
+              "symbol_signal_absent"
+            ]
           }
         ]
       }
@@ -1617,43 +2724,17 @@
     "final_intersection": {
       "symbols": [],
       "final_reasons": [
-        "recommender 2개 strict intersection 0개",
+        "recommender 5개 strict intersection 0개",
         "recommender union normalized top10 10개",
-        "analyzer 1개 policy=pass_or_watch",
+        "analyzer 3개 policy=pass_or_watch",
         "analysis filtered intersection 0개",
-        "analysis filtered top10 2개",
-        "drop: recommender_intersection_empty"
+        "analysis filtered top10 10개",
+        "drop: recommender_intersection_empty",
+        "drop: analyzer_filtered_top10_empty[all_pass]",
+        "drop: fallback_pass_or_watch_applied"
       ],
       "policy_used": "pass_or_watch",
-      "comparison": {
-        "enabled": true,
-        "strict_all_pass": {
-          "symbols": [],
-          "count": 0,
-          "by_target": {
-            "intersection": [],
-            "top10": []
-          }
-        },
-        "watch_inclusive": {
-          "symbols": [
-            "NONE",
-            "NVDA"
-          ],
-          "count": 2,
-          "by_target": {
-            "intersection": [],
-            "top10": [
-              "NONE",
-              "NVDA"
-            ]
-          }
-        },
-        "watch_only_delta": [
-          "NONE",
-          "NVDA"
-        ]
-      },
+      "comparison": {},
       "post_analyzer_by_recommender": [
         {
           "recommender_skill": "us-stock-analysis",
@@ -1663,11 +2744,60 @@
           "count": 1
         },
         {
-          "recommender_skill": "market-news-analyst",
+          "recommender_skill": "portfolio-manager",
           "symbols": [
-            "NONE"
+            "NVDA",
+            "AVGO",
+            "LLY",
+            "META",
+            "AAPL",
+            "MSFT",
+            "GOOGL",
+            "AMZN"
           ],
-          "count": 1
+          "count": 8
+        },
+        {
+          "recommender_skill": "market-top-detector",
+          "symbols": [
+            "XOM",
+            "COST",
+            "AMZN",
+            "MSFT",
+            "GOOGL",
+            "AAPL"
+          ],
+          "count": 6
+        },
+        {
+          "recommender_skill": "ftd-detector",
+          "symbols": [
+            "NVDA",
+            "AVGO",
+            "LLY",
+            "META",
+            "AAPL",
+            "MSFT",
+            "GOOGL",
+            "AMZN"
+          ],
+          "count": 8
+        },
+        {
+          "recommender_skill": "earnings-trade-analyzer",
+          "symbols": [
+            "NVDA",
+            "AVGO",
+            "LLY",
+            "META",
+            "AAPL",
+            "MSFT",
+            "GOOGL",
+            "AMZN",
+            "COST",
+            "XOM"
+          ],
+          "count": 10
         }
       ],
       "per_skill_traces": [],
@@ -1677,25 +2807,50 @@
       "intersection_symbols": [],
       "top5_from_top10": [
         {
-          "symbol": "NVDA",
-          "support_count": 1,
-          "analyzer_avg_score": 64.35,
-          "volatility_proxy": 2.6,
-          "final_score": 70.7
+          "symbol": "AMZN",
+          "support_count": 4,
+          "analyzer_avg_score": 65.97,
+          "volatility_proxy": 0.6,
+          "final_score": 132.6
         },
         {
-          "symbol": "NONE",
-          "support_count": 1,
-          "analyzer_avg_score": 64.35,
-          "volatility_proxy": 35.0,
-          "final_score": 60.98
+          "symbol": "MSFT",
+          "support_count": 4,
+          "analyzer_avg_score": 65.48,
+          "volatility_proxy": 0.9,
+          "final_score": 132.11
+        },
+        {
+          "symbol": "NVDA",
+          "support_count": 4,
+          "analyzer_avg_score": 64.81,
+          "volatility_proxy": 2.6,
+          "final_score": 131.07
+        },
+        {
+          "symbol": "GOOGL",
+          "support_count": 4,
+          "analyzer_avg_score": 64.13,
+          "volatility_proxy": 1.1,
+          "final_score": 130.97
+        },
+        {
+          "symbol": "AAPL",
+          "support_count": 4,
+          "analyzer_avg_score": 61.12,
+          "volatility_proxy": 1.2,
+          "final_score": 128.54
         }
       ],
       "policy_used": "pass_or_watch",
       "dropped_by_stage": [
-        "recommender_intersection_empty"
+        "recommender_intersection_empty",
+        "analyzer_filtered_top10_empty[all_pass]",
+        "fallback_pass_or_watch_applied"
       ]
     }
   },
-  "warnings": []
+  "warnings": [
+    "two-stage: all_pass 결과가 비어 pass_or_watch 폴백을 적용했습니다."
+  ]
 }

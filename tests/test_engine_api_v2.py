@@ -139,6 +139,282 @@ def test_market_news_extract_tickers_filters_noise_tokens():
     assert "USD" not in tickers
 
 
+def test_analyzer_evaluation_uses_symbol_specific_signal_components():
+    from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
+    from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV2
+
+    result = SkillRunResultV2(
+        skill_slug="macro-regime-detector",
+        status="ok",
+        score_0_100=57.5,
+        confidence_0_1=0.65,
+        summary_ko="test",
+        cache_info=CacheInfo(mode="fresh"),
+        analysis_payload={
+            "top_candidates": [
+                {"symbol": "NVDA", "ai_factor": 0.91, "momentum_20d": 9.3},
+                {"symbol": "AAPL", "ai_factor": 0.78, "momentum_20d": 5.9},
+            ]
+        },
+        source_statuses={"fmp": "stale"},
+    )
+
+    nvda_eval = SkillEngineOrchestratorV2._evaluate_symbol_for_analyzer("NVDA", result, target_group="top10")
+    aapl_eval = SkillEngineOrchestratorV2._evaluate_symbol_for_analyzer("AAPL", result, target_group="top10")
+
+    assert nvda_eval.score != aapl_eval.score
+    assert nvda_eval.score > aapl_eval.score
+    assert any("rank_bonus" in item for item in nvda_eval.reasons)
+    assert any("ai_factor" in item for item in nvda_eval.reasons)
+    assert any("momentum_20d" in item for item in nvda_eval.reasons)
+
+
+def test_analyzer_evaluation_is_independent_from_recommender_strength_hint():
+    from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
+    from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV2
+
+    result = SkillRunResultV2(
+        skill_slug="economic-calendar-fetcher",
+        status="ok",
+        score_0_100=100.0,
+        confidence_0_1=0.63,
+        summary_ko="test",
+        cache_info=CacheInfo(mode="fresh"),
+        analysis_payload={"events": [{"event": "FOMC", "impact": "High"}]},
+        source_statuses={"fmp": "stale"},
+    )
+
+    weak_eval = SkillEngineOrchestratorV2._evaluate_symbol_for_analyzer(
+        "AAPL",
+        result,
+        target_group="top10",
+        symbol_strength_0_100=0.0,
+    )
+    strong_eval = SkillEngineOrchestratorV2._evaluate_symbol_for_analyzer(
+        "NVDA",
+        result,
+        target_group="top10",
+        symbol_strength_0_100=100.0,
+    )
+
+    assert strong_eval.score == weak_eval.score
+    assert any("symbol_signal absent" in item for item in weak_eval.reasons)
+    assert all("recommender_strength" not in item for item in weak_eval.reasons)
+    assert "symbol_signal_absent" in weak_eval.risk_flags
+
+
+def test_skill_result_is_independent_from_other_selected_skills(client):
+    def _by_slug(response_json):
+        return {item["skill_slug"]: item for item in response_json["results"]}
+
+    single = client.post(
+        "/api/v2/skills/run",
+        json={
+            "selected_skills": ["sector-analyst"],
+            "as_of_date": "2026-02-28",
+        },
+    )
+    assert single.status_code == 200
+    single_item = _by_slug(single.json())["sector-analyst"]
+
+    mixed = client.post(
+        "/api/v2/skills/run",
+        json={
+            "selected_skills": ["sector-analyst", "technical-analyst", "macro-regime-detector"],
+            "as_of_date": "2026-02-28",
+        },
+    )
+    assert mixed.status_code == 200
+    mixed_item = _by_slug(mixed.json())["sector-analyst"]
+
+    assert single_item["status"] == mixed_item["status"]
+    assert single_item["score_0_100"] == mixed_item["score_0_100"]
+    assert single_item["confidence_0_1"] == mixed_item["confidence_0_1"]
+    assert single_item["analysis_payload"] == mixed_item["analysis_payload"]
+
+
+def test_analyzer_evaluation_reflects_style_profile_weights():
+    from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
+    from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV2
+
+    shared_payload = {
+        "top_candidates": [
+            {"symbol": "NVDA", "ai_factor": 0.91, "momentum_20d": 9.3},
+            {"symbol": "AAPL", "ai_factor": 0.78, "momentum_20d": 5.9},
+        ]
+    }
+
+    env_result = SkillRunResultV2(
+        skill_slug="market-environment-analysis",
+        status="ok",
+        score_0_100=57.5,
+        confidence_0_1=0.65,
+        summary_ko="env",
+        cache_info=CacheInfo(mode="fresh"),
+        analysis_payload=shared_payload,
+        source_statuses={"fmp": "stale"},
+    )
+    macro_result = SkillRunResultV2(
+        skill_slug="macro-regime-detector",
+        status="ok",
+        score_0_100=57.5,
+        confidence_0_1=0.65,
+        summary_ko="macro",
+        cache_info=CacheInfo(mode="fresh"),
+        analysis_payload=shared_payload,
+        source_statuses={"fmp": "stale"},
+    )
+
+    env_eval = SkillEngineOrchestratorV2._evaluate_symbol_for_analyzer("NVDA", env_result, target_group="top10")
+    macro_eval = SkillEngineOrchestratorV2._evaluate_symbol_for_analyzer("NVDA", macro_result, target_group="top10")
+
+    assert env_eval.score != macro_eval.score
+    assert any("style cross_asset_regime" in item for item in env_eval.reasons)
+    assert any("style macro_regime" in item for item in macro_eval.reasons)
+
+
+def test_recommender_extract_uses_derived_top_candidate_score_without_fixed_ladder():
+    from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
+    from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV2
+
+    result = SkillRunResultV2(
+        skill_slug="vcp-screener",
+        status="ok",
+        score_0_100=60.0,
+        confidence_0_1=0.6,
+        summary_ko="derived score test",
+        cache_info=CacheInfo(mode="fresh"),
+        analysis_payload={
+            "top_candidates": [
+                {"symbol": "AAA", "ai_factor": 0.95, "momentum_20d": 10.0, "daily_return_pct": 2.0},
+                {"symbol": "BBB", "ai_factor": 0.65, "momentum_20d": 4.0, "daily_return_pct": 1.0},
+                {"symbol": "CCC", "ai_factor": 0.40, "momentum_20d": -2.0, "daily_return_pct": -0.5},
+            ]
+        },
+        source_statuses={"fmp": "stale"},
+    )
+
+    rows = SkillEngineOrchestratorV2._extract_ranked_symbols_for_recommender(result=result, top_n=10)
+    assert rows[0][0] == "AAA"
+    assert rows[1][0] == "BBB"
+    assert rows[2][0] == "CCC"
+    assert rows[0][2] == "top_candidates_derived"
+    assert rows[1][1] != 79.0
+    assert rows[2][1] != 78.0
+
+
+def test_recommender_extract_payload_backfill_does_not_override_top_candidates():
+    from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
+    from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV2
+
+    result = SkillRunResultV2(
+        skill_slug="technical-analyst",
+        status="ok",
+        score_0_100=60.0,
+        confidence_0_1=0.6,
+        summary_ko="backfill priority test",
+        cache_info=CacheInfo(mode="fresh"),
+        analysis_payload={
+            "top_candidates": [
+                {"symbol": "AAA", "score": 52.0},
+                {"symbol": "BBB", "score": 48.0},
+            ],
+        },
+        source_statuses={"fmp": "stale"},
+    )
+
+    rows = SkillEngineOrchestratorV2._extract_ranked_symbols_for_recommender(result=result, top_n=10)
+    by_symbol = {symbol: (score, reason) for symbol, score, reason in rows}
+    assert by_symbol["AAA"] == (52.0, "top_candidates_score")
+    assert by_symbol["BBB"] == (48.0, "top_candidates_score")
+
+
+def test_recommender_extract_supports_leaders_and_candidates_payload():
+    from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
+    from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV2
+
+    leaders_result = SkillRunResultV2(
+        skill_slug="uptrend-analyzer",
+        status="ok",
+        score_0_100=70.0,
+        confidence_0_1=0.6,
+        summary_ko="leaders test",
+        cache_info=CacheInfo(mode="fresh"),
+        analysis_payload={"leaders": [{"symbol": "AAA", "score": 66.4}]},
+        source_statuses={"fmp": "stale"},
+    )
+    leaders_rows = SkillEngineOrchestratorV2._extract_ranked_symbols_for_recommender(leaders_result, top_n=10)
+    assert leaders_rows[0][0] == "AAA"
+    assert leaders_rows[0][2] == "leaders_score"
+
+    candidates_result = SkillRunResultV2(
+        skill_slug="market-top-detector",
+        status="ok",
+        score_0_100=70.0,
+        confidence_0_1=0.6,
+        summary_ko="candidates test",
+        cache_info=CacheInfo(mode="fresh"),
+        analysis_payload={"candidates": [{"ticker": "BBB", "setup_score": 74.2}]},
+        source_statuses={"fmp": "stale"},
+    )
+    candidate_rows = SkillEngineOrchestratorV2._extract_ranked_symbols_for_recommender(candidates_result, top_n=10)
+    assert candidate_rows[0][0] == "BBB"
+    assert candidate_rows[0][2] == "candidates_setup"
+
+
+def test_proxy_recommenders_do_not_return_identical_rank_signature(client):
+    response = client.post(
+        "/api/v2/skills/run",
+        json={
+            "selected_skills": ["market-breadth-analyzer", "uptrend-analyzer"],
+            "as_of_date": "2026-02-28",
+            "top_picks_mode": "two_stage_intersection",
+            "pipeline_config": {
+                "recommender_skills": ["market-breadth-analyzer", "uptrend-analyzer"],
+                "analyzer_skills": [],
+                "recommender_top_n": 25,
+                "intersection_policy": "strict",
+                "analyzer_pass_policy": "all_pass",
+            },
+        },
+    )
+    assert response.status_code == 200
+    pipeline = response.json()["pipeline"]
+    assert pipeline is not None
+    outputs = {row["skill_slug"]: row["symbols"] for row in pipeline["recommender_outputs"]}
+    breadth = [(row["symbol"], row["raw_score"]) for row in outputs["market-breadth-analyzer"][:8]]
+    uptrend = [(row["symbol"], row["raw_score"]) for row in outputs["uptrend-analyzer"][:8]]
+    assert breadth != uptrend
+
+
+def test_proxy_analyzers_do_not_return_identical_symbol_evaluations(client):
+    response = client.post(
+        "/api/v2/skills/run",
+        json={
+            "selected_skills": [
+                "vcp-screener",
+                "scenario-analyzer",
+                "backtest-expert",
+            ],
+            "as_of_date": "2026-02-28",
+            "top_picks_mode": "two_stage_intersection",
+            "pipeline_config": {
+                "recommender_skills": ["vcp-screener"],
+                "analyzer_skills": ["scenario-analyzer", "backtest-expert"],
+                "recommender_top_n": 25,
+                "intersection_policy": "strict",
+                "analyzer_pass_policy": "pass_or_watch",
+            },
+        },
+    )
+    assert response.status_code == 200
+    pipeline = response.json()["pipeline"]
+    assert pipeline is not None
+    rows = [row for row in pipeline["analyzer_outputs_by_target"] if row["target_group"] == "top10"]
+    by_slug = {row["skill_slug"]: [(ev["symbol"], ev["score"], ev["decision"]) for ev in row["evaluations"]] for row in rows}
+    assert by_slug["scenario-analyzer"] != by_slug["backtest-expert"]
+
+
 def test_v2_watchlist_consensus_mode_filters_to_watchlist(client, monkeypatch):
     from trading_skills_engine.data.rss_client import RSSClient
 
@@ -244,8 +520,9 @@ def test_v2_two_stage_all_pass_fallback_to_watch_on_empty(client, monkeypatch):
         result,
         source_recommender=None,
         target_group=None,
+        symbol_strength_0_100=None,
     ):
-        del result
+        del result, symbol_strength_0_100
         return AnalyzerEvaluationV2(
             symbol=str(symbol),
             source_recommender=source_recommender,
