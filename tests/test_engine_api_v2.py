@@ -128,6 +128,17 @@ def test_v2_market_news_runs_with_rss_without_fmp_key(client, monkeypatch):
     assert result["source_statuses"]["rss"] == "live"
 
 
+def test_market_news_extract_tickers_filters_noise_tokens():
+    from trading_skills_engine.skills_v2.market_news import _extract_tickers
+
+    tickers = _extract_tickers("NYSE and FOMC updates mention NVDA and TSLA with USD strength")
+    assert "NVDA" in tickers
+    assert "TSLA" in tickers
+    assert "NYSE" not in tickers
+    assert "FOMC" not in tickers
+    assert "USD" not in tickers
+
+
 def test_v2_watchlist_consensus_mode_filters_to_watchlist(client, monkeypatch):
     from trading_skills_engine.data.rss_client import RSSClient
 
@@ -222,6 +233,66 @@ def test_v2_role_gated_consensus_returns_decision_reason(client, monkeypatch):
     assert any(any(tag in item["reason"] for tag in ["PASS", "WATCH", "REJECT"]) for item in body["top_picks"])
     assert all(item.get("decision") in {"PASS", "WATCH", "REJECT"} for item in body["top_picks"])
     assert all(item.get("primary_skill") for item in body["top_picks"])
+
+
+def test_v2_two_stage_all_pass_fallback_to_watch_on_empty(client, monkeypatch):
+    from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
+    from trading_skills_engine.skills_v2.contracts import AnalyzerEvaluationV2
+
+    def _always_watch(
+        symbol,
+        result,
+        source_recommender=None,
+        target_group=None,
+    ):
+        del result
+        return AnalyzerEvaluationV2(
+            symbol=str(symbol),
+            source_recommender=source_recommender,
+            target_group=target_group if target_group in {"intersection", "top10"} else None,
+            decision="WATCH",
+            score=60.0,
+            reasons=["test watch decision"],
+            risk_flags=[],
+        )
+
+    monkeypatch.setattr(
+        SkillEngineOrchestratorV2,
+        "_evaluate_symbol_for_analyzer",
+        staticmethod(_always_watch),
+    )
+
+    response = client.post(
+        "/api/v2/skills/run",
+        json={
+            "selected_skills": [
+                "vcp-screener",
+                "macro-regime-detector",
+            ],
+            "as_of_date": "2026-02-26",
+            "top_picks_mode": "two_stage_intersection",
+            "pipeline_config": {
+                "recommender_skills": ["vcp-screener"],
+                "analyzer_skills": ["macro-regime-detector"],
+                "recommender_top_n": 10,
+                "intersection_policy": "strict",
+                "analyzer_pass_policy": "all_pass",
+            },
+            "params_by_skill": {
+                "top-picks": {
+                    "fallback_to_watch_on_empty": True,
+                }
+            },
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    pipeline = body["pipeline"]
+
+    assert pipeline["final_summary"]["policy_used"] == "pass_or_watch"
+    assert pipeline["final_summary"]["top5_from_top10"]
+    assert "analyzer_filtered_top10_empty[all_pass]" in pipeline["final_summary"]["dropped_by_stage"]
+    assert "fallback_pass_or_watch_applied" in pipeline["final_summary"]["dropped_by_stage"]
 
 
 def test_v2_two_stage_intersection_contract(client, monkeypatch):
@@ -383,6 +454,35 @@ def test_v2_two_stage_watch_policy_comparison_mode(client):
     watch_count = final_intersection["comparison"]["watch_inclusive"]["count"]
     assert watch_count >= strict_count
     assert all("analyzer pass-or-watch" in item["reason"] for item in body["top_picks"])
+
+
+def test_v2_two_stage_single_recommender_has_empty_intersection(client):
+    response = client.post(
+        "/api/v2/skills/run",
+        json={
+            "selected_skills": [
+                "us-stock-analysis",
+                "macro-regime-detector",
+            ],
+            "as_of_date": "2026-02-26",
+            "top_picks_mode": "two_stage_intersection",
+            "pipeline_config": {
+                "recommender_skills": ["us-stock-analysis"],
+                "analyzer_skills": ["macro-regime-detector"],
+                "recommender_top_n": 25,
+                "intersection_policy": "strict",
+                "analyzer_pass_policy": "pass_or_watch",
+            },
+            "params_by_skill": {
+                "us-stock-analysis": {"ticker": "NVDA"},
+            },
+        },
+    )
+    assert response.status_code == 200
+    pipeline = response.json()["pipeline"]
+    assert pipeline is not None
+    assert pipeline["recommender_intersection"]["symbols"] == []
+    assert pipeline["analysis_targets"]["intersection_symbols"] == []
 
 
 def test_v2_two_stage_strict_empty_intersection_keeps_empty_results(client):
@@ -656,7 +756,7 @@ def test_dashboard_run_renders_proxy_result(tmp_path: Path, monkeypatch):
     with TestClient(app) as isolated_client:
         run_response = isolated_client.post(
             "/dashboard/run",
-            data={"skills": ["vcp-screener"]},
+            data={"recommender_skills": ["vcp-screener"]},
             follow_redirects=False,
         )
         assert run_response.status_code == 303
@@ -676,7 +776,10 @@ def test_dashboard_run_filters_invalid_and_duplicate_slugs(tmp_path: Path, monke
     with TestClient(app) as isolated_client:
         run_response = isolated_client.post(
             "/dashboard/run",
-            data={"skills": ["vcp-screener", "invalid-slug", "vcp-screener"]},
+            data={
+                "recommender_skills": ["vcp-screener", "invalid-slug", "vcp-screener"],
+                "analyzer_skills": ["macro-regime-detector", "invalid-slug", "macro-regime-detector"],
+            },
             follow_redirects=False,
         )
         assert run_response.status_code == 303
@@ -684,7 +787,7 @@ def test_dashboard_run_filters_invalid_and_duplicate_slugs(tmp_path: Path, monke
     payload = json.loads(report_path.read_text(encoding="utf-8"))
     results = payload.get("results", [])
     slugs = [item.get("skill_slug") for item in results if isinstance(item, dict)]
-    assert slugs == ["vcp-screener"]
+    assert slugs == ["vcp-screener", "macro-regime-detector"]
 
 
 def test_dashboard_run_rejects_oversized_form_body(client):

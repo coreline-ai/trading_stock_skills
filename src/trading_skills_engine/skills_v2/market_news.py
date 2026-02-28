@@ -9,6 +9,26 @@ from trading_skills_engine.data.cache_store import CacheStore
 from trading_skills_engine.skills_v2.base import AnalyzerContext, SkillAnalyzer, unavailable_result
 from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV2
 
+_TICKER_STOPWORDS = {
+    "NONE",
+    "NYSE",
+    "NASDAQ",
+    "FOMC",
+    "ECB",
+    "FED",
+    "CPI",
+    "PPI",
+    "NFP",
+    "GDP",
+    "USD",
+    "EUR",
+    "JPY",
+    "GBP",
+    "US",
+    "LP",
+    "PLC",
+}
+
 
 class MarketNewsAnalyzer(SkillAnalyzer):
     slug = "market-news-analyst"
@@ -230,6 +250,11 @@ def _extract_tickers(headline: str) -> list[str]:
     tokens = headline.replace("/", " ").replace("-", " ").split()
     for token in tokens:
         clean = token.strip("(),.:;")
-        if clean.isupper() and 1 < len(clean) <= 5 and clean.isalpha():
+        if (
+            clean.isupper()
+            and 1 < len(clean) <= 5
+            and clean.isalpha()
+            and clean not in _TICKER_STOPWORDS
+        ):
             candidates.append(clean)
     return candidates[:3]

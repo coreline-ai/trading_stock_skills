@@ -122,88 +122,64 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
             parsed = {}
 
         allowed_slugs = {item.slug for item in SKILL_CATALOG}
-        selected: list[str] = []
-        for raw in parsed.get("skills", []):
+        recommender_skills: list[str] = []
+        for raw in parsed.get("recommender_skills", []):
             slug = str(raw).strip()
-            if not slug or slug not in allowed_slugs or slug in selected:
+            if not slug or slug not in allowed_slugs or slug in recommender_skills:
                 continue
-            selected.append(slug)
+            recommender_skills.append(slug)
 
-        params_by_skill = {
-            "economic-calendar-fetcher": {
-                "from_days": _form_int(_first(parsed, "param__economic-calendar-fetcher__from_days"), 7),
-                "to_days": _form_int(_first(parsed, "param__economic-calendar-fetcher__to_days"), 90),
-                "country": _first(parsed, "param__economic-calendar-fetcher__country", "US").upper().strip(),
-            },
-            "earnings-calendar": {
-                "days": _form_int(_first(parsed, "param__earnings-calendar__days"), 7),
-                "min_market_cap": _form_int(_first(parsed, "param__earnings-calendar__min_market_cap"), 2_000_000_000),
-            },
-            "market-news-analyst": {
-                "lookback_days": _form_int(_first(parsed, "param__market-news-analyst__lookback_days"), 10),
-                "max_items": _form_int(_first(parsed, "param__market-news-analyst__max_items"), 80),
-            },
-            "us-stock-analysis": {
-                "ticker": _first(parsed, "param__us-stock-analysis__ticker", "").upper().strip(),
-            },
-        }
+        analyzer_skills: list[str] = []
+        for raw in parsed.get("analyzer_skills", []):
+            slug = str(raw).strip()
+            if not slug or slug not in allowed_slugs or slug in analyzer_skills:
+                continue
+            analyzer_skills.append(slug)
 
-        filtered_params = {slug: params_by_skill.get(slug, {}) for slug in selected}
-        top_picks_mode = _first(parsed, "param__top-picks__mode", "skill_consensus").strip()
-        if top_picks_mode not in {"skill_consensus", "watchlist_consensus", "role_gated_consensus", "two_stage_intersection"}:
-            top_picks_mode = "skill_consensus"
-
-        watchlist_text = _first(parsed, "param__top-picks__watchlist", "")
-        watchlist_symbols = _parse_watchlist_symbols(watchlist_text)
-        top_picks_limit = _form_int(_first(parsed, "param__top-picks__limit"), 5)
-        top_picks_primary = _first(parsed, "param__top-picks__primary_skill", "").strip()
-        top_picks_confirm = _first(parsed, "param__top-picks__confirm_skills", "").strip()
-        top_picks_analysis = _first(parsed, "param__top-picks__analysis_skills", "").strip()
-        top_picks_min_confirm_votes = _form_int(_first(parsed, "param__top-picks__min_confirm_votes"), 1)
-        pipeline_recommenders_input = _first(parsed, "param__pipeline__recommender_skills", "").strip()
-        pipeline_analyzers_input = _first(parsed, "param__pipeline__analyzer_skills", "").strip()
-        pipeline_top_n = max(5, min(50, _form_int(_first(parsed, "param__pipeline__recommender_top_n"), 25)))
-        pipeline_include_watch = _form_bool(_first(parsed, "param__pipeline__include_watch"), False)
-        pipeline_comparison_mode = _form_bool(_first(parsed, "param__pipeline__comparison_mode"), False)
-        analyzer_pass_policy = "pass_or_watch" if pipeline_include_watch else "all_pass"
-
-        role_recommenders: list[str] = []
-        role_analyzers: list[str] = []
-        for slug in selected:
+        role_valid_recommenders: list[str] = []
+        role_valid_analyzers: list[str] = []
+        for slug in recommender_skills:
             trait = get_skill_trait(slug)
-            role = trait.recommendation_role if trait else "analysis_only"
-            if role in {"direct", "candidate"}:
-                role_recommenders.append(slug)
-            else:
-                role_analyzers.append(slug)
+            if trait and trait.recommendation_role in {"direct", "candidate"}:
+                role_valid_recommenders.append(slug)
+        for slug in analyzer_skills:
+            trait = get_skill_trait(slug)
+            if trait and trait.recommendation_role == "analysis_only":
+                role_valid_analyzers.append(slug)
 
-        effective_recommenders = role_recommenders if top_picks_mode == "two_stage_intersection" else _parse_skill_slugs(pipeline_recommenders_input)
-        effective_analyzers = role_analyzers if top_picks_mode == "two_stage_intersection" else _parse_skill_slugs(pipeline_analyzers_input)
-        pipeline_recommenders = ",".join(effective_recommenders)
-        pipeline_analyzers = ",".join(effective_analyzers)
+        if len(role_valid_recommenders) > 5:
+            role_valid_recommenders = role_valid_recommenders[:5]
+        if len(role_valid_analyzers) > 3:
+            role_valid_analyzers = role_valid_analyzers[:3]
 
-        filtered_params["top-picks"] = {
-            "primary_skill": top_picks_primary,
-            "confirm_skills": top_picks_confirm,
-            "analysis_skills": top_picks_analysis,
-            "min_confirm_votes": top_picks_min_confirm_votes,
-            "recommender_skills": pipeline_recommenders,
-            "analyzer_skills": pipeline_analyzers,
-            "recommender_top_n": pipeline_top_n,
-            "analyzer_pass_policy": analyzer_pass_policy,
-            "comparison_mode": pipeline_comparison_mode,
+        selected: list[str] = []
+        for slug in role_valid_recommenders + role_valid_analyzers:
+            if slug not in selected:
+                selected.append(slug)
+
+        filtered_params = {
+            "top-picks": {
+                "recommender_skills": ",".join(role_valid_recommenders),
+                "analyzer_skills": ",".join(role_valid_analyzers),
+                "recommender_top_n": 25,
+                "analyzer_pass_policy": "all_pass",
+                "fallback_to_watch_on_empty": True,
+                "comparison_mode": False,
+            }
         }
 
-        pipeline_config = None
-        if top_picks_mode == "two_stage_intersection":
-            pipeline_config = {
-                "recommender_skills": effective_recommenders,
-                "analyzer_skills": effective_analyzers,
-                "recommender_top_n": pipeline_top_n,
-                "intersection_policy": "strict",
-                "analyzer_pass_policy": analyzer_pass_policy,
-                "comparison_mode": pipeline_comparison_mode,
-            }
+        pipeline_config = {
+            "recommender_skills": role_valid_recommenders,
+            "analyzer_skills": role_valid_analyzers,
+            "recommender_top_n": 25,
+            "intersection_policy": "strict",
+            "analyzer_pass_policy": "all_pass",
+            "comparison_mode": False,
+        }
+
+        top_picks_mode = "two_stage_intersection"
+        watchlist_symbols: list[str] = []
+        top_picks_limit = 5
 
         orchestrator_v2 = SkillEngineOrchestratorV2()
         orchestrator_v2.run_and_persist(

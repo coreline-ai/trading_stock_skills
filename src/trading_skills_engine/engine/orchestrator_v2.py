@@ -35,6 +35,27 @@ from trading_skills_engine.skills_v2.registry import all_skill_slugs, get_analyz
 from trading_skills_engine.skills_v2.traits import get_skill_trait
 
 
+INVALID_SYMBOL_TOKENS = {
+    "NONE",
+    "NYSE",
+    "NASDAQ",
+    "FOMC",
+    "ECB",
+    "FED",
+    "CPI",
+    "PPI",
+    "NFP",
+    "GDP",
+    "USD",
+    "EUR",
+    "JPY",
+    "GBP",
+    "US",
+    "LP",
+    "PLC",
+}
+
+
 class SkillEngineOrchestratorV2:
     def __init__(self, report_path: Path | None = None) -> None:
         env_report_path = os.getenv("SKILL_RUN_REPORT_V2_PATH")
@@ -438,6 +459,7 @@ class SkillEngineOrchestratorV2:
             if pipeline_config is not None
             else _to_bool(top_picks_params.get("comparison_mode"), False)
         )
+        fallback_to_watch_on_empty = _to_bool(top_picks_params.get("fallback_to_watch_on_empty"), False)
 
         if not raw_recommenders:
             raw_recommenders = [
@@ -520,7 +542,8 @@ class SkillEngineOrchestratorV2:
                 base_set &= symbol_set
             recommender_intersection_symbols = sorted(base_set)
         elif len(recommender_symbol_sets) == 1:
-            recommender_intersection_symbols = [item.symbol for item in recommender_outputs[0].symbols]
+            # Intersection is only meaningful when at least two recommenders are selected.
+            recommender_intersection_symbols = []
         else:
             recommender_intersection_symbols = []
 
@@ -645,13 +668,30 @@ class SkillEngineOrchestratorV2:
                 filtered &= accepted_symbols
             return sorted(filtered)
 
-        final_intersection_symbols = _filter_target_symbols("intersection", analyzer_pass_policy)
-        final_top10_symbols = _filter_target_symbols("top10", analyzer_pass_policy)
+        strict_intersection_symbols = _filter_target_symbols("intersection", analyzer_pass_policy)
+        strict_top10_symbols = _filter_target_symbols("top10", analyzer_pass_policy)
+        final_intersection_symbols = list(strict_intersection_symbols)
+        final_top10_symbols = list(strict_top10_symbols)
+        effective_policy = analyzer_pass_policy
 
-        if recommender_intersection_symbols and analyzer_skills and not final_intersection_symbols:
+        if recommender_intersection_symbols and analyzer_skills and not strict_intersection_symbols:
             dropped_by_stage.append(f"analyzer_filtered_intersection_empty[{analyzer_pass_policy}]")
-        if target_symbols["top10"] and analyzer_skills and not final_top10_symbols:
+        if target_symbols["top10"] and analyzer_skills and not strict_top10_symbols:
             dropped_by_stage.append(f"analyzer_filtered_top10_empty[{analyzer_pass_policy}]")
+            if (
+                fallback_to_watch_on_empty
+                and analyzer_pass_policy == "all_pass"
+            ):
+                watch_intersection_symbols = _filter_target_symbols("intersection", "pass_or_watch")
+                watch_top10_symbols = _filter_target_symbols("top10", "pass_or_watch")
+                if watch_top10_symbols:
+                    final_intersection_symbols = watch_intersection_symbols
+                    final_top10_symbols = watch_top10_symbols
+                    effective_policy = "pass_or_watch"
+                    warnings.append(
+                        "two-stage: all_pass 결과가 비어 pass_or_watch 폴백을 적용했습니다."
+                    )
+                    dropped_by_stage.append("fallback_pass_or_watch_applied")
 
         def _build_rank_rows(symbols: list[str], target_group: str) -> list[dict[str, Any]]:
             volatility_proxy = SkillEngineOrchestratorV2._build_volatility_proxy(results)
@@ -726,7 +766,7 @@ class SkillEngineOrchestratorV2:
                 }
             )
 
-        analyzer_policy_label = "all-pass" if analyzer_pass_policy == "all_pass" else "pass-or-watch"
+        analyzer_policy_label = "all-pass" if effective_policy == "all_pass" else "pass-or-watch"
         top_picks = [
             TopPickV2(
                 symbol=str(row["symbol"]),
@@ -754,7 +794,7 @@ class SkillEngineOrchestratorV2:
         final_reasons = [
             f"recommender {len(recommender_outputs)}개 strict intersection {len(recommender_intersection_symbols)}개",
             f"recommender union normalized top10 {len(recommender_union_top10_rows)}개",
-            f"analyzer {len(analyzer_outputs)}개 policy={analyzer_pass_policy}",
+            f"analyzer {len(analyzer_outputs)}개 policy={effective_policy}",
             f"analysis filtered intersection {len(final_intersection_symbols)}개",
             f"analysis filtered top10 {len(final_top10_symbols)}개",
         ]
@@ -781,7 +821,7 @@ class SkillEngineOrchestratorV2:
             final_intersection=FinalIntersectionV2(
                 symbols=final_intersection_symbols,
                 final_reasons=final_reasons,
-                policy_used=analyzer_pass_policy,
+                policy_used=effective_policy,
                 comparison=comparison,
                 post_analyzer_by_recommender=post_analyzer_by_recommender,
                 per_skill_traces=[],
@@ -790,7 +830,7 @@ class SkillEngineOrchestratorV2:
             final_summary=FinalSummaryV2(
                 intersection_symbols=final_intersection_symbols,
                 top5_from_top10=top5_from_top10,
-                policy_used=analyzer_pass_policy,
+                policy_used=effective_policy,
                 dropped_by_stage=dropped_by_stage,
             ),
         )
@@ -1130,6 +1170,8 @@ def _sanitize_symbol(raw: Any) -> str:
     symbol = str(raw or "").strip().upper()
     if not symbol:
         return ""
+    if symbol in INVALID_SYMBOL_TOKENS:
+        return ""
     if len(symbol) > 10:
         return ""
     if re.fullmatch(r"[A-Z0-9.\-]+", symbol) is None:
@@ -1147,16 +1189,12 @@ def _extract_symbols_from_payload(payload: dict[str, Any]) -> list[str]:
     symbols: list[str] = []
 
     def _add(raw: Any) -> None:
-        text = str(raw).strip().upper()
-        if not text:
+        symbol = _sanitize_symbol(raw)
+        if not symbol:
             return
-        if len(text) > 10:
+        if symbol in symbols:
             return
-        if re.fullmatch(r"[A-Z0-9.\-]+", text) is None:
-            return
-        if text in symbols:
-            return
-        symbols.append(text)
+        symbols.append(symbol)
 
     _add(payload.get("ticker"))
 

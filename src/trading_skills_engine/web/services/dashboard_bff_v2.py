@@ -15,64 +15,84 @@ DEFAULT_REPORT_PATH = Path("reports/skill_runs/latest_skill_runs_v2.json")
 DEFAULT_APP_NAME = "Coreline Stock AI"
 
 DEFAULT_PARAMS_BY_SKILL: dict[str, dict[str, Any]] = {
-    "economic-calendar-fetcher": {"from_days": 7, "to_days": 90, "country": "US"},
-    "earnings-calendar": {"days": 7, "min_market_cap": 2_000_000_000},
-    "market-news-analyst": {"lookback_days": 10, "max_items": 80},
-    "us-stock-analysis": {"ticker": ""},
     "top-picks": {
-        "mode": "skill_consensus",
-        "watchlist": "NVDA, AVGO, AAPL, MSFT, AMZN",
-        "limit": 5,
-        "primary_skill": "us-stock-analysis",
-        "confirm_skills": "earnings-calendar, market-news-analyst",
-        "analysis_skills": "macro-regime-detector, market-environment-analysis",
-        "min_confirm_votes": 1,
-        "recommender_skills": "us-stock-analysis, market-news-analyst",
-        "analyzer_skills": "macro-regime-detector",
+        "mode": "two_stage_intersection",
         "recommender_top_n": 25,
-        "include_watch": False,
-        "comparison_mode": False,
     },
 }
-DEFAULT_SKILL_PRESETS: list[dict[str, Any]] = [
-    {
-        "id": "core_reco",
-        "label": "추천 코어 5",
-        "description": "추천 생성에 직접 기여하는 핵심 조합",
-        "slugs": [
-            "us-stock-analysis",
-            "earnings-calendar",
-            "market-news-analyst",
-            "market-breadth-analyzer",
-            "uptrend-analyzer",
-        ],
-    },
-    {
-        "id": "momentum_swing",
-        "label": "모멘텀 스윙",
-        "description": "상승 추세/타이밍/실적 모멘텀 중심",
-        "slugs": [
-            "uptrend-analyzer",
-            "market-top-detector",
-            "ftd-detector",
-            "earnings-trade-analyzer",
-            "vcp-screener",
-            "canslim-screener",
-        ],
-    },
-    {
-        "id": "defensive_blend",
-        "label": "방어 밸런스",
-        "description": "리스크/배당/방어 섹터 혼합",
-        "slugs": [
-            "portfolio-manager",
-            "market-environment-analysis",
-            "value-dividend-screener",
-            "dividend-growth-pullback-screener",
-            "economic-calendar-fetcher",
-        ],
-    },
-]
+
+KOREAN_SYMBOL_ALIASES: dict[str, str] = {
+    "AAPL": "애플",
+    "MSFT": "마이크로소프트",
+    "NVDA": "엔비디아",
+    "AMZN": "아마존",
+    "META": "메타",
+    "GOOGL": "알파벳",
+    "TSLA": "테슬라",
+    "AVGO": "브로드컴",
+    "AMD": "AMD",
+    "INTC": "인텔",
+    "QCOM": "퀄컴",
+    "NFLX": "넷플릭스",
+    "SPY": "S&P500 ETF",
+    "QQQ": "나스닥100 ETF",
+    "IWM": "러셀2000 ETF",
+    "TLT": "미국 장기채 ETF",
+    "GLD": "금 ETF",
+    "XOM": "엑슨모빌",
+    "JPM": "JP모건",
+    "LLY": "일라이 릴리",
+    "COST": "코스트코",
+    "PLTR": "팔란티어",
+    "SMCI": "슈퍼마이크로컴퓨터",
+    "SOXX": "반도체 ETF",
+    "TAC": "트랜스알타",
+    "ABCL": "앱셀레라 바이오로직스",
+    "AI": "C3.ai",
+    "MP": "MP 머티리얼즈",
+    "JOBY": "조비 에비에이션",
+    "DCI": "도널드슨",
+    "STNE": "스톤코",
+    "ADT": "ADT",
+    "XPOF": "엑스포넨셜 피트니스",
+    "SBA": "SBA 커뮤니케이션스",
+    "SBAC": "SBA 커뮤니케이션스",
+    "RPID": "래피드 마이크로 바이오시스템즈",
+    "SHAK": "쉐이크쉑",
+    "ARQT": "아르쿠티스 바이오테라퓨틱스",
+    "QURE": "유니큐어",
+    "LNG": "셰니어 에너지",
+}
+
+KOREAN_COMPANY_ALIASES: dict[str, str] = {
+    "Apple": "애플",
+    "Microsoft": "마이크로소프트",
+    "NVIDIA": "엔비디아",
+    "Amazon": "아마존",
+    "Meta": "메타",
+    "Alphabet": "알파벳",
+    "Tesla": "테슬라",
+    "Broadcom": "브로드컴",
+    "Intel": "인텔",
+    "Qualcomm": "퀄컴",
+    "Netflix": "넷플릭스",
+    "JPMorgan": "JP모건",
+    "Exxon Mobil": "엑슨모빌",
+    "Eli Lilly": "일라이 릴리",
+    "Costco": "코스트코",
+    "TransAlta": "트랜스알타",
+    "AbCellera Biologics": "앱셀레라 바이오로직스",
+    "C3.ai": "C3.ai",
+    "MP Materials": "MP 머티리얼즈",
+    "Joby Aviation": "조비 에비에이션",
+    "Donaldson": "도널드슨",
+    "StoneCo": "스톤코",
+    "ADT": "ADT",
+    "SBA Communications": "SBA 커뮤니케이션스",
+    "Shake Shack": "쉐이크쉑",
+    "uniQure": "유니큐어",
+    "Cheniere Energy": "셰니어 에너지",
+}
 
 
 class DashboardBFFV2:
@@ -122,8 +142,17 @@ class DashboardBFFV2:
 
         top_picks = _normalize_top_picks(report.get("top_picks", []))
         pipeline_tables = _normalize_pipeline(report.get("pipeline", {}))
+        symbol_name_ko = _build_symbol_name_ko_map(
+            top_picks=top_picks,
+            pipeline_tables=pipeline_tables,
+            results=results_enriched,
+        )
         selected_skill_top5 = _build_selected_skill_top5(results_enriched)
         final_intersection_top5 = _build_final_intersection_top5(pipeline_tables)
+        recommender_list = [item for item in catalog if item["trait_role"] in {"direct", "candidate"}]
+        analyzer_list = [item for item in catalog if item["trait_role"] == "analysis_only"]
+        selected_recommender_count = sum(1 for item in recommender_list if item.get("selected"))
+        selected_analyzer_count = sum(1 for item in analyzer_list if item.get("selected"))
 
         return {
             "header": {
@@ -138,9 +167,18 @@ class DashboardBFFV2:
             "results": results_enriched,
             "top_picks": top_picks,
             "pipeline_tables": pipeline_tables,
+            "symbol_name_ko": symbol_name_ko,
             "summary_top5": {
                 "selected_skill_scores": selected_skill_top5,
                 "final_intersection": final_intersection_top5,
+            },
+            "left_menu": {
+                "recommender_skills": recommender_list,
+                "analyzer_skills": analyzer_list,
+                "selected_recommender_count": selected_recommender_count,
+                "selected_analyzer_count": selected_analyzer_count,
+                "max_recommender": 5,
+                "max_analyzer": 3,
             },
             "risk_badges": ["투자 권유 아님", "무효화 레벨 확인"],
             "recommendation_mode": inferred_mode,
@@ -159,7 +197,6 @@ class DashboardBFFV2:
                 "not_implemented": sum(1 for item in results_enriched if item.get("status") == "not_implemented"),
             },
             "params_defaults": params_defaults,
-            "skill_presets": DEFAULT_SKILL_PRESETS,
             "selected_skill_count": len(selected_slugs),
             "role_groups": {
                 "recommendation": [
@@ -304,34 +341,8 @@ def _params_defaults_with_mode(mode: str, pipeline: Any = None) -> dict[str, dic
         key: dict(value) for key, value in DEFAULT_PARAMS_BY_SKILL.items()
     }
     top_picks = defaults.get("top-picks", {})
-    top_picks["mode"] = mode if mode in {"skill_consensus", "watchlist_consensus", "role_gated_consensus", "two_stage_intersection"} else "skill_consensus"
-    if isinstance(pipeline, dict):
-        recommender_outputs = pipeline.get("recommender_outputs")
-        if isinstance(recommender_outputs, list) and recommender_outputs:
-            top_picks["recommender_skills"] = ", ".join(
-                str(item.get("skill_slug") or "").strip()
-                for item in recommender_outputs
-                if isinstance(item, dict) and str(item.get("skill_slug") or "").strip()
-            )
-        analyzer_outputs_by_target = pipeline.get("analyzer_outputs_by_target")
-        if isinstance(analyzer_outputs_by_target, list) and analyzer_outputs_by_target:
-            analyzers: list[str] = []
-            for item in analyzer_outputs_by_target:
-                if not isinstance(item, dict):
-                    continue
-                if str(item.get("target_group") or "") != "top10":
-                    continue
-                slug = str(item.get("skill_slug") or "").strip()
-                if slug and slug not in analyzers:
-                    analyzers.append(slug)
-            if analyzers:
-                top_picks["analyzer_skills"] = ", ".join(analyzers)
-        final_intersection = pipeline.get("final_intersection")
-        if isinstance(final_intersection, dict):
-            policy = str(final_intersection.get("policy_used") or "all_pass").strip().lower()
-            top_picks["include_watch"] = policy == "pass_or_watch"
-            comparison = final_intersection.get("comparison")
-            top_picks["comparison_mode"] = bool(comparison.get("enabled")) if isinstance(comparison, dict) else False
+    top_picks["mode"] = "two_stage_intersection"
+    top_picks["recommender_top_n"] = 25
     defaults["top-picks"] = top_picks
     return defaults
 
@@ -366,8 +377,41 @@ def _normalize_pipeline(raw_pipeline: Any) -> dict[str, Any]:
         analysis_targets.setdefault("top10_symbols", [])
     analyzer_outputs = raw_pipeline.get("analyzer_outputs")
     analyzer_outputs = analyzer_outputs if isinstance(analyzer_outputs, list) else []
-    analyzer_outputs_by_target = raw_pipeline.get("analyzer_outputs_by_target")
-    analyzer_outputs_by_target = analyzer_outputs_by_target if isinstance(analyzer_outputs_by_target, list) else []
+    analyzer_outputs_by_target_raw = raw_pipeline.get("analyzer_outputs_by_target")
+    analyzer_outputs_by_target_raw = analyzer_outputs_by_target_raw if isinstance(analyzer_outputs_by_target_raw, list) else []
+    analyzer_outputs_by_target: list[dict[str, Any]] = []
+    for output in analyzer_outputs_by_target_raw:
+        if not isinstance(output, dict):
+            continue
+        evaluations = output.get("evaluations")
+        evaluations = evaluations if isinstance(evaluations, list) else []
+        pass_count = sum(
+            1
+            for row in evaluations
+            if isinstance(row, dict) and str(row.get("decision") or "").upper() == "PASS"
+        )
+        watch_count = sum(
+            1
+            for row in evaluations
+            if isinstance(row, dict) and str(row.get("decision") or "").upper() == "WATCH"
+        )
+        reject_count = sum(
+            1
+            for row in evaluations
+            if isinstance(row, dict) and str(row.get("decision") or "").upper() == "REJECT"
+        )
+        analyzer_outputs_by_target.append(
+            {
+                **output,
+                "evaluations": evaluations,
+                "summary": {
+                    "total": len(evaluations),
+                    "pass": pass_count,
+                    "watch": watch_count,
+                    "reject": reject_count,
+                },
+            }
+        )
     recommender_intersection = raw_pipeline.get("recommender_intersection")
     if not isinstance(recommender_intersection, dict):
         recommender_intersection = {"symbols": [], "support_count_by_symbol": {}, "dropped_by_stage": []}
@@ -483,8 +527,99 @@ def _build_final_intersection_top5(pipeline_tables: dict[str, Any]) -> list[dict
                 }
             )
     if rows:
-        rows.sort(key=lambda row: (-float(row.get("final_score", 0.0)), -int(row.get("support_count", 0)), -float(row.get("analyzer_avg_score", 0.0)), str(row.get("symbol", ""))))
+        rows.sort(
+            key=lambda row: (
+                -float(row.get("final_score", 0.0)),
+                -int(row.get("support_count", 0)),
+                -float(row.get("analyzer_avg_score", 0.0)),
+                str(row.get("symbol", "")),
+            )
+        )
         return rows[:5]
+
+
+def _build_symbol_name_ko_map(
+    top_picks: list[dict[str, Any]],
+    pipeline_tables: dict[str, Any],
+    results: list[dict[str, Any]],
+) -> dict[str, str]:
+    symbols: set[str] = set()
+    inferred: dict[str, str] = {}
+
+    def _add_symbol(raw: Any) -> None:
+        symbol = str(raw or "").strip().upper()
+        if symbol:
+            symbols.add(symbol)
+
+    for pick in top_picks:
+        if not isinstance(pick, dict):
+            continue
+        symbol = str(pick.get("symbol") or "").strip().upper()
+        if symbol:
+            symbols.add(symbol)
+            company_name = str(pick.get("name") or "").strip()
+            if company_name:
+                ko = KOREAN_COMPANY_ALIASES.get(company_name)
+                if ko:
+                    inferred[symbol] = ko
+
+    for output in pipeline_tables.get("recommender_outputs", []):
+        if not isinstance(output, dict):
+            continue
+        for row in output.get("symbols", []):
+            if isinstance(row, dict):
+                _add_symbol(row.get("symbol"))
+
+    for symbol in pipeline_tables.get("recommender_intersection", {}).get("symbols", []):
+        _add_symbol(symbol)
+
+    for row in pipeline_tables.get("recommender_union_top10", {}).get("symbols", []):
+        if isinstance(row, dict):
+            _add_symbol(row.get("symbol"))
+
+    for symbol in pipeline_tables.get("analysis_targets", {}).get("intersection_symbols", []):
+        _add_symbol(symbol)
+    for symbol in pipeline_tables.get("analysis_targets", {}).get("top10_symbols", []):
+        _add_symbol(symbol)
+
+    for output in pipeline_tables.get("analyzer_outputs_by_target", []):
+        if not isinstance(output, dict):
+            continue
+        for row in output.get("evaluations", []):
+            if isinstance(row, dict):
+                _add_symbol(row.get("symbol"))
+
+    for symbol in pipeline_tables.get("final_summary", {}).get("intersection_symbols", []):
+        _add_symbol(symbol)
+    for row in pipeline_tables.get("final_summary", {}).get("top5_from_top10", []):
+        if isinstance(row, dict):
+            _add_symbol(row.get("symbol"))
+
+    for result in results:
+        if not isinstance(result, dict):
+            continue
+        if str(result.get("skill_slug") or "") != "us-stock-analysis":
+            continue
+        payload = result.get("analysis_payload")
+        if not isinstance(payload, dict):
+            continue
+        ticker = str(payload.get("ticker") or "").strip().upper()
+        fundamentals = payload.get("fundamentals")
+        if not ticker or not isinstance(fundamentals, dict):
+            continue
+        company = str(fundamentals.get("company") or "").strip()
+        if company:
+            ko = KOREAN_COMPANY_ALIASES.get(company)
+            if ko:
+                inferred[ticker] = ko
+            symbols.add(ticker)
+
+    symbol_name_ko: dict[str, str] = {}
+    for symbol in sorted(symbols):
+        ko = inferred.get(symbol) or KOREAN_SYMBOL_ALIASES.get(symbol)
+        if ko:
+            symbol_name_ko[symbol] = ko
+    return symbol_name_ko
 
     symbols = final_intersection.get("symbols")
     if isinstance(symbols, list):

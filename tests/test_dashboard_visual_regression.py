@@ -26,7 +26,8 @@ def test_mobile_layout_structure_regression(client):
     assert any("추천 합집합 정규화 TOP10 테이블" in title for title in titles)
     assert any("분석 스킬별 평가 테이블 (타겟 분리)" in title for title in titles)
     assert any("최종 결과 요약 (교집합 + TOP5)" in title for title in titles)
-    assert "WATCH 포함 교집합 사용" in soup.get_text(" ")
+    assert "종목추천 스킬" in soup.get_text(" ")
+    assert "분석 스킬" in soup.get_text(" ")
 
     cards = soup.find_all("article")
     assert len(cards) >= 1
