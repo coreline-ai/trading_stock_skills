@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.116-009688?logo=fastapi&logoColor=white)](pyproject.toml)
-[![Pytest](https://img.shields.io/badge/Pytest-48%20passed-0A9EDC?logo=pytest&logoColor=white)](tests)
+[![Pytest](https://img.shields.io/badge/Pytest-83%20passed-0A9EDC?logo=pytest&logoColor=white)](tests)
 [![Upstream](https://img.shields.io/badge/Upstream-claude--trading--skills-181717?logo=github&logoColor=white)](https://github.com/tradermonty/claude-trading-skills)
 
 FastAPI 기반 트레이딩 스킬 실행 엔진과 대시보드입니다.  
@@ -21,7 +21,10 @@ FastAPI 기반 트레이딩 스킬 실행 엔진과 대시보드입니다.
 - [AI 최종 리포트](#ai-최종-리포트)
 - [스킬 독립 실행 원칙](#스킬-독립-실행-원칙)
 - [진단/테스트](#진단테스트)
+- [운영 체크리스트](#운영-체크리스트)
 - [FMP 연동 및 런타임 토글](#fmp-연동-및-런타임-토글)
+- [환경 변수 전체](#환경-변수-전체)
+- [상태 배지 해석](#상태-배지-해석)
 - [산출물 경로](#산출물-경로)
 - [트러블슈팅](#트러블슈팅)
 - [레거시(v1) 엔드포인트](#레거시v1-엔드포인트)
@@ -57,7 +60,16 @@ source .venv/bin/activate
 pip install -e '.[dev]'
 ```
 
-### 2) 서버 실행
+### 2) 환경 변수 설정
+```bash
+cp .env.example .env
+```
+
+필수/권장:
+- `FMP_API_KEY` (시장/캘린더/FMP 기반 스킬)
+- `GLM_API_KEY` (AI 최종 리포트)
+
+### 3) 서버 실행
 ```bash
 # start | stop | restart | status | check
 scripts/dashboard_server.sh restart
@@ -75,7 +87,7 @@ scripts/dashboard_watchdog.sh status
 - `http://127.0.0.1:8001/dashboard`
 - `http://127.0.0.1:8001/healthz`
 
-### 3) 직접 uvicorn 실행(대안)
+### 4) 직접 uvicorn 실행(대안)
 ```bash
 python3.11 -m uvicorn trading_skills_engine.web.app:app --host 127.0.0.1 --port 8001
 ```
@@ -86,6 +98,9 @@ python3.11 -m uvicorn trading_skills_engine.web.app:app --host 127.0.0.1 --port 
 
 ### Dashboard - Mid View
 ![Dashboard Middle](docs/screenshots/dashboard-middle.png)
+
+### Dashboard - Result View
+![Dashboard Result](docs/screenshots/result.png)
 
 ## 대시보드 사용법
 대시보드 왼쪽 메뉴는 파이프라인 전용입니다.
@@ -129,12 +144,19 @@ GLM_TIMEOUT_SEC=20
 참고:
 - `GLM_API_KEY`가 없으면 버튼은 비활성화됩니다.
 - TOP5 대상이 비어 있어도 버튼이 비활성화됩니다.
+- 실행 상태는 `idle / running / failed`로 관리되며 `reports/ai/runtime.json`에 저장됩니다.
 
 ## API 사용법
 ### v2 엔드포인트
 - `GET /api/v2/skills`
 - `POST /api/v2/skills/run`
 - `GET /api/v2/engine/status`
+- `GET /api/v2/ai-report/latest`
+
+### 대시보드 액션 엔드포인트
+- `POST /dashboard/run` (스킬 실행)
+- `POST /dashboard/fmp-toggle` (FMP 런타임 ON/OFF)
+- `POST /dashboard/ai-report/run` (AI 최종 리포트 비동기 실행)
 
 ### v2 실행 예시 (two-stage)
 ```bash
@@ -207,6 +229,15 @@ python3.11 scripts/run_skill_independence_report.py
 - JSON: `reports/diagnostics/latest_skill_independence_report.json`
 - HTML: `reports/diagnostics/latest_skill_independence_report.html`
 
+## 운영 체크리스트
+코드 수정 후 아래 순서로 확인하는 것을 권장합니다.
+
+1. `python3.11 -m pytest -q`
+2. `scripts/verify_after_change.sh`
+3. `scripts/dashboard_server.sh status`
+4. `curl -fsS http://127.0.0.1:8001/healthz`
+5. 대시보드에서 스킬 실행 1회 + AI 리포트 실행 1회
+
 ## FMP 연동 및 런타임 토글
 `.env` 또는 환경변수로 `FMP_API_KEY`를 설정하면 FMP 기반 조회를 활성화할 수 있습니다.
 
@@ -233,7 +264,39 @@ EOF
 - `TRADING_SKILLS_DISABLE_DOTENV=1` : `.env` 자동 로드 비활성화
 - `SKILL_RUN_REPORT_V2_PATH` : v2 리포트 저장 위치 변경
 - `FMP_RUNTIME_SETTINGS_PATH` : FMP 런타임 설정 파일 경로 변경
+- `FMP_USAGE_PATH` : FMP 사용량 파일 경로 변경
 - `AI_REPORT_PATH` : AI 리포트 저장 위치 변경
+- `AI_REPORT_RUNTIME_PATH` : AI 실행 상태(runtime) 파일 경로 변경
+
+## 환경 변수 전체
+| 키 | 기본값 | 설명 |
+| --- | --- | --- |
+| `FMP_API_KEY` | 없음 | FMP API 연동 키 |
+| `GLM_API_KEY` | 없음 | GLM 4.5 AI 리포트 키 |
+| `GLM_BASE_URL` | `https://open.bigmodel.cn/api/paas/v4` | GLM API Base URL |
+| `GLM_MODEL` | `glm-4.5` | GLM 모델명 |
+| `GLM_TIMEOUT_SEC` | `20` | GLM 호출 타임아웃(초) |
+| `TRADING_SKILLS_ENV_FILE` | `.env` | 환경 파일 경로 오버라이드 |
+| `TRADING_SKILLS_DISABLE_DOTENV` | `0` | `.env` 자동 로드 비활성화 (`1`이면 비활성) |
+| `SKILL_RUN_REPORT_V2_PATH` | `reports/skill_runs/latest_skill_runs_v2.json` | v2 최신 리포트 경로 |
+| `FMP_RUNTIME_SETTINGS_PATH` | `reports/runtime/fmp_settings.json` | FMP 런타임 설정 경로 |
+| `FMP_USAGE_PATH` | `reports/runtime/fmp_usage.json` | FMP 호출 사용량 경로 |
+| `AI_REPORT_PATH` | `reports/ai/latest_ai_report.json` | AI 최신 리포트 경로 |
+| `AI_REPORT_RUNTIME_PATH` | `reports/ai/runtime.json` | AI 실행 상태 경로 |
+
+## 상태 배지 해석
+대시보드 헤더의 상태 배지는 아래 의미를 가집니다.
+
+- `API Key configured/missing`
+  - 현재 프로세스에서 API 키를 읽었는지 여부
+- `FMP: live/stale/unavailable`
+  - `live`: 실시간 조회 성공
+  - `stale`: 캐시/샘플 등 대체 데이터
+  - `unavailable`: 조회 실패 또는 미구성
+- `RSS: live/stale/unavailable`
+  - 뉴스 소스 상태
+- `OK / Unavailable / Not Implemented`
+  - 이번 실행에서 각 상태로 종료된 스킬 개수
 
 ## 산출물 경로
 - v2 최신 리포트: `reports/skill_runs/latest_skill_runs_v2.json`
@@ -267,6 +330,13 @@ tail -f /tmp/trading_skills_watchdog_8001.log
   - FMP 토글 OFF
   - 호출량 초기화(날짜 경과)
   - 한도 상향(설정 파일)
+
+### `AI 최종 리포트 생성` 클릭 후 반응이 없거나 실패
+1. `GLM_API_KEY` 설정 여부 확인
+2. `reports/ai/runtime.json`에서 상태(`running/failed`) 확인
+3. `GET /api/v2/ai-report/latest`로 최신 실패 코드 확인
+4. `GLM_TIMEOUT_SEC` 값을 늘려 재시도(예: `30`)
+5. 여전히 실패하면 FMP 토글/네트워크 상태를 점검하고 다시 실행
 
 ## 레거시(v1) 엔드포인트
 호환을 위해 v1 API도 유지합니다.
