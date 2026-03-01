@@ -168,3 +168,52 @@ def test_ai_report_service_suppresses_yahoo_warning_when_stooq_fallback_succeeds
     assert report.status == "ok"
     assert all(not str(item).startswith("YAHOO_FAIL:") for item in (report.warnings or []))
     assert all(any(ev.source == "stooq" for ev in row.evidence) for row in report.symbols)
+
+
+def test_ai_report_service_read_runtime_respects_glm_worst_case_budget(monkeypatch, tmp_path: Path):
+    runtime_path = tmp_path / "runtime.json"
+    started = (datetime.now(timezone.utc) - timedelta(minutes=11)).isoformat()
+    runtime_path.write_text(
+        json.dumps(
+            {
+                "status": "running",
+                "started_at": started,
+                "updated_at": started,
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
+    monkeypatch.setenv("AI_REPORT_RUNNING_TTL_SEC", "600")
+    monkeypatch.setenv("GLM_TIMEOUT_SEC", "180")
+    monkeypatch.setenv("GLM_MAX_RETRIES", "4")
+
+    service = AIReportService(ai_runtime_path=runtime_path)
+    runtime = service.read_runtime()
+    assert runtime["status"] == "running"
+
+
+def test_ai_report_service_touch_runtime_updates_timestamp(monkeypatch, tmp_path: Path):
+    runtime_path = tmp_path / "runtime.json"
+    old = (datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat()
+    runtime_path.write_text(
+        json.dumps(
+            {
+                "status": "running",
+                "started_at": old,
+                "updated_at": old,
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
+    service = AIReportService(ai_runtime_path=runtime_path)
+    service._touch_runtime_if_running()
+
+    refreshed = json.loads(runtime_path.read_text(encoding="utf-8"))
+    assert refreshed["status"] == "running"
+    assert refreshed["updated_at"] != old

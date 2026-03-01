@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from datetime import date, datetime
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from trading_skills_engine.core.models import MarketState, SymbolSignal
 from trading_skills_engine.data.fmp_client import FMPClient
 
 SAMPLE_STATE_PATH = Path(__file__).resolve().parent / "sample_market_state.json"
+logger = logging.getLogger(__name__)
 
 
 class MarketDataProvider:
@@ -29,6 +31,7 @@ class MarketDataProvider:
         try:
             quotes = self.client.fetch_quotes(["SPY", "QQQ", "IWM", "TLT", "AAPL", "MSFT", "NVDA", "AMZN"])
         except Exception:
+            logger.warning("fmp quotes fetch failed. falling back to sample market state", exc_info=True)
             return state, "sample"
 
         if not quotes:

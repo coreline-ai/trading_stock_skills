@@ -41,7 +41,12 @@ class EconomicCalendarAnalyzer(SkillAnalyzer):
             stale = context.cache_store.get_stale(cache_key)
             if stale:
                 context.warnings.append(f"{self.slug}: NO_API_KEY -> stale cache 사용")
-                return self._build_ok(stale.payload, CacheStore.cache_info("stale", stale), "stale", "stale")
+                return self._build_ok(
+                    stale.payload,
+                    CacheStore.cache_info("stale", stale),
+                    "stale",
+                    _rss_state(stale.payload),
+                )
 
             proxy_payload, rss_state, warnings = self._build_proxy_payload(context=context, start=start, end=end, country=country)
             context.warnings.extend(warnings)
@@ -54,7 +59,12 @@ class EconomicCalendarAnalyzer(SkillAnalyzer):
                 stale = context.cache_store.get_stale(cache_key)
                 if stale and _source_state(stale.payload) == "live":
                     context.warnings.append(f"{self.slug}: EMPTY_SOURCE -> stale cache 사용")
-                    return self._build_ok(stale.payload, CacheStore.cache_info("stale", stale), "stale", "stale")
+                    return self._build_ok(
+                        stale.payload,
+                        CacheStore.cache_info("stale", stale),
+                        "stale",
+                        _rss_state(stale.payload),
+                    )
                 proxy_payload, rss_state, warnings = self._build_proxy_payload(
                     context=context,
                     start=start,
@@ -74,7 +84,12 @@ class EconomicCalendarAnalyzer(SkillAnalyzer):
             stale = context.cache_store.get_stale(cache_key)
             if stale and _source_state(stale.payload) == "live":
                 context.warnings.append(f"{self.slug}: FETCH_FAILED -> stale cache 사용")
-                return self._build_ok(stale.payload, CacheStore.cache_info("stale", stale), "stale", "stale")
+                return self._build_ok(
+                    stale.payload,
+                    CacheStore.cache_info("stale", stale),
+                    "stale",
+                    _rss_state(stale.payload),
+                )
             proxy_payload, rss_state, warnings = self._build_proxy_payload(
                 context=context,
                 start=start,

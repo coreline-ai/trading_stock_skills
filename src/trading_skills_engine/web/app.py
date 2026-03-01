@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 from contextlib import asynccontextmanager
 from datetime import date
 from pathlib import Path
-import re
 from urllib.parse import parse_qs
 
 from fastapi import BackgroundTasks, FastAPI, Query, Request
@@ -13,6 +13,7 @@ from fastapi.templating import Jinja2Templates
 
 from trading_skills_engine.ai.report_service import AIReportService
 from trading_skills_engine.config.fmp_runtime import FMPRuntimeSettingsStore
+from trading_skills_engine.core.validators import parse_bool, parse_symbol_list
 from trading_skills_engine.engine.orchestrator import SkillEngineOrchestrator
 from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
 from trading_skills_engine.skills.catalog import SKILL_CATALOG
@@ -52,11 +53,12 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
         orchestrator_v2 = SkillEngineOrchestratorV2()
         if not orchestrator_v2.report_path.exists():
             default_v2_skills = [item.slug for item in SKILL_CATALOG if is_implemented(item.slug)]
-            orchestrator_v2.run_and_persist(
+            await asyncio.to_thread(
+                orchestrator_v2.run_and_persist,
                 EngineRunRequestV2(
                     selected_skills=default_v2_skills,
                     as_of_date=date.today(),
-                )
+                ),
             )
         yield
 
@@ -174,53 +176,11 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
 
     @app.get("/sw.js")
     def service_worker() -> Response:
-        script = """
-const CACHE_NAME = "coreline-static-v1";
-const STATIC_ASSETS = [
-  "/dashboard",
-  "/static/dashboard.css",
-  "/static/favicon.svg",
-  "/manifest.webmanifest"
-];
-self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)));
-  self.skipWaiting();
-});
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
-});
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-  if (request.method !== "GET" || url.origin !== self.location.origin) {
-    return;
-  }
-  if (url.pathname.startsWith("/static/")) {
-    event.respondWith(
-      caches.match(request).then((cached) => cached || fetch(request).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        return res;
-      }))
-    );
-    return;
-  }
-  if (url.pathname === "/dashboard") {
-    event.respondWith(
-      fetch(request).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        return res;
-      }).catch(() => caches.match(request))
-    );
-  }
-});
-        """.strip()
+        sw_path = web_dir / "static" / "sw.js"
+        try:
+            script = sw_path.read_text(encoding="utf-8")
+        except Exception:
+            script = "self.addEventListener('install', () => self.skipWaiting());"
         return Response(content=script, media_type="application/javascript")
 
     @app.get("/dashboard", response_class=HTMLResponse)
@@ -330,17 +290,16 @@ self.addEventListener("fetch", (event) => {
         top_picks_limit = 5
 
         orchestrator_v2 = SkillEngineOrchestratorV2()
-        orchestrator_v2.run_and_persist(
-            EngineRunRequestV2(
-                selected_skills=selected,
-                as_of_date=date.today(),
-                params_by_skill=filtered_params,
-                top_picks_mode=top_picks_mode,
-                watchlist_symbols=watchlist_symbols,
-                top_picks_limit=top_picks_limit,
-                pipeline_config=pipeline_config,
-            )
+        run_request = EngineRunRequestV2(
+            selected_skills=selected,
+            as_of_date=date.today(),
+            params_by_skill=filtered_params,
+            top_picks_mode=top_picks_mode,
+            watchlist_symbols=watchlist_symbols,
+            top_picks_limit=top_picks_limit,
+            pipeline_config=pipeline_config,
         )
+        await asyncio.to_thread(orchestrator_v2.run_and_persist, run_request)
         return RedirectResponse(url="/dashboard", status_code=303)
 
     @app.post("/dashboard/ai-report/run")
@@ -364,52 +323,12 @@ self.addEventListener("fetch", (event) => {
 app = create_app()
 
 
-def _form_int(raw: object, default: int) -> int:
-    try:
-        return int(str(raw))
-    except (TypeError, ValueError):
-        return default
-
-
 def _form_bool(raw: object, default: bool) -> bool:
-    text = str(raw).strip().lower()
-    if text in {"1", "true", "on", "yes"}:
-        return True
-    if text in {"0", "false", "off", "no"}:
-        return False
-    return default
+    return parse_bool(raw, default=default)
 
 
 def _parse_watchlist_symbols(raw_text: str) -> list[str]:
-    if not raw_text:
-        return []
-    parsed: list[str] = []
-    for token in re.split(r"[\s,]+", raw_text):
-        symbol = token.strip().upper()
-        if not symbol or symbol in parsed:
-            continue
-        if len(symbol) > 10:
-            continue
-        if re.fullmatch(r"[A-Z0-9.\-]+", symbol) is None:
-            continue
-        parsed.append(symbol)
-    return parsed[:200]
-
-
-def _parse_skill_slugs(raw_text: str) -> list[str]:
-    if not raw_text:
-        return []
-    parsed: list[str] = []
-    for token in re.split(r"[\s,]+", raw_text):
-        slug = token.strip().lower()
-        if not slug or slug in parsed:
-            continue
-        if len(slug) > 80:
-            continue
-        if re.fullmatch(r"[a-z0-9\-]+", slug) is None:
-            continue
-        parsed.append(slug)
-    return parsed[:50]
+    return parse_symbol_list(raw_text, max_items=200, max_len=10)
 
 
 def _first(parsed: dict[str, list[str]], key: str, default: str = "") -> str:

@@ -293,17 +293,6 @@ def _composite_symbol_score(symbol: str, axis_weights: dict[str, float], axis_sc
     return sum(value * weight for value, weight in zip(values, weights)) / denominator
 
 
-def _leadership_score(
-    focus: list[SymbolSignal],
-    axis_weights: dict[str, float],
-    axis_scores: dict[str, dict[str, float]],
-) -> float:
-    if not focus:
-        return 0.0
-    avg = sum(_composite_symbol_score(item.symbol, axis_weights, axis_scores) for item in focus) / len(focus)
-    return max(0.0, min(100.0, avg))
-
-
 def _leadership_score_from_map(focus: list[SymbolSignal], composite_by_symbol: dict[str, float]) -> float:
     if not focus:
         return 0.0

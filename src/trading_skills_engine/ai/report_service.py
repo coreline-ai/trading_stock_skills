@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -9,6 +10,7 @@ from typing import Any
 from trading_skills_engine.ai.contracts import AIReport, AISymbolDecision, EvidenceItem
 from trading_skills_engine.ai.glm_client import GLMClient, GLMClientError
 from trading_skills_engine.config.env import ensure_project_env_loaded
+from trading_skills_engine.core.history_retention import prune_history_files
 from trading_skills_engine.data.fmp_client import FMPClient
 from trading_skills_engine.data.stooq_client import StooqClient
 from trading_skills_engine.data.yahoo_finance_client import YahooFinanceClient
@@ -17,6 +19,8 @@ DEFAULT_V2_REPORT_PATH = Path("reports/skill_runs/latest_skill_runs_v2.json")
 DEFAULT_AI_REPORT_PATH = Path("reports/ai/latest_ai_report.json")
 DEFAULT_AI_RUNTIME_PATH = Path("reports/ai/runtime.json")
 DEFAULT_AI_RUNNING_TTL_SEC = 600
+
+logger = logging.getLogger(__name__)
 
 
 class AIReportService:
@@ -35,6 +39,18 @@ class AIReportService:
         self.ai_report_path = Path(env_ai_path) if env_ai_path else (ai_report_path or DEFAULT_AI_REPORT_PATH)
         self.ai_runtime_path = Path(env_runtime_path) if env_runtime_path else (ai_runtime_path or DEFAULT_AI_RUNTIME_PATH)
         self.ai_history_dir = self.ai_report_path.parent / "history"
+        self.ai_history_max_files = _coerce_int_env(
+            "AI_REPORT_HISTORY_MAX_FILES",
+            default=500,
+            min_value=0,
+            max_value=20_000,
+        )
+        self.ai_history_max_days = _coerce_int_env(
+            "AI_REPORT_HISTORY_MAX_DAYS",
+            default=0,
+            min_value=0,
+            max_value=3650,
+        )
         try:
             self.running_ttl_sec = max(300, min(7200, int(env_runtime_ttl)))
         except ValueError:
@@ -53,6 +69,7 @@ class AIReportService:
         try:
             payload = json.loads(self.ai_report_path.read_text(encoding="utf-8"))
         except Exception:
+            logger.warning("failed to read ai report path=%s", self.ai_report_path, exc_info=True)
             return None
         return payload if isinstance(payload, dict) else None
 
@@ -62,6 +79,7 @@ class AIReportService:
         try:
             payload = json.loads(self.ai_runtime_path.read_text(encoding="utf-8"))
         except Exception:
+            logger.warning("failed to read ai runtime path=%s", self.ai_runtime_path, exc_info=True)
             return {"status": "idle"}
         if not isinstance(payload, dict):
             return {"status": "idle"}
@@ -87,6 +105,7 @@ class AIReportService:
         try:
             report = self.generate_and_persist()
         except Exception as exc:
+            logger.exception("ai report runtime execution failed")
             report = AIReport(
                 status="unavailable",
                 portfolio_summary_ko="AI 리포트 실행 중 내부 오류가 발생했습니다.",
@@ -152,6 +171,7 @@ class AIReportService:
         warnings: list[str] = []
         packet_by_symbol: dict[str, dict[str, Any]] = {}
         for row in target_rows:
+            self._touch_runtime_if_running()
             symbol = str(row.get("symbol") or "").upper()
             if not symbol:
                 continue
@@ -176,6 +196,7 @@ class AIReportService:
         system_prompt, user_prompt = _build_glm_prompts(
             [_compact_packet(item) for item in packet_by_symbol.values()]
         )
+        self._touch_runtime_if_running()
         try:
             raw = glm_client.chat_json(system_prompt=system_prompt, user_prompt=user_prompt)
             symbol_rows, portfolio_summary, parse_warnings = _parse_glm_output(
@@ -249,6 +270,7 @@ class AIReportService:
         try:
             payload = json.loads(self.source_report_path.read_text(encoding="utf-8"))
         except Exception:
+            logger.warning("failed to read source report path=%s", self.source_report_path, exc_info=True)
             return {}
         return payload if isinstance(payload, dict) else {}
 
@@ -259,6 +281,12 @@ class AIReportService:
         self.ai_report_path.write_text(serialized, encoding="utf-8")
         history_path = self.ai_history_dir / f"{report.run_id}.json"
         history_path.write_text(serialized, encoding="utf-8")
+        prune_history_files(
+            self.ai_history_dir,
+            max_files=self.ai_history_max_files,
+            max_age_days=self.ai_history_max_days,
+            logger=logger,
+        )
 
     def _write_runtime(self, payload: dict[str, Any]) -> None:
         self.ai_runtime_path.parent.mkdir(parents=True, exist_ok=True)
@@ -266,6 +294,21 @@ class AIReportService:
             json.dumps(payload, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
+
+    def _touch_runtime_if_running(self) -> None:
+        if not self.ai_runtime_path.exists():
+            return
+        try:
+            payload = json.loads(self.ai_runtime_path.read_text(encoding="utf-8"))
+        except Exception:
+            logger.warning("failed to parse runtime heartbeat path=%s", self.ai_runtime_path, exc_info=True)
+            return
+        if not isinstance(payload, dict):
+            return
+        if str(payload.get("status") or "").lower() != "running":
+            return
+        payload["updated_at"] = _now_iso()
+        self._write_runtime(payload)
 
     def _is_runtime_stale(self, payload: dict[str, Any]) -> bool:
         reference = str(payload.get("updated_at") or payload.get("started_at") or "").strip()
@@ -275,7 +318,21 @@ class AIReportService:
         if parsed is None:
             return True
         now = datetime.now(timezone.utc)
-        return (now - parsed).total_seconds() > float(self.running_ttl_sec)
+        return (now - parsed).total_seconds() > float(self._effective_running_ttl_sec())
+
+    def _effective_running_ttl_sec(self) -> int:
+        base_ttl = int(self.running_ttl_sec)
+        timeout_sec = _coerce_int_env("GLM_TIMEOUT_SEC", default=90, min_value=15, max_value=180)
+        max_retries = _coerce_int_env("GLM_MAX_RETRIES", default=2, min_value=0, max_value=4)
+
+        # chat_json() can invoke _post() up to two times (response_format 시도 + fallback).
+        retry_wait = 0.8 * (max_retries * (max_retries + 1) / 2)
+        single_post_worst = timeout_sec * (max_retries + 1) + retry_wait
+        glm_worst = single_post_worst * 2
+
+        # Add fixed buffer for evidence collection + serialization overhead.
+        adaptive_ttl = int(glm_worst + 180)
+        return max(base_ttl, adaptive_ttl)
 
     def _collect_evidence(
         self,
@@ -303,6 +360,7 @@ class AIReportService:
             yahoo_ok = True
         except Exception as exc:
             yahoo_error = f"YAHOO_FAIL:{symbol}:{exc}"
+            logger.warning("yahoo evidence fetch failed symbol=%s error=%s", symbol, exc)
 
         if not yahoo_ok:
             try:
@@ -310,6 +368,7 @@ class AIReportService:
                 stooq_ok = True
             except Exception as exc:
                 stooq_error = f"STOOQ_FAIL:{symbol}:{exc}"
+                logger.warning("stooq evidence fetch failed symbol=%s error=%s", symbol, exc)
 
         if not yahoo_ok and not stooq_ok:
             if yahoo_error:
@@ -341,6 +400,7 @@ class AIReportService:
                             }
                         )
                 except Exception as exc:
+                    logger.warning("fmp evidence fetch failed symbol=%s error=%s", symbol, exc)
                     warnings.append(f"FMP_FAIL:{symbol}:{exc}")
         return evidence
 
@@ -561,3 +621,14 @@ def _parse_iso_datetime(text: str) -> datetime | None:
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
+
+def _coerce_int_env(name: str, default: int, min_value: int, max_value: int) -> int:
+    raw = str(os.getenv(name) or "").strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    return max(min_value, min(max_value, value))

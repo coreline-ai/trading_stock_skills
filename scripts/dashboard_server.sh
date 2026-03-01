@@ -10,6 +10,11 @@ LOG_PATH="${LOG_PATH:-/tmp/trading_skills_${PORT}.log}"
 PID_PATH="${PID_PATH:-/tmp/trading_skills_${PORT}.pid}"
 HEALTH_URL="http://${HOST}:${PORT}/healthz"
 
+# Runtime output defaults (keeps tracked reports/ files clean during local server runs)
+SKILL_RUN_REPORT_V2_PATH="${SKILL_RUN_REPORT_V2_PATH:-${ROOT_DIR}/reports/runtime/latest_skill_runs_v2.runtime.json}"
+AI_REPORT_PATH="${AI_REPORT_PATH:-${ROOT_DIR}/reports/runtime/latest_ai_report.runtime.json}"
+AI_REPORT_RUNTIME_PATH="${AI_REPORT_RUNTIME_PATH:-${ROOT_DIR}/reports/runtime/ai_runtime.runtime.json}"
+
 PYTHON_BIN="${PYTHON_BIN:-python3.11}"
 if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1; then
   PYTHON_BIN="python3"
@@ -71,8 +76,14 @@ stop_server() {
 
 start_server() {
   cd "${ROOT_DIR}"
+  mkdir -p "${ROOT_DIR}/reports/runtime"
   : >"${LOG_PATH}"
-  nohup env PYTHONUNBUFFERED=1 "${PYTHON_BIN}" -m uvicorn trading_skills_engine.web.app:app --host "${HOST}" --port "${PORT}" >>"${LOG_PATH}" 2>&1 </dev/null &
+  nohup env \
+    PYTHONUNBUFFERED=1 \
+    SKILL_RUN_REPORT_V2_PATH="${SKILL_RUN_REPORT_V2_PATH}" \
+    AI_REPORT_PATH="${AI_REPORT_PATH}" \
+    AI_REPORT_RUNTIME_PATH="${AI_REPORT_RUNTIME_PATH}" \
+    "${PYTHON_BIN}" -m uvicorn trading_skills_engine.web.app:app --host "${HOST}" --port "${PORT}" >>"${LOG_PATH}" 2>&1 </dev/null &
   local pid=$!
   echo "${pid}" >"${PID_PATH}"
 

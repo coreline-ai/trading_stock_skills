@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 from datetime import date
@@ -12,6 +13,21 @@ from trading_skills_engine.data.fmp_calendar_client import FMPCalendarClient
 from trading_skills_engine.data.fmp_news_client import FMPNewsClient
 from trading_skills_engine.data.provider import MarketDataProvider
 from trading_skills_engine.data.rss_client import RSSClient
+from trading_skills_engine.core.history_retention import prune_history_files
+from trading_skills_engine.core.validators import parse_bool, parse_slug_list
+from trading_skills_engine.engine.pipeline.analyzer_stage import (
+    build_rank_rows as build_rank_rows_stage,
+    build_volatility_proxy as build_volatility_proxy_stage,
+    evaluate_symbol_for_analyzer as evaluate_symbol_for_analyzer_stage,
+)
+from trading_skills_engine.engine.pipeline.analyzer_policy import (
+    apply_policy_by_recommender,
+    build_post_analyzer_rows,
+    filter_symbols_by_policy,
+)
+from trading_skills_engine.engine.pipeline.recommender_stage import (
+    extract_ranked_symbols_for_recommender as extract_ranked_symbols_stage,
+)
 from trading_skills_engine.skills_v2.base import AnalyzerContext, not_implemented_result, unavailable_result
 from trading_skills_engine.skills_v2.contracts import (
     AnalysisTargetsV2,
@@ -33,6 +49,8 @@ from trading_skills_engine.skills_v2.contracts import (
 )
 from trading_skills_engine.skills_v2.registry import all_skill_slugs, get_analyzer
 from trading_skills_engine.skills_v2.traits import get_skill_trait
+
+logger = logging.getLogger(__name__)
 
 
 INVALID_SYMBOL_TOKENS = {
@@ -61,6 +79,16 @@ class SkillEngineOrchestratorV2:
         env_report_path = os.getenv("SKILL_RUN_REPORT_V2_PATH")
         self.report_path = report_path or (Path(env_report_path) if env_report_path else Path("reports/skill_runs/latest_skill_runs_v2.json"))
         self.history_dir = self.report_path.parent / "history_v2"
+        self.history_max_files = _coerce_non_negative_int(
+            os.getenv("SKILL_RUN_HISTORY_MAX_FILES"),
+            default=500,
+            max_value=20_000,
+        )
+        self.history_max_days = _coerce_non_negative_int(
+            os.getenv("SKILL_RUN_HISTORY_MAX_DAYS"),
+            default=0,
+            max_value=3650,
+        )
         self.cache_store = CacheStore(Path("reports/cache/v2"))
         self.market_provider = MarketDataProvider()
         self.fmp_calendar = FMPCalendarClient.from_env()
@@ -103,6 +131,7 @@ class SkillEngineOrchestratorV2:
             try:
                 result = analyzer.run(params=params, context=context)
             except Exception:
+                logger.exception("skill analyzer run failed slug=%s", slug)
                 result = unavailable_result(
                     skill_slug=slug,
                     summary_ko="스킬 실행 중 예외가 발생했습니다.",
@@ -150,6 +179,12 @@ class SkillEngineOrchestratorV2:
         self.history_dir.mkdir(parents=True, exist_ok=True)
         history_path = self.history_dir / f"{response.run_id}.json"
         history_path.write_text(response.model_dump_json(indent=2, ensure_ascii=False), encoding="utf-8")
+        prune_history_files(
+            self.history_dir,
+            max_files=self.history_max_files,
+            max_age_days=self.history_max_days,
+            logger=logger,
+        )
         return response
 
     def read_latest(self) -> dict[str, Any] | None:
@@ -158,6 +193,7 @@ class SkillEngineOrchestratorV2:
         try:
             return json.loads(self.report_path.read_text(encoding="utf-8"))
         except Exception:
+            logger.warning("failed to read latest v2 report path=%s", self.report_path, exc_info=True)
             return None
 
     @staticmethod
@@ -654,22 +690,18 @@ class SkillEngineOrchestratorV2:
             warnings.append("two-stage: analyzer 스킬이 없어 최종 결과는 빈 결과입니다.")
             dropped_by_stage.append("analyzer_skills_empty")
 
-        def _filter_target_symbols(target_group: str, policy: str) -> list[str]:
-            symbols = target_symbols.get(target_group, [])
-            if not symbols:
-                return []
-            if not analyzer_skills:
-                return []
-            accepted = {"PASS"} if policy == "all_pass" else {"PASS", "WATCH"}
-            filtered = set(symbols)
-            for analyzer_slug in analyzer_skills:
-                decision_map = analyzer_decisions_by_target_skill.get(target_group, {}).get(analyzer_slug, {})
-                accepted_symbols = {symbol for symbol in symbols if decision_map.get(symbol) in accepted}
-                filtered &= accepted_symbols
-            return sorted(filtered)
-
-        strict_intersection_symbols = _filter_target_symbols("intersection", analyzer_pass_policy)
-        strict_top10_symbols = _filter_target_symbols("top10", analyzer_pass_policy)
+        strict_intersection_symbols = filter_symbols_by_policy(
+            symbols=target_symbols.get("intersection", []),
+            analyzer_skills=analyzer_skills,
+            analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("intersection", {}),
+            analyzer_pass_policy=analyzer_pass_policy,
+        )
+        strict_top10_symbols = filter_symbols_by_policy(
+            symbols=target_symbols.get("top10", []),
+            analyzer_skills=analyzer_skills,
+            analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("top10", {}),
+            analyzer_pass_policy=analyzer_pass_policy,
+        )
         final_intersection_symbols = list(strict_intersection_symbols)
         final_top10_symbols = list(strict_top10_symbols)
         effective_policy = analyzer_pass_policy
@@ -682,8 +714,18 @@ class SkillEngineOrchestratorV2:
                 fallback_to_watch_on_empty
                 and analyzer_pass_policy == "all_pass"
             ):
-                watch_intersection_symbols = _filter_target_symbols("intersection", "pass_or_watch")
-                watch_top10_symbols = _filter_target_symbols("top10", "pass_or_watch")
+                watch_intersection_symbols = filter_symbols_by_policy(
+                    symbols=target_symbols.get("intersection", []),
+                    analyzer_skills=analyzer_skills,
+                    analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("intersection", {}),
+                    analyzer_pass_policy="pass_or_watch",
+                )
+                watch_top10_symbols = filter_symbols_by_policy(
+                    symbols=target_symbols.get("top10", []),
+                    analyzer_skills=analyzer_skills,
+                    analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("top10", {}),
+                    analyzer_pass_policy="pass_or_watch",
+                )
                 if watch_top10_symbols:
                     final_intersection_symbols = watch_intersection_symbols
                     final_top10_symbols = watch_top10_symbols
@@ -693,46 +735,48 @@ class SkillEngineOrchestratorV2:
                     )
                     dropped_by_stage.append("fallback_pass_or_watch_applied")
 
-        def _build_rank_rows(symbols: list[str], target_group: str) -> list[dict[str, Any]]:
-            volatility_proxy = SkillEngineOrchestratorV2._build_volatility_proxy(results)
-            rows: list[dict[str, Any]] = []
-            for symbol in symbols:
-                support_count = support_count_all.get(symbol, 0)
-                score_map = analyzer_scores_by_target_symbol.get(target_group, {}).get(symbol, {})
-                analyzer_scores = list(score_map.values())
-                analyzer_avg = sum(analyzer_scores) / len(analyzer_scores) if analyzer_scores else 0.0
-                volatility = float(volatility_proxy.get(symbol, 35.0))
-                final_score = support_count * 20.0 + analyzer_avg * 0.8 - volatility * 0.3
-                rows.append(
-                    {
-                        "symbol": symbol,
-                        "support_count": support_count,
-                        "analyzer_avg_score": round(analyzer_avg, 2),
-                        "volatility_proxy": round(volatility, 2),
-                        "final_score": round(final_score, 2),
-                    }
-                )
-            rows.sort(
-                key=lambda row: (
-                    -float(row.get("final_score", 0.0)),
-                    -float(row.get("analyzer_avg_score", 0.0)),
-                    -int(row.get("support_count", 0)),
-                    float(row.get("volatility_proxy", 999.0)),
-                    str(row.get("symbol", "")),
-                )
-            )
-            return rows
-
-        intersection_ranking_rows = _build_rank_rows(final_intersection_symbols, "intersection")
-        top10_ranking_rows = _build_rank_rows(final_top10_symbols, "top10")
+        intersection_ranking_rows = SkillEngineOrchestratorV2._build_rank_rows(
+            symbols=final_intersection_symbols,
+            target_group="intersection",
+            results=results,
+            support_count_all=support_count_all,
+            analyzer_scores_by_target_symbol=analyzer_scores_by_target_symbol,
+        )
+        top10_ranking_rows = SkillEngineOrchestratorV2._build_rank_rows(
+            symbols=final_top10_symbols,
+            target_group="top10",
+            results=results,
+            support_count_all=support_count_all,
+            analyzer_scores_by_target_symbol=analyzer_scores_by_target_symbol,
+        )
         top5_from_top10 = top10_ranking_rows[:5]
 
         comparison: dict[str, Any] = {}
         if comparison_mode:
-            strict_intersection = _filter_target_symbols("intersection", "all_pass")
-            strict_top10 = _filter_target_symbols("top10", "all_pass")
-            watch_intersection = _filter_target_symbols("intersection", "pass_or_watch")
-            watch_top10 = _filter_target_symbols("top10", "pass_or_watch")
+            strict_intersection = filter_symbols_by_policy(
+                symbols=target_symbols.get("intersection", []),
+                analyzer_skills=analyzer_skills,
+                analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("intersection", {}),
+                analyzer_pass_policy="all_pass",
+            )
+            strict_top10 = filter_symbols_by_policy(
+                symbols=target_symbols.get("top10", []),
+                analyzer_skills=analyzer_skills,
+                analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("top10", {}),
+                analyzer_pass_policy="all_pass",
+            )
+            watch_intersection = filter_symbols_by_policy(
+                symbols=target_symbols.get("intersection", []),
+                analyzer_skills=analyzer_skills,
+                analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("intersection", {}),
+                analyzer_pass_policy="pass_or_watch",
+            )
+            watch_top10 = filter_symbols_by_policy(
+                symbols=target_symbols.get("top10", []),
+                analyzer_skills=analyzer_skills,
+                analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("top10", {}),
+                analyzer_pass_policy="pass_or_watch",
+            )
             comparison = {
                 "enabled": True,
                 "strict_all_pass": {
@@ -754,17 +798,33 @@ class SkillEngineOrchestratorV2:
                 "watch_only_delta": sorted(set(watch_top10) - set(strict_top10)),
             }
 
-        post_analyzer_by_recommender: list[dict[str, Any]] = []
-        final_top10_set = set(final_top10_symbols)
-        for output in recommender_outputs:
-            filtered_symbols = [row.symbol for row in output.symbols if row.symbol in final_top10_set]
-            post_analyzer_by_recommender.append(
-                {
-                    "recommender_skill": output.skill_slug,
-                    "symbols": filtered_symbols,
-                    "count": len(filtered_symbols),
+        symbols_by_recommender = {
+            output.skill_slug: [row.symbol for row in output.symbols]
+            for output in recommender_outputs
+        }
+        analyzer_decisions_top10_by_recommender: dict[str, dict[str, dict[str, str]]] = {}
+        for analyzer_slug in analyzer_skills:
+            symbol_decisions = analyzer_decisions_by_target_skill.get("top10", {}).get(analyzer_slug, {})
+            decision_by_recommender: dict[str, dict[str, str]] = {}
+            for recommender_slug, symbols in symbols_by_recommender.items():
+                decision_by_recommender[recommender_slug] = {
+                    symbol: str(symbol_decisions.get(symbol) or "REJECT")
+                    for symbol in symbols
                 }
-            )
+            analyzer_decisions_top10_by_recommender[analyzer_slug] = decision_by_recommender
+
+        filtered_sets_by_recommender, _ = apply_policy_by_recommender(
+            symbols_by_recommender=symbols_by_recommender,
+            analyzer_skills=analyzer_skills,
+            analyzer_decisions_by_skill=analyzer_decisions_top10_by_recommender,
+            analyzer_pass_policy=effective_policy,
+            recommender_order=[output.skill_slug for output in recommender_outputs],
+        )
+        post_analyzer_by_recommender = build_post_analyzer_rows(
+            filtered_sets_by_recommender=filtered_sets_by_recommender,
+            final_symbols=final_top10_symbols,
+            recommender_order=[output.skill_slug for output in recommender_outputs],
+        )
 
         analyzer_policy_label = "all-pass" if effective_policy == "all_pass" else "pass-or-watch"
         top_picks = [
@@ -841,134 +901,13 @@ class SkillEngineOrchestratorV2:
         result: SkillRunResultV2,
         top_n: int,
     ) -> list[tuple[str, float, str]]:
-        payload = result.analysis_payload if isinstance(result.analysis_payload, dict) else {}
-        ranked: dict[str, tuple[float, str]] = {}
-
-        def _put(raw_symbol: Any, raw_score: Any, reason: str) -> None:
-            symbol = _sanitize_symbol(raw_symbol)
-            if not symbol:
-                return
-            score = _to_float(raw_score, 0.0)
-            current = ranked.get(symbol)
-            if current is None or score > current[0]:
-                ranked[symbol] = (score, reason)
-
-        _put(payload.get("ticker"), result.score_0_100 or 55.0, "ticker")
-
-        for idx, row in enumerate(payload.get("top_candidates", [])[: top_n * 3]):
-            if not isinstance(row, dict):
-                continue
-            if row.get("composite_score") is not None:
-                score = _to_float(row.get("composite_score"), 0.0)
-                reason = "top_candidates"
-            elif row.get("score") is not None:
-                score = _to_float(row.get("score"), 0.0)
-                reason = "top_candidates_score"
-            else:
-                ai = max(0.0, min(1.0, _to_float(row.get("ai_factor"), 0.5)))
-                momentum = max(-15.0, min(20.0, _to_float(row.get("momentum_20d"), 0.0)))
-                daily = max(-12.0, min(12.0, _to_float(row.get("daily_return_pct"), 0.0)))
-                # Avoid synthetic fixed ladder (80,79,...) when upstream score fields are missing.
-                score = 45.0 + ai * 30.0 + momentum * 1.4 + daily * 1.1 - idx * 0.3
-                reason = "top_candidates_derived"
-            _put(row.get("symbol"), max(0.0, min(100.0, score)), reason)
-
-        for idx, row in enumerate(payload.get("leaders", [])[: top_n * 3]):
-            if not isinstance(row, dict):
-                continue
-            if row.get("score") is not None:
-                score = _to_float(row.get("score"), 0.0)
-                reason = "leaders_score"
-            else:
-                ai = max(0.0, min(1.0, _to_float(row.get("ai_factor"), 0.5)))
-                momentum = max(-15.0, min(20.0, _to_float(row.get("momentum_20d"), 0.0)))
-                daily = max(-12.0, min(12.0, _to_float(row.get("daily_return_pct"), 0.0)))
-                score = 42.0 + ai * 28.0 + momentum * 1.3 + daily * 1.0 - idx * 0.35
-                reason = "leaders_derived"
-            _put(row.get("symbol"), max(0.0, min(100.0, score)), reason)
-
-        for idx, row in enumerate(payload.get("targets", [])[: top_n * 3]):
-            if not isinstance(row, dict):
-                continue
-            weight = max(0.0, min(100.0, _to_float(row.get("target_weight_pct"), 0.0)))
-            ai = max(0.0, min(1.0, _to_float(row.get("ai_factor"), 0.5)))
-            momentum = max(-15.0, min(20.0, _to_float(row.get("momentum_20d"), 0.0)))
-            score = 38.0 + weight * 0.7 + ai * 12.0 + momentum * 0.6 - idx * 0.25
-            _put(row.get("symbol"), max(0.0, min(100.0, score)), "targets")
-
-        for idx, row in enumerate(payload.get("candidates", [])[: top_n * 3]):
-            if not isinstance(row, dict):
-                continue
-            if row.get("setup_score") is not None:
-                score = _to_float(row.get("setup_score"), 0.0)
-                reason = "candidates_setup"
-            elif row.get("score") is not None:
-                score = _to_float(row.get("score"), 0.0)
-                reason = "candidates_score"
-            else:
-                ai = max(0.0, min(1.0, _to_float(row.get("ai_factor"), 0.5)))
-                momentum = max(-15.0, min(20.0, _to_float(row.get("momentum_20d"), 0.0)))
-                daily = max(-12.0, min(12.0, _to_float(row.get("daily_return_pct"), 0.0)))
-                score = 41.0 + ai * 24.0 + momentum * 1.2 + daily * 0.9 - idx * 0.3
-                reason = "candidates_derived"
-            _put(row.get("symbol") or row.get("ticker"), max(0.0, min(100.0, score)), reason)
-
-        for idx, row in enumerate(payload.get("earnings", [])[: top_n * 3]):
-            if not isinstance(row, dict):
-                continue
-            market_cap = _to_float(row.get("market_cap"), 0.0)
-            _put(row.get("ticker"), min(100.0, 35.0 + market_cap / 50_000_000_000), "earnings")
-
-        for idx, row in enumerate(payload.get("ranked_events", [])[: top_n * 3]):
-            if not isinstance(row, dict):
-                continue
-            impact = _to_float(row.get("impact_score"), 0.0)
-            for related in row.get("related_tickers", [])[:3]:
-                _put(related, min(100.0, 45.0 + impact * 12.0 - idx * 0.5), "ranked_events")
-
-        for idx, symbol in enumerate(_extract_symbols_from_payload(payload)[: top_n * 3]):
-            sanitized = _sanitize_symbol(symbol)
-            if not sanitized:
-                continue
-            # payload_extract is a low-priority backfill and must not overwrite
-            # richer sources like top_candidates/earnings/ranked_events.
-            if sanitized in ranked:
-                continue
-            _put(sanitized, max(0.0, 38.0 - idx), "payload_extract")
-
-        sorted_rows = sorted(ranked.items(), key=lambda item: item[1][0], reverse=True)[:top_n]
-        return [(symbol, score_reason[0], score_reason[1]) for symbol, score_reason in sorted_rows]
-
-    @staticmethod
-    def _apply_analyzer_policy(
-        symbols_by_recommender: dict[str, list[str]],
-        analyzer_skills: list[str],
-        analyzer_decisions_by_skill: dict[str, dict[str, dict[str, str]]],
-        analyzer_pass_policy: str,
-        recommender_skills: list[str],
-    ) -> tuple[dict[str, set[str]], list[str]]:
-        accepted_decisions = {"PASS"} if analyzer_pass_policy == "all_pass" else {"PASS", "WATCH"}
-        filtered_sets: dict[str, set[str]] = {}
-        for recommender_slug, symbols in symbols_by_recommender.items():
-            filtered = set(symbols)
-            for analyzer_slug in analyzer_skills:
-                decision_map = analyzer_decisions_by_skill.get(analyzer_slug, {}).get(recommender_slug, {})
-                accepted_symbols = {
-                    symbol for symbol in symbols if decision_map.get(symbol) in accepted_decisions
-                }
-                filtered &= accepted_symbols
-            filtered_sets[recommender_slug] = filtered
-
-        if len(recommender_skills) >= 2:
-            intersection_set = set(filtered_sets.get(recommender_skills[0], set()))
-            for slug in recommender_skills[1:]:
-                intersection_set &= set(filtered_sets.get(slug, set()))
-            final_symbols = sorted(intersection_set)
-        elif len(recommender_skills) == 1:
-            final_symbols = sorted(filtered_sets.get(recommender_skills[0], set()))
-        else:
-            final_symbols = []
-        return filtered_sets, final_symbols
+        return extract_ranked_symbols_stage(
+            result=result,
+            top_n=top_n,
+            sanitize_symbol=_sanitize_symbol,
+            to_float=_to_float,
+            extract_symbols_from_payload=_extract_symbols_from_payload,
+        )
 
     @staticmethod
     def _evaluate_symbol_for_analyzer(
@@ -978,121 +917,42 @@ class SkillEngineOrchestratorV2:
         target_group: str | None = None,
         symbol_strength_0_100: float | None = None,
     ) -> AnalyzerEvaluationV2:
-        del symbol_strength_0_100
-        payload = result.analysis_payload if isinstance(result.analysis_payload, dict) else {}
-        matched_symbols = set(_extract_symbols_from_payload(payload))
-        candidate_rows = payload.get("top_candidates")
-        candidate_rows = candidate_rows if isinstance(candidate_rows, list) else []
-        candidate_rank: dict[str, int] = {}
-        candidate_ai: dict[str, float] = {}
-        candidate_momentum: dict[str, float] = {}
-        for idx, row in enumerate(candidate_rows[:50]):
-            if not isinstance(row, dict):
-                continue
-            row_symbol = _sanitize_symbol(row.get("symbol"))
-            if not row_symbol:
-                continue
-            if row_symbol not in candidate_rank:
-                candidate_rank[row_symbol] = idx
-            candidate_ai[row_symbol] = _to_float(row.get("ai_factor"), 0.5)
-            candidate_momentum[row_symbol] = _to_float(row.get("momentum_20d"), 0.0)
-
-        has_payload_symbol_signals = (
-            symbol in matched_symbols
-            or symbol in candidate_rank
-            or symbol in candidate_ai
-            or symbol in candidate_momentum
-        )
-        style = ""
-        if (trait := get_skill_trait(result.skill_slug)) is not None:
-            style = trait.style
-        style_weights = _analyzer_style_weights(style)
-        base_score = _to_float(result.score_0_100, 50.0)
-        confidence = _to_float(result.confidence_0_1, 0.5)
-        # Macro/event analyzers often have no symbol-level payload; avoid uniform hard penalty.
-        match_bonus = (10.0 if symbol in matched_symbols else -10.0) if has_payload_symbol_signals else 0.0
-
-        rank_idx = candidate_rank.get(symbol)
-        if rank_idx is None:
-            rank_score = 0.0
-        else:
-            # Earlier rank in top_candidates gets higher contribution.
-            rank_score = max(0.0, 16.0 - float(rank_idx) * 2.0)
-        ai_score = max(0.0, min(1.0, candidate_ai.get(symbol, 0.5))) * 10.0
-        momentum = max(-12.0, min(12.0, candidate_momentum.get(symbol, 0.0)))
-        momentum_score = momentum * 0.4
-        score = (
-            base_score * 0.42 * style_weights["base"]
-            + confidence * 100.0 * 0.18 * style_weights["confidence"]
-            + match_bonus * style_weights["match"]
-            + rank_score * style_weights["rank"]
-            + ai_score * style_weights["ai"]
-            + momentum_score * style_weights["momentum"]
-        )
-        score = max(0.0, min(100.0, score))
-
-        reasons: list[str] = [
-            f"base {base_score:.1f}",
-            f"confidence {confidence:.2f}",
-            (
-                "symbol matched"
-                if symbol in matched_symbols
-                else ("symbol not matched" if has_payload_symbol_signals else "symbol_signal absent")
-            ),
-            f"rank_bonus {rank_score:.1f}" if rank_idx is not None else "rank_bonus 0.0",
-            f"ai_factor {candidate_ai.get(symbol, 0.5):.2f}",
-            f"momentum_20d {candidate_momentum.get(symbol, 0.0):.2f}",
-        ]
-        if style:
-            reasons.append(f"style {style}")
-            reasons.append(
-                f"style_weights rank {style_weights['rank']:.2f} ai {style_weights['ai']:.2f} momentum {style_weights['momentum']:.2f}"
-            )
-        risk_flags: list[str] = []
-        if base_score < 40.0:
-            risk_flags.append("low_skill_score")
-        if confidence < 0.45:
-            risk_flags.append("low_confidence")
-        if not has_payload_symbol_signals:
-            risk_flags.append("symbol_signal_absent")
-
-        if score >= 65.0:
-            decision = "PASS"
-        elif score >= 45.0:
-            decision = "WATCH"
-        else:
-            decision = "REJECT"
-
-        return AnalyzerEvaluationV2(
+        return evaluate_symbol_for_analyzer_stage(
             symbol=symbol,
+            result=result,
+            get_skill_trait=get_skill_trait,
+            sanitize_symbol=_sanitize_symbol,
+            to_float=_to_float,
+            extract_symbols_from_payload=_extract_symbols_from_payload,
             source_recommender=source_recommender,
-            target_group=(str(target_group) if target_group in {"intersection", "top10"} else None),
-            decision=decision,
-            score=round(score, 2),
-            reasons=reasons,
-            risk_flags=risk_flags,
+            target_group=target_group,
+            symbol_strength_0_100=symbol_strength_0_100,
         )
 
     @staticmethod
     def _build_volatility_proxy(results: list[SkillRunResultV2]) -> dict[str, float]:
-        values: dict[str, list[float]] = {}
-        for result in results:
-            payload = result.analysis_payload if isinstance(result.analysis_payload, dict) else {}
-            for row in payload.get("top_candidates", [])[:30]:
-                if not isinstance(row, dict):
-                    continue
-                symbol = _sanitize_symbol(row.get("symbol"))
-                if not symbol:
-                    continue
-                vol = abs(_to_float(row.get("daily_return_pct"), 2.5))
-                values.setdefault(symbol, []).append(vol)
+        return build_volatility_proxy_stage(
+            results=results,
+            sanitize_symbol=_sanitize_symbol,
+            to_float=_to_float,
+        )
 
-        proxy: dict[str, float] = {}
-        for symbol, nums in values.items():
-            if not nums:
-                continue
-            proxy[symbol] = sum(nums) / len(nums)
-        return proxy
+    @staticmethod
+    def _build_rank_rows(
+        symbols: list[str],
+        target_group: str,
+        results: list[SkillRunResultV2],
+        support_count_all: dict[str, int],
+        analyzer_scores_by_target_symbol: dict[str, dict[str, dict[str, float]]],
+    ) -> list[dict[str, Any]]:
+        volatility_proxy = SkillEngineOrchestratorV2._build_volatility_proxy(results)
+        return build_rank_rows_stage(
+            symbols=symbols,
+            target_group=target_group,
+            support_count_all=support_count_all,
+            analyzer_scores_by_target_symbol=analyzer_scores_by_target_symbol,
+            volatility_proxy=volatility_proxy,
+        )
 
     @staticmethod
     def _pick_primary_skill(
@@ -1183,35 +1043,15 @@ def _max_state(current: str, incoming: str) -> str:
     return incoming if order.get(incoming, 0) > order.get(current, 0) else current
 
 
-def _analyzer_style_weights(style: str) -> dict[str, float]:
-    key = str(style or "").strip().lower()
-    presets: dict[str, dict[str, float]] = {
-        # 환경/자산배분 성격: 모멘텀보다는 안정성/컨텍스트 가중
-        "cross_asset_regime": {
-            "base": 1.08,
-            "confidence": 1.12,
-            "match": 1.0,
-            "rank": 0.78,
-            "ai": 0.86,
-            "momentum": 0.35,
-        },
-        # 매크로 레짐 성격: 추세/랭크 기여를 더 반영
-        "macro_regime": {
-            "base": 1.0,
-            "confidence": 1.0,
-            "match": 1.0,
-            "rank": 1.08,
-            "ai": 1.0,
-            "momentum": 0.82,
-        },
-    }
-    base = {"base": 1.0, "confidence": 1.0, "match": 1.0, "rank": 1.0, "ai": 1.0, "momentum": 1.0}
-    selected = presets.get(key)
-    if not selected:
-        return base
-    merged = dict(base)
-    merged.update(selected)
-    return merged
+def _coerce_non_negative_int(raw: str | None, default: int, max_value: int) -> int:
+    text = str(raw or "").strip()
+    if not text:
+        return default
+    try:
+        parsed = int(text)
+    except ValueError:
+        return default
+    return max(0, min(max_value, parsed))
 
 
 def _sanitize_selected_skills(raw_slugs: list[str]) -> list[str]:
@@ -1252,24 +1092,7 @@ def _sanitize_top_picks_limit(value: int) -> int:
 
 
 def _sanitize_slugs(value: Any) -> list[str]:
-    if isinstance(value, str):
-        raw = re.split(r"[\s,]+", value)
-    elif isinstance(value, list):
-        raw = [str(item) for item in value]
-    else:
-        raw = []
-
-    parsed: list[str] = []
-    for item in raw[:100]:
-        slug = str(item).strip()
-        if not slug or slug in parsed:
-            continue
-        if len(slug) > 80:
-            continue
-        if re.fullmatch(r"[a-z0-9\-]+", slug) is None:
-            continue
-        parsed.append(slug)
-    return parsed
+    return parse_slug_list(value, max_items=100, max_len=80)
 
 
 def _sanitize_min_confirm_votes(value: Any) -> int:
@@ -1296,14 +1119,7 @@ def _sanitize_analyzer_pass_policy(value: Any) -> str:
 
 
 def _to_bool(value: Any, default: bool = False) -> bool:
-    if isinstance(value, bool):
-        return value
-    text = str(value or "").strip().lower()
-    if text in {"1", "true", "yes", "on"}:
-        return True
-    if text in {"0", "false", "no", "off"}:
-        return False
-    return default
+    return parse_bool(value, default=default)
 
 
 def _to_float(value: Any, default: float) -> float:

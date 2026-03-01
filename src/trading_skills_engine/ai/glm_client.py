@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import time
 from dataclasses import dataclass
 from typing import Any
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+
+import httpx
 
 from trading_skills_engine.config.env import ensure_project_env_loaded
+
+logger = logging.getLogger(__name__)
 
 
 class GLMClientError(RuntimeError):
@@ -81,46 +84,49 @@ class GLMClient:
 
     def _post(self, payload: dict[str, Any]) -> dict[str, Any]:
         url = f"{self.base_url.rstrip('/')}/chat/completions"
-        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        req = Request(
-            url,
-            data=body,
-            headers={
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-                "User-Agent": "trading-skills-engine/2.0",
-            },
-            method="POST",
-        )
-        for attempt in range(self.max_retries + 1):
-            try:
-                with urlopen(req, timeout=self.timeout_sec) as response:
-                    raw = response.read().decode("utf-8")
-                    parsed = json.loads(raw)
-                if not isinstance(parsed, dict):
-                    raise GLMClientError("GLM_RESPONSE_NOT_OBJECT")
-                return parsed
-            except TimeoutError as exc:
-                if attempt < self.max_retries:
-                    time.sleep(0.8 * (attempt + 1))
-                    continue
-                raise GLMClientError("GLM_TIMEOUT") from exc
-            except HTTPError as exc:
-                if exc.code in {408, 429, 500, 502, 503, 504} and attempt < self.max_retries:
-                    time.sleep(0.8 * (attempt + 1))
-                    continue
-                raise GLMClientError(f"GLM_HTTP_{exc.code}") from exc
-            except URLError as exc:
-                if attempt < self.max_retries:
-                    time.sleep(0.8 * (attempt + 1))
-                    continue
-                raise GLMClientError("GLM_NETWORK_ERROR") from exc
-            except json.JSONDecodeError as exc:
-                raise GLMClientError("GLM_RESPONSE_NOT_JSON") from exc
-            except GLMClientError:
-                raise
-            except Exception as exc:
-                raise GLMClientError("GLM_RESPONSE_PARSE_ERROR") from exc
+        retryable_statuses = {408, 429, 500, 502, 503, 504}
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "User-Agent": "trading-skills-engine/2.0",
+        }
+        timeout = httpx.Timeout(timeout=float(self.timeout_sec))
+
+        with httpx.Client(timeout=timeout, headers=headers) as client:
+            for attempt in range(self.max_retries + 1):
+                try:
+                    response = client.post(url, json=payload)
+                    if response.status_code in retryable_statuses and attempt < self.max_retries:
+                        time.sleep(0.8 * (attempt + 1))
+                        continue
+                    response.raise_for_status()
+                    parsed = response.json()
+                    if not isinstance(parsed, dict):
+                        raise GLMClientError("GLM_RESPONSE_NOT_OBJECT")
+                    return parsed
+                except httpx.TimeoutException as exc:
+                    if attempt < self.max_retries:
+                        time.sleep(0.8 * (attempt + 1))
+                        continue
+                    raise GLMClientError("GLM_TIMEOUT") from exc
+                except httpx.HTTPStatusError as exc:
+                    status_code = int(exc.response.status_code)
+                    if status_code in retryable_statuses and attempt < self.max_retries:
+                        time.sleep(0.8 * (attempt + 1))
+                        continue
+                    raise GLMClientError(f"GLM_HTTP_{status_code}") from exc
+                except httpx.RequestError as exc:
+                    if attempt < self.max_retries:
+                        time.sleep(0.8 * (attempt + 1))
+                        continue
+                    raise GLMClientError("GLM_NETWORK_ERROR") from exc
+                except ValueError as exc:
+                    raise GLMClientError("GLM_RESPONSE_NOT_JSON") from exc
+                except GLMClientError:
+                    raise
+                except Exception as exc:
+                    logger.warning("glm response parse failed on attempt=%s", attempt + 1, exc_info=True)
+                    raise GLMClientError("GLM_RESPONSE_PARSE_ERROR") from exc
         raise GLMClientError("GLM_NETWORK_ERROR")
 
 

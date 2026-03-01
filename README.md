@@ -83,6 +83,11 @@ scripts/dashboard_watchdog.sh start
 scripts/dashboard_watchdog.sh status
 ```
 
+참고:
+- `dashboard_server.sh` 기본 실행은 런타임 산출물을 `reports/runtime/*.runtime.json`에 저장합니다.
+- 깃 추적 중인 `reports/skill_runs/latest_*.json`, `reports/ai/latest_ai_report.json` 파일 오염을 줄이기 위한 기본 동작입니다.
+- 기존 경로를 유지하려면 실행 시 `SKILL_RUN_REPORT_V2_PATH`, `AI_REPORT_PATH`, `AI_REPORT_RUNTIME_PATH`를 직접 지정하세요.
+
 접속:
 - `http://127.0.0.1:8001/dashboard`
 - `http://127.0.0.1:8001/healthz`
@@ -278,14 +283,23 @@ EOF
 | `GLM_MODEL` | `glm-4.5` | GLM 모델명 |
 | `GLM_TIMEOUT_SEC` | `90` | GLM 호출 타임아웃(초, 최소 15 / 최대 180) |
 | `GLM_MAX_RETRIES` | `2` | GLM 타임아웃/일시적 네트워크 오류 재시도 횟수 (최대 4) |
+| `TRADING_SKILLS_LOG_LEVEL` | `INFO` | 애플리케이션 로그 레벨 (`DEBUG/INFO/WARNING/ERROR`) |
 | `TRADING_SKILLS_ENV_FILE` | `.env` | 환경 파일 경로 오버라이드 |
 | `TRADING_SKILLS_DISABLE_DOTENV` | `0` | `.env` 자동 로드 비활성화 (`1`이면 비활성) |
 | `SKILL_RUN_REPORT_V2_PATH` | `reports/skill_runs/latest_skill_runs_v2.json` | v2 최신 리포트 경로 |
+| `SKILL_RUN_HISTORY_MAX_FILES` | `500` | v2 history 보관 최대 파일 수 (`0`이면 개수 제한 비활성) |
+| `SKILL_RUN_HISTORY_MAX_DAYS` | `0` | v2 history 보관 일수 (`0`이면 기간 제한 비활성) |
 | `FMP_RUNTIME_SETTINGS_PATH` | `reports/runtime/fmp_settings.json` | FMP 런타임 설정 경로 |
 | `FMP_USAGE_PATH` | `reports/runtime/fmp_usage.json` | FMP 호출 사용량 경로 |
 | `AI_REPORT_PATH` | `reports/ai/latest_ai_report.json` | AI 최신 리포트 경로 |
 | `AI_REPORT_RUNTIME_PATH` | `reports/ai/runtime.json` | AI 실행 상태 경로 |
 | `AI_REPORT_RUNNING_TTL_SEC` | `600` | `running` 상태 stale 자동 복구 기준(초, 기본 10분) |
+| `AI_REPORT_HISTORY_MAX_FILES` | `500` | AI history 보관 최대 파일 수 (`0`이면 개수 제한 비활성) |
+| `AI_REPORT_HISTORY_MAX_DAYS` | `0` | AI history 보관 일수 (`0`이면 기간 제한 비활성) |
+
+`.env` 파서 제한 사항:
+- 현재 내장 파서는 기본 `KEY=VALUE`만 지원합니다.
+- 멀티라인 값, `${VAR}` 확장, 복잡한 escape 시퀀스는 지원하지 않습니다.
 
 ## 상태 배지 해석
 대시보드 헤더의 상태 배지는 아래 의미를 가집니다.
@@ -336,14 +350,16 @@ tail -f /tmp/trading_skills_watchdog_8001.log
 
 ### `AI 최종 리포트 생성` 클릭 후 반응이 없거나 실패
 1. `GLM_API_KEY` 설정 여부 확인
-2. `reports/ai/runtime.json`에서 상태(`running/failed`) 확인
+2. `AI_REPORT_RUNTIME_PATH` 경로의 상태 파일에서 `status(running/failed)` 확인  
+   (`dashboard_server.sh` 기본 실행 시: `reports/runtime/ai_runtime.runtime.json`)
 3. `GET /api/v2/ai-report/latest`로 최신 실패 코드 확인
 4. `GLM_TIMEOUT_SEC` 값을 늘리고(`90`~`120` 권장), `GLM_MAX_RETRIES=2` 이상으로 재시도
 5. 여전히 실패하면 FMP 토글/네트워크 상태를 점검하고 다시 실행
 
 ### `AI 리포트 생성 진행 중` 상태가 오래 유지될 때
 - 기본적으로 `running` 상태가 10분(`AI_REPORT_RUNNING_TTL_SEC`) 이상 갱신되지 않으면 자동으로 stale 처리되어 재실행 가능 상태로 전환됩니다.
-- 즉시 초기화가 필요하면 `reports/ai/runtime.json` 파일을 삭제한 뒤 다시 실행합니다.
+- 즉시 초기화가 필요하면 `AI_REPORT_RUNTIME_PATH` 파일을 삭제한 뒤 다시 실행합니다.  
+  (`dashboard_server.sh` 기본 실행 시: `reports/runtime/ai_runtime.runtime.json`)
 
 ## 레거시(v1) 엔드포인트
 호환을 위해 v1 API도 유지합니다.
