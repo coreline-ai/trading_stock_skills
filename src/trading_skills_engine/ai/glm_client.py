@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from dataclasses import dataclass
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -19,7 +20,8 @@ class GLMClient:
     api_key: str
     base_url: str = "https://open.bigmodel.cn/api/paas/v4"
     model: str = "glm-4.5"
-    timeout_sec: int = 20
+    timeout_sec: int = 90
+    max_retries: int = 2
 
     @classmethod
     def from_env(cls) -> "GLMClient | None":
@@ -29,12 +31,23 @@ class GLMClient:
             return None
         base_url = str(os.getenv("GLM_BASE_URL") or "https://open.bigmodel.cn/api/paas/v4").strip()
         model = str(os.getenv("GLM_MODEL") or "glm-4.5").strip()
-        timeout_raw = str(os.getenv("GLM_TIMEOUT_SEC") or "20").strip()
+        timeout_raw = str(os.getenv("GLM_TIMEOUT_SEC") or "90").strip()
+        retries_raw = str(os.getenv("GLM_MAX_RETRIES") or "2").strip()
         try:
-            timeout_sec = max(5, min(60, int(timeout_raw)))
+            timeout_sec = max(15, min(180, int(timeout_raw)))
         except ValueError:
-            timeout_sec = 20
-        return cls(api_key=api_key, base_url=base_url, model=model, timeout_sec=timeout_sec)
+            timeout_sec = 90
+        try:
+            max_retries = max(0, min(4, int(retries_raw)))
+        except ValueError:
+            max_retries = 2
+        return cls(
+            api_key=api_key,
+            base_url=base_url,
+            model=model,
+            timeout_sec=timeout_sec,
+            max_retries=max_retries,
+        )
 
     def chat_json(self, system_prompt: str, user_prompt: str) -> dict[str, Any]:
         payload = {
@@ -79,23 +92,36 @@ class GLMClient:
             },
             method="POST",
         )
-        try:
-            with urlopen(req, timeout=self.timeout_sec) as response:
-                raw = response.read().decode("utf-8")
-                parsed = json.loads(raw)
-        except TimeoutError as exc:
-            raise GLMClientError("GLM_TIMEOUT") from exc
-        except HTTPError as exc:
-            raise GLMClientError(f"GLM_HTTP_{exc.code}") from exc
-        except URLError as exc:
-            raise GLMClientError("GLM_NETWORK_ERROR") from exc
-        except json.JSONDecodeError as exc:
-            raise GLMClientError("GLM_RESPONSE_NOT_JSON") from exc
-        except Exception as exc:
-            raise GLMClientError("GLM_RESPONSE_PARSE_ERROR") from exc
-        if not isinstance(parsed, dict):
-            raise GLMClientError("GLM_RESPONSE_NOT_OBJECT")
-        return parsed
+        for attempt in range(self.max_retries + 1):
+            try:
+                with urlopen(req, timeout=self.timeout_sec) as response:
+                    raw = response.read().decode("utf-8")
+                    parsed = json.loads(raw)
+                if not isinstance(parsed, dict):
+                    raise GLMClientError("GLM_RESPONSE_NOT_OBJECT")
+                return parsed
+            except TimeoutError as exc:
+                if attempt < self.max_retries:
+                    time.sleep(0.8 * (attempt + 1))
+                    continue
+                raise GLMClientError("GLM_TIMEOUT") from exc
+            except HTTPError as exc:
+                if exc.code in {408, 429, 500, 502, 503, 504} and attempt < self.max_retries:
+                    time.sleep(0.8 * (attempt + 1))
+                    continue
+                raise GLMClientError(f"GLM_HTTP_{exc.code}") from exc
+            except URLError as exc:
+                if attempt < self.max_retries:
+                    time.sleep(0.8 * (attempt + 1))
+                    continue
+                raise GLMClientError("GLM_NETWORK_ERROR") from exc
+            except json.JSONDecodeError as exc:
+                raise GLMClientError("GLM_RESPONSE_NOT_JSON") from exc
+            except GLMClientError:
+                raise
+            except Exception as exc:
+                raise GLMClientError("GLM_RESPONSE_PARSE_ERROR") from exc
+        raise GLMClientError("GLM_NETWORK_ERROR")
 
 
 def _extract_content(payload: Any) -> str:

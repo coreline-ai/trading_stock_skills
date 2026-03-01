@@ -78,3 +78,41 @@ def test_glm_chat_json_raises_on_http_error(monkeypatch):
         client.chat_json(system_prompt="sys", user_prompt="user")
     assert "GLM_HTTP_401" in str(exc.value)
 
+
+def test_glm_chat_json_retries_on_timeout_then_succeeds(monkeypatch):
+    payload = {
+        "choices": [
+            {
+                "message": {
+                    "content": json.dumps({"portfolio_summary_ko": "ok", "symbols": []}, ensure_ascii=False)
+                }
+            }
+        ]
+    }
+    calls = {"count": 0}
+
+    def _flaky(req, timeout=20):  # noqa: ARG001
+        calls["count"] += 1
+        if calls["count"] == 1:
+            raise TimeoutError("slow")
+        return _FakeResponse(payload)
+
+    monkeypatch.setattr("trading_skills_engine.ai.glm_client.urlopen", _flaky)
+    monkeypatch.setattr("trading_skills_engine.ai.glm_client.time.sleep", lambda sec: None)  # noqa: ARG005
+
+    client = GLMClient(api_key="test-key", timeout_sec=30, max_retries=1)
+    result = client.chat_json(system_prompt="sys", user_prompt="user")
+    assert result["portfolio_summary_ko"] == "ok"
+    assert calls["count"] == 2
+
+
+def test_glm_from_env_uses_expanded_defaults(monkeypatch):
+    monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
+    monkeypatch.setenv("GLM_API_KEY", "key")
+    monkeypatch.delenv("GLM_TIMEOUT_SEC", raising=False)
+    monkeypatch.delenv("GLM_MAX_RETRIES", raising=False)
+
+    client = GLMClient.from_env()
+    assert client is not None
+    assert client.timeout_sec == 90
+    assert client.max_retries == 2

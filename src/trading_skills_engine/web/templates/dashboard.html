@@ -199,8 +199,19 @@
             {% if not model.ai_runtime.can_run and model.ai_runtime.disabled_reason %}
               <p class="text-[11px] text-bad">{{ model.ai_runtime.disabled_reason }}</p>
             {% endif %}
+            {% set ai_notice = request.query_params.get('ai_report') %}
             <p id="ai-run-status" class="text-[11px] text-muted">
-              {% if request.query_params.get('ai_report') == 'queued' %}AI 리포트 생성 요청이 접수되었습니다. 잠시 후 자동 반영됩니다.{% elif request.query_params.get('ai_report') == 'running' %}이미 AI 리포트 생성이 진행 중입니다.{% elif request.query_params.get('ai_report') == 'missing_key' %}GLM API Key가 없어 실행되지 않았습니다.{% endif %}
+              {% if ai_notice == 'queued' and model.ai_runtime.is_running %}
+                AI 리포트 생성 요청이 접수되었습니다. 잠시 후 자동 반영됩니다.
+              {% elif ai_notice == 'queued' and model.ai_runtime.status == 'idle' and model.ai_runtime.latest_report and model.ai_runtime.latest_report.status == 'ok' %}
+                AI 리포트 생성이 완료되었습니다.
+              {% elif ai_notice == 'queued' and model.ai_runtime.status == 'idle' and model.ai_runtime.latest_report and model.ai_runtime.latest_report.status != 'ok' %}
+                AI 리포트 실행이 종료되었습니다. 결과 상태를 확인해 주세요.
+              {% elif ai_notice == 'running' and model.ai_runtime.is_running %}
+                이미 AI 리포트 생성이 진행 중입니다.
+              {% elif ai_notice == 'missing_key' %}
+                GLM API Key가 없어 실행되지 않았습니다.
+              {% endif %}
             </p>
           </form>
         </aside>
@@ -938,6 +949,21 @@
             aiButton.textContent = 'AI 리포트 생성 요청됨...';
           }
         });
+      }
+
+      // Prevent stale query notices (e.g., ?ai_report=queued) from lingering after completion.
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const aiNotice = params.get('ai_report');
+        const aiRuntimeStatus = '{{ model.ai_runtime.status }}';
+        if (aiNotice && aiRuntimeStatus !== 'running') {
+          params.delete('ai_report');
+          const nextQuery = params.toString();
+          const nextUrl = nextQuery ? `${window.location.pathname}?${nextQuery}` : window.location.pathname;
+          window.history.replaceState({}, '', nextUrl);
+        }
+      } catch (e) {
+        // noop
       }
 
       if ('serviceWorker' in navigator) {

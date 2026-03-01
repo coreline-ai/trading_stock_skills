@@ -138,7 +138,8 @@ python3.11 -m uvicorn trading_skills_engine.web.app:app --host 127.0.0.1 --port 
 GLM_API_KEY=your_key
 GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
 GLM_MODEL=glm-4.5
-GLM_TIMEOUT_SEC=20
+GLM_TIMEOUT_SEC=90
+GLM_MAX_RETRIES=2
 ```
 
 참고:
@@ -275,7 +276,8 @@ EOF
 | `GLM_API_KEY` | 없음 | GLM 4.5 AI 리포트 키 |
 | `GLM_BASE_URL` | `https://open.bigmodel.cn/api/paas/v4` | GLM API Base URL |
 | `GLM_MODEL` | `glm-4.5` | GLM 모델명 |
-| `GLM_TIMEOUT_SEC` | `20` | GLM 호출 타임아웃(초) |
+| `GLM_TIMEOUT_SEC` | `90` | GLM 호출 타임아웃(초, 최소 15 / 최대 180) |
+| `GLM_MAX_RETRIES` | `2` | GLM 타임아웃/일시적 네트워크 오류 재시도 횟수 (최대 4) |
 | `TRADING_SKILLS_ENV_FILE` | `.env` | 환경 파일 경로 오버라이드 |
 | `TRADING_SKILLS_DISABLE_DOTENV` | `0` | `.env` 자동 로드 비활성화 (`1`이면 비활성) |
 | `SKILL_RUN_REPORT_V2_PATH` | `reports/skill_runs/latest_skill_runs_v2.json` | v2 최신 리포트 경로 |
@@ -283,6 +285,7 @@ EOF
 | `FMP_USAGE_PATH` | `reports/runtime/fmp_usage.json` | FMP 호출 사용량 경로 |
 | `AI_REPORT_PATH` | `reports/ai/latest_ai_report.json` | AI 최신 리포트 경로 |
 | `AI_REPORT_RUNTIME_PATH` | `reports/ai/runtime.json` | AI 실행 상태 경로 |
+| `AI_REPORT_RUNNING_TTL_SEC` | `600` | `running` 상태 stale 자동 복구 기준(초, 기본 10분) |
 
 ## 상태 배지 해석
 대시보드 헤더의 상태 배지는 아래 의미를 가집니다.
@@ -335,8 +338,12 @@ tail -f /tmp/trading_skills_watchdog_8001.log
 1. `GLM_API_KEY` 설정 여부 확인
 2. `reports/ai/runtime.json`에서 상태(`running/failed`) 확인
 3. `GET /api/v2/ai-report/latest`로 최신 실패 코드 확인
-4. `GLM_TIMEOUT_SEC` 값을 늘려 재시도(예: `30`)
+4. `GLM_TIMEOUT_SEC` 값을 늘리고(`90`~`120` 권장), `GLM_MAX_RETRIES=2` 이상으로 재시도
 5. 여전히 실패하면 FMP 토글/네트워크 상태를 점검하고 다시 실행
+
+### `AI 리포트 생성 진행 중` 상태가 오래 유지될 때
+- 기본적으로 `running` 상태가 10분(`AI_REPORT_RUNNING_TTL_SEC`) 이상 갱신되지 않으면 자동으로 stale 처리되어 재실행 가능 상태로 전환됩니다.
+- 즉시 초기화가 필요하면 `reports/ai/runtime.json` 파일을 삭제한 뒤 다시 실행합니다.
 
 ## 레거시(v1) 엔드포인트
 호환을 위해 v1 API도 유지합니다.

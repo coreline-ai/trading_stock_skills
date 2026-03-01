@@ -16,6 +16,7 @@ from trading_skills_engine.data.yahoo_finance_client import YahooFinanceClient
 DEFAULT_V2_REPORT_PATH = Path("reports/skill_runs/latest_skill_runs_v2.json")
 DEFAULT_AI_REPORT_PATH = Path("reports/ai/latest_ai_report.json")
 DEFAULT_AI_RUNTIME_PATH = Path("reports/ai/runtime.json")
+DEFAULT_AI_RUNNING_TTL_SEC = 600
 
 
 class AIReportService:
@@ -29,10 +30,15 @@ class AIReportService:
         env_source_path = str(os.getenv("SKILL_RUN_REPORT_V2_PATH") or "").strip()
         env_ai_path = str(os.getenv("AI_REPORT_PATH") or "").strip()
         env_runtime_path = str(os.getenv("AI_REPORT_RUNTIME_PATH") or "").strip()
+        env_runtime_ttl = str(os.getenv("AI_REPORT_RUNNING_TTL_SEC") or str(DEFAULT_AI_RUNNING_TTL_SEC)).strip()
         self.source_report_path = Path(env_source_path) if env_source_path else (source_report_path or DEFAULT_V2_REPORT_PATH)
         self.ai_report_path = Path(env_ai_path) if env_ai_path else (ai_report_path or DEFAULT_AI_REPORT_PATH)
         self.ai_runtime_path = Path(env_runtime_path) if env_runtime_path else (ai_runtime_path or DEFAULT_AI_RUNTIME_PATH)
         self.ai_history_dir = self.ai_report_path.parent / "history"
+        try:
+            self.running_ttl_sec = max(300, min(7200, int(env_runtime_ttl)))
+        except ValueError:
+            self.running_ttl_sec = DEFAULT_AI_RUNNING_TTL_SEC
 
         self.yahoo_client = YahooFinanceClient()
         self.stooq_client = StooqClient()
@@ -60,6 +66,13 @@ class AIReportService:
         if not isinstance(payload, dict):
             return {"status": "idle"}
         payload.setdefault("status", "idle")
+        if str(payload.get("status") or "").lower() == "running" and self._is_runtime_stale(payload):
+            finished_at = _now_iso()
+            payload["status"] = "failed"
+            payload["finished_at"] = finished_at
+            payload["updated_at"] = finished_at
+            payload["last_error_code"] = "AI_REPORT_RUNTIME_STALE"
+            self._write_runtime(payload)
         return payload
 
     def run_with_runtime(self) -> AIReport:
@@ -254,6 +267,16 @@ class AIReportService:
             encoding="utf-8",
         )
 
+    def _is_runtime_stale(self, payload: dict[str, Any]) -> bool:
+        reference = str(payload.get("updated_at") or payload.get("started_at") or "").strip()
+        if not reference:
+            return True
+        parsed = _parse_iso_datetime(reference)
+        if parsed is None:
+            return True
+        now = datetime.now(timezone.utc)
+        return (now - parsed).total_seconds() > float(self.running_ttl_sec)
+
     def _collect_evidence(
         self,
         symbol: str,
@@ -272,21 +295,27 @@ class AIReportService:
 
         yahoo_ok = False
         stooq_ok = False
+        yahoo_error: str | None = None
+        stooq_error: str | None = None
 
         try:
             evidence.append(self.yahoo_client.fetch_quote(symbol))
             yahoo_ok = True
         except Exception as exc:
-            warnings.append(f"YAHOO_FAIL:{symbol}:{exc}")
+            yahoo_error = f"YAHOO_FAIL:{symbol}:{exc}"
 
         if not yahoo_ok:
             try:
                 evidence.append(self.stooq_client.fetch_quote(symbol))
                 stooq_ok = True
             except Exception as exc:
-                warnings.append(f"STOOQ_FAIL:{symbol}:{exc}")
+                stooq_error = f"STOOQ_FAIL:{symbol}:{exc}"
 
         if not yahoo_ok and not stooq_ok:
+            if yahoo_error:
+                warnings.append(yahoo_error)
+            if stooq_error:
+                warnings.append(stooq_error)
             fmp_client = FMPClient.from_env()
             if fmp_client is not None:
                 try:
@@ -517,3 +546,18 @@ def _coerce_float(
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _parse_iso_datetime(text: str) -> datetime | None:
+    value = str(text or "").strip()
+    if not value:
+        return None
+    if value.endswith("Z"):
+        value = f"{value[:-1]}+00:00"
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)

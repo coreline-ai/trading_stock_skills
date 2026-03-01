@@ -35,11 +35,7 @@ class StooqClient:
         except Exception as exc:
             raise StooqError("STOOQ_PARSE_ERROR") from exc
 
-        reader = csv.DictReader(StringIO(text))
-        rows = list(reader)
-        if not rows:
-            raise StooqError("STOOQ_NO_ROWS")
-        row = rows[0]
+        row = _parse_quote_row(text)
         close_raw = str(row.get("Close") or "").strip()
         if not close_raw or close_raw.upper() == "N/D":
             raise StooqError("STOOQ_SYMBOL_NOT_FOUND")
@@ -66,3 +62,40 @@ class StooqClient:
             "url": url,
             "metrics": metrics,
         }
+
+
+def _parse_quote_row(csv_text: str) -> dict[str, str]:
+    text = str(csv_text or "").strip()
+    if not text:
+        raise StooqError("STOOQ_NO_ROWS")
+
+    dict_rows = list(csv.DictReader(StringIO(text)))
+    if dict_rows and isinstance(dict_rows[0], dict) and "Close" in dict_rows[0]:
+        return {str(k): str(v) for k, v in dict_rows[0].items()}
+
+    rows = [row for row in csv.reader(StringIO(text)) if row]
+    if not rows:
+        raise StooqError("STOOQ_NO_ROWS")
+
+    first = [str(item).strip() for item in rows[0]]
+    has_header = bool(first and first[0].lower() == "symbol")
+    if has_header:
+        if len(rows) < 2:
+            raise StooqError("STOOQ_NO_ROWS")
+        values = [str(item).strip() for item in rows[1]]
+    else:
+        values = first
+
+    if len(values) < 8:
+        raise StooqError("STOOQ_NO_ROWS")
+
+    return {
+        "Symbol": values[0],
+        "Date": values[1],
+        "Time": values[2] if len(values) > 2 else "",
+        "Open": values[3] if len(values) > 3 else "",
+        "High": values[4] if len(values) > 4 else "",
+        "Low": values[5] if len(values) > 5 else "",
+        "Close": values[6] if len(values) > 6 else "",
+        "Volume": values[7] if len(values) > 7 else "",
+    }

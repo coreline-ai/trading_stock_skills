@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from trading_skills_engine.ai.report_service import AIReportService
@@ -109,3 +110,61 @@ def test_ai_report_service_returns_unavailable_when_key_missing(monkeypatch, tmp
     assert report.status == "unavailable"
     assert report.error_code == "GLM_API_KEY_MISSING"
     assert ai_path.exists()
+
+
+def test_ai_report_service_read_runtime_marks_stale_running_as_failed(monkeypatch, tmp_path: Path):
+    runtime_path = tmp_path / "runtime.json"
+    started = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+    runtime_path.write_text(
+        json.dumps(
+            {
+                "status": "running",
+                "started_at": started,
+                "updated_at": started,
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
+    monkeypatch.setenv("AI_REPORT_RUNNING_TTL_SEC", "600")
+
+    service = AIReportService(ai_runtime_path=runtime_path)
+    runtime = service.read_runtime()
+    assert runtime["status"] == "failed"
+    assert runtime["last_error_code"] == "AI_REPORT_RUNTIME_STALE"
+
+    persisted = json.loads(runtime_path.read_text(encoding="utf-8"))
+    assert persisted["status"] == "failed"
+    assert persisted["last_error_code"] == "AI_REPORT_RUNTIME_STALE"
+
+
+def test_ai_report_service_suppresses_yahoo_warning_when_stooq_fallback_succeeds(monkeypatch, tmp_path: Path):
+    source_path = tmp_path / "latest_skill_runs_v2.json"
+    ai_path = tmp_path / "latest_ai_report.json"
+    _write_source_report(source_path, with_top5=False)
+
+    monkeypatch.setenv("GLM_API_KEY", "test-glm-key")
+    monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
+    monkeypatch.setattr("trading_skills_engine.ai.report_service.GLMClient.from_env", lambda: _FakeGLMClient())
+    monkeypatch.setattr("trading_skills_engine.ai.report_service.FMPClient.from_env", lambda: None)
+    monkeypatch.setattr(
+        "trading_skills_engine.data.yahoo_finance_client.YahooFinanceClient.fetch_quote",
+        lambda self, symbol: (_ for _ in ()).throw(RuntimeError("YAHOO_HTTP_401")),  # noqa: ARG005
+    )
+    monkeypatch.setattr(
+        "trading_skills_engine.data.stooq_client.StooqClient.fetch_quote",
+        lambda self, symbol: {  # noqa: ARG005
+            "source": "stooq",
+            "url": f"https://stooq.com/{symbol}",
+            "metrics": {"close": 99.0},
+        },
+    )
+
+    service = AIReportService(source_report_path=source_path, ai_report_path=ai_path)
+    report = service.generate_and_persist()
+
+    assert report.status == "ok"
+    assert all(not str(item).startswith("YAHOO_FAIL:") for item in (report.warnings or []))
+    assert all(any(ev.source == "stooq" for ev in row.evidence) for row in report.symbols)
