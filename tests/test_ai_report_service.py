@@ -114,6 +114,7 @@ def test_ai_report_service_returns_unavailable_when_key_missing(monkeypatch, tmp
 
 def test_ai_report_service_read_runtime_marks_stale_running_as_failed(monkeypatch, tmp_path: Path):
     runtime_path = tmp_path / "runtime.json"
+    ai_path = tmp_path / "latest_ai_report.json"
     started = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
     runtime_path.write_text(
         json.dumps(
@@ -130,7 +131,7 @@ def test_ai_report_service_read_runtime_marks_stale_running_as_failed(monkeypatc
     monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
     monkeypatch.setenv("AI_REPORT_RUNNING_TTL_SEC", "600")
 
-    service = AIReportService(ai_runtime_path=runtime_path)
+    service = AIReportService(ai_runtime_path=runtime_path, ai_report_path=ai_path)
     runtime = service.read_runtime()
     assert runtime["status"] == "failed"
     assert runtime["last_error_code"] == "AI_REPORT_RUNTIME_STALE"
@@ -138,6 +139,46 @@ def test_ai_report_service_read_runtime_marks_stale_running_as_failed(monkeypatc
     persisted = json.loads(runtime_path.read_text(encoding="utf-8"))
     assert persisted["status"] == "failed"
     assert persisted["last_error_code"] == "AI_REPORT_RUNTIME_STALE"
+
+
+def test_ai_report_service_read_runtime_recovers_running_when_new_report_exists(monkeypatch, tmp_path: Path):
+    runtime_path = tmp_path / "runtime.json"
+    ai_path = tmp_path / "latest_ai_report.json"
+    started = datetime.now(timezone.utc) - timedelta(minutes=3)
+    runtime_path.write_text(
+        json.dumps(
+            {
+                "status": "running",
+                "started_at": started.isoformat(),
+                "updated_at": started.isoformat(),
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    created_at = (started + timedelta(seconds=50)).isoformat()
+    ai_path.write_text(
+        json.dumps(
+            {
+                "run_id": "report-run-1",
+                "created_at": created_at,
+                "status": "ok",
+                "error_code": None,
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
+    service = AIReportService(ai_runtime_path=runtime_path, ai_report_path=ai_path)
+    runtime = service.read_runtime()
+
+    assert runtime["status"] == "idle"
+    assert runtime["last_report_run_id"] == "report-run-1"
+    assert runtime["last_report_status"] == "ok"
+    assert runtime["finished_at"] == created_at
 
 
 def test_ai_report_service_suppresses_yahoo_warning_when_stooq_fallback_succeeds(monkeypatch, tmp_path: Path):
@@ -172,6 +213,7 @@ def test_ai_report_service_suppresses_yahoo_warning_when_stooq_fallback_succeeds
 
 def test_ai_report_service_read_runtime_respects_glm_worst_case_budget(monkeypatch, tmp_path: Path):
     runtime_path = tmp_path / "runtime.json"
+    ai_path = tmp_path / "latest_ai_report.json"
     started = (datetime.now(timezone.utc) - timedelta(minutes=11)).isoformat()
     runtime_path.write_text(
         json.dumps(
@@ -190,7 +232,7 @@ def test_ai_report_service_read_runtime_respects_glm_worst_case_budget(monkeypat
     monkeypatch.setenv("GLM_TIMEOUT_SEC", "180")
     monkeypatch.setenv("GLM_MAX_RETRIES", "4")
 
-    service = AIReportService(ai_runtime_path=runtime_path)
+    service = AIReportService(ai_runtime_path=runtime_path, ai_report_path=ai_path)
     runtime = service.read_runtime()
     assert runtime["status"] == "running"
 

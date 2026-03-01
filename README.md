@@ -294,6 +294,7 @@ EOF
 | `AI_REPORT_PATH` | `reports/ai/latest_ai_report.json` | AI 최신 리포트 경로 |
 | `AI_REPORT_RUNTIME_PATH` | `reports/ai/runtime.json` | AI 실행 상태 경로 |
 | `AI_REPORT_RUNNING_TTL_SEC` | `600` | `running` 상태 stale 자동 복구 기준(초, 기본 10분) |
+| `AI_REPORT_RUNNING_DELAY_WARN_SEC` | `300` | 대시보드에서 실행 지연 경고를 표시하는 기준(초) |
 | `AI_REPORT_HISTORY_MAX_FILES` | `500` | AI history 보관 최대 파일 수 (`0`이면 개수 제한 비활성) |
 | `AI_REPORT_HISTORY_MAX_DAYS` | `0` | AI history 보관 일수 (`0`이면 기간 제한 비활성) |
 

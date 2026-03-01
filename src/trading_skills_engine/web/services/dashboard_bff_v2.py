@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -915,6 +915,15 @@ def _build_ai_runtime(
     runtime = ai_report_service.read_runtime()
     status = str(runtime.get("status") or "idle").lower()
     is_running = status == "running"
+    running_elapsed_sec: int | None = None
+    running_delay_warn_sec = _coerce_int(
+        os.getenv("AI_REPORT_RUNNING_DELAY_WARN_SEC"),
+        default=300,
+        min_value=60,
+        max_value=3600,
+    )
+    if is_running:
+        running_elapsed_sec = _runtime_elapsed_sec(runtime)
     disabled_reason = ""
     if is_running:
         disabled_reason = "AI 리포트 생성 진행 중"
@@ -930,6 +939,11 @@ def _build_ai_runtime(
         "api_configured": api_configured,
         "status": status,
         "is_running": is_running,
+        "running_elapsed_sec": running_elapsed_sec,
+        "running_delay_warn_sec": running_delay_warn_sec,
+        "is_running_delayed": bool(
+            is_running and running_elapsed_sec is not None and running_elapsed_sec >= running_delay_warn_sec
+        ),
         "runtime": runtime,
         "can_run": api_configured and target_count > 0 and not is_running,
         "disabled_reason": disabled_reason,
@@ -963,6 +977,43 @@ def _extract_ai_target_symbols(source_report: dict[str, Any]) -> list[str]:
             if symbol and symbol not in symbols:
                 symbols.append(symbol)
     return symbols[:5]
+
+
+def _runtime_elapsed_sec(runtime: dict[str, Any]) -> int | None:
+    started_raw = str(runtime.get("started_at") or runtime.get("updated_at") or "").strip()
+    if not started_raw:
+        return None
+    parsed = _parse_iso_datetime(started_raw)
+    if parsed is None:
+        return None
+    now = datetime.now(timezone.utc)
+    return max(0, int((now - parsed).total_seconds()))
+
+
+def _parse_iso_datetime(value: str) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    if text.endswith("Z"):
+        text = f"{text[:-1]}+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def _coerce_int(raw: str | None, default: int, min_value: int, max_value: int) -> int:
+    text = str(raw or "").strip()
+    if not text:
+        return default
+    try:
+        value = int(text)
+    except ValueError:
+        return default
+    return max(min_value, min(max_value, value))
 
 
 def _normalize_ai_report(raw: dict[str, Any]) -> dict[str, Any]:

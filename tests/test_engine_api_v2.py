@@ -37,6 +37,15 @@ def test_v2_ai_report_latest_contract(client):
     assert "api_configured" in body
 
 
+def test_v2_ai_report_runtime_contract(client):
+    response = client.get("/api/v2/ai-report/runtime")
+    assert response.status_code == 200
+    body = response.json()
+    assert "api_configured" in body
+    assert "runtime" in body
+    assert isinstance(body["runtime"], dict)
+
+
 def test_v2_skills_catalog_has_expanded_implemented_set(client):
     response = client.get("/api/v2/skills")
     assert response.status_code == 200

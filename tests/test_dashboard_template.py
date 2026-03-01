@@ -86,3 +86,9 @@ def test_web_basics_endpoints_render(client):
     assert sw.status_code == 200
     assert "serviceWorker" not in sw.text
     assert "CACHE_NAME" in sw.text
+
+
+def test_ai_report_run_get_redirects_to_dashboard(client):
+    response = client.get("/dashboard/ai-report/run", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/dashboard"

@@ -222,7 +222,7 @@ def test_dashboard_ai_report_run_ignores_stale_running_runtime(tmp_path: Path, m
     assert runtime_payload.get("last_error_code") == "AI_REPORT_RUNTIME_STALE"
 
 
-def test_dashboard_query_notice_queued_changes_to_completed_when_ai_is_idle(tmp_path: Path, monkeypatch):
+def test_dashboard_query_notice_queued_shows_status_check_when_ai_is_idle(tmp_path: Path, monkeypatch):
     v2_report_path = tmp_path / "latest_skill_runs_v2.json"
     ai_report_path = tmp_path / "latest_ai_report.json"
     runtime_path = tmp_path / "runtime.json"
@@ -268,8 +268,107 @@ def test_dashboard_query_notice_queued_changes_to_completed_when_ai_is_idle(tmp_
     with TestClient(app) as isolated_client:
         response = isolated_client.get("/dashboard?ai_report=queued")
         assert response.status_code == 200
+        assert "AI 리포트 상태를 확인 중입니다..." in response.text
+        assert "AI 리포트 생성이 완료되었습니다." not in response.text
+
+
+def test_dashboard_query_notice_completed_shows_completion_message_when_ai_is_idle(tmp_path: Path, monkeypatch):
+    v2_report_path = tmp_path / "latest_skill_runs_v2.json"
+    ai_report_path = tmp_path / "latest_ai_report.json"
+    runtime_path = tmp_path / "runtime.json"
+
+    v2_report_path.write_text(
+        json.dumps(
+            {
+                "run_id": "run-for-ai-completed-notice",
+                "as_of_date": "2026-02-28",
+                "top_picks": [{"symbol": "NVDA", "score": 77.0, "reason": "test"}],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    ai_report_path.write_text(
+        json.dumps(
+            {
+                "run_id": "ai-ok",
+                "created_at": "2026-03-01T04:28:19.915086+00:00",
+                "status": "ok",
+                "provider": "glm",
+                "model": "glm-4.5",
+                "symbols": [{"symbol": "NVDA", "decision": "BUY"}],
+                "warnings": [],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    runtime_path.write_text(
+        json.dumps({"status": "idle"}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("SKILL_RUN_REPORT_V2_PATH", str(v2_report_path))
+    monkeypatch.setenv("AI_REPORT_PATH", str(ai_report_path))
+    monkeypatch.setenv("AI_REPORT_RUNTIME_PATH", str(runtime_path))
+    monkeypatch.setenv("GLM_API_KEY", "test-glm-key")
+    monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
+
+    app = create_app()
+    with TestClient(app) as isolated_client:
+        response = isolated_client.get("/dashboard?ai_report=completed")
+        assert response.status_code == 200
         assert "AI 리포트 생성이 완료되었습니다." in response.text
-        assert "AI 리포트 생성 요청이 접수되었습니다." not in response.text
+
+
+def test_dashboard_query_notice_failed_shows_failure_message(tmp_path: Path, monkeypatch):
+    v2_report_path = tmp_path / "latest_skill_runs_v2.json"
+    ai_report_path = tmp_path / "latest_ai_report.json"
+    runtime_path = tmp_path / "runtime.json"
+
+    v2_report_path.write_text(
+        json.dumps(
+            {
+                "run_id": "run-for-ai-failed-notice",
+                "as_of_date": "2026-02-28",
+                "top_picks": [{"symbol": "NVDA", "score": 77.0, "reason": "test"}],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    ai_report_path.write_text(
+        json.dumps(
+            {
+                "run_id": "ai-failed",
+                "created_at": "2026-03-01T04:28:19.915086+00:00",
+                "status": "unavailable",
+                "provider": "glm",
+                "model": "glm-4.5",
+                "symbols": [],
+                "warnings": ["GLM_TIMEOUT"],
+                "error_code": "GLM_TIMEOUT",
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    runtime_path.write_text(
+        json.dumps({"status": "idle"}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("SKILL_RUN_REPORT_V2_PATH", str(v2_report_path))
+    monkeypatch.setenv("AI_REPORT_PATH", str(ai_report_path))
+    monkeypatch.setenv("AI_REPORT_RUNTIME_PATH", str(runtime_path))
+    monkeypatch.setenv("GLM_API_KEY", "test-glm-key")
+    monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
+
+    app = create_app()
+    with TestClient(app) as isolated_client:
+        response = isolated_client.get("/dashboard?ai_report=failed")
+        assert response.status_code == 200
+        assert "AI 리포트 실행이 종료되었습니다. 실패 상태를 확인해 주세요." in response.text
 
 
 def test_dashboard_query_notice_queued_shows_pending_when_ai_is_running(tmp_path: Path, monkeypatch):
@@ -327,3 +426,62 @@ def test_dashboard_query_notice_queued_shows_pending_when_ai_is_running(tmp_path
         response = isolated_client.get("/dashboard?ai_report=queued")
         assert response.status_code == 200
         assert "AI 리포트 생성 요청이 접수되었습니다. 잠시 후 자동 반영됩니다." in response.text
+
+
+def test_dashboard_query_notice_queued_shows_delay_warning_when_ai_running_too_long(tmp_path: Path, monkeypatch):
+    v2_report_path = tmp_path / "latest_skill_runs_v2.json"
+    ai_report_path = tmp_path / "latest_ai_report.json"
+    runtime_path = tmp_path / "runtime.json"
+
+    v2_report_path.write_text(
+        json.dumps(
+            {
+                "run_id": "run-for-ai-delayed-notice",
+                "as_of_date": "2026-02-28",
+                "top_picks": [{"symbol": "NVDA", "score": 77.0, "reason": "test"}],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    ai_report_path.write_text(
+        json.dumps(
+            {
+                "run_id": "ai-prev",
+                "created_at": "2026-03-01T04:20:20.709472+00:00",
+                "status": "ok",
+                "provider": "glm",
+                "model": "glm-4.5",
+                "symbols": [{"symbol": "NVDA", "decision": "BUY"}],
+                "warnings": [],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    delayed_iso = (datetime.now(timezone.utc) - timedelta(minutes=10)).isoformat()
+    runtime_path.write_text(
+        json.dumps(
+            {
+                "status": "running",
+                "started_at": delayed_iso,
+                "updated_at": delayed_iso,
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("SKILL_RUN_REPORT_V2_PATH", str(v2_report_path))
+    monkeypatch.setenv("AI_REPORT_PATH", str(ai_report_path))
+    monkeypatch.setenv("AI_REPORT_RUNTIME_PATH", str(runtime_path))
+    monkeypatch.setenv("AI_REPORT_RUNNING_TTL_SEC", "900")
+    monkeypatch.setenv("AI_REPORT_RUNNING_DELAY_WARN_SEC", "300")
+    monkeypatch.setenv("GLM_API_KEY", "test-glm-key")
+    monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
+
+    app = create_app()
+    with TestClient(app) as isolated_client:
+        response = isolated_client.get("/dashboard?ai_report=queued")
+        assert response.status_code == 200
+        assert "AI 리포트 생성이 지연되고 있습니다" in response.text

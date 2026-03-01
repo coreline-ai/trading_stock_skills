@@ -84,13 +84,16 @@ class AIReportService:
         if not isinstance(payload, dict):
             return {"status": "idle"}
         payload.setdefault("status", "idle")
-        if str(payload.get("status") or "").lower() == "running" and self._is_runtime_stale(payload):
-            finished_at = _now_iso()
-            payload["status"] = "failed"
-            payload["finished_at"] = finished_at
-            payload["updated_at"] = finished_at
-            payload["last_error_code"] = "AI_REPORT_RUNTIME_STALE"
-            self._write_runtime(payload)
+        if str(payload.get("status") or "").lower() == "running":
+            if self._recover_runtime_from_latest_report(payload):
+                return payload
+            if self._is_runtime_stale(payload):
+                finished_at = _now_iso()
+                payload["status"] = "failed"
+                payload["finished_at"] = finished_at
+                payload["updated_at"] = finished_at
+                payload["last_error_code"] = "AI_REPORT_RUNTIME_STALE"
+                self._write_runtime(payload)
         return payload
 
     def run_with_runtime(self) -> AIReport:
@@ -332,7 +335,38 @@ class AIReportService:
 
         # Add fixed buffer for evidence collection + serialization overhead.
         adaptive_ttl = int(glm_worst + 180)
-        return max(base_ttl, adaptive_ttl)
+        # Keep stale recovery bounded to avoid queued/running state appearing frozen for too long.
+        return min(max(base_ttl, adaptive_ttl), 900)
+
+    def _recover_runtime_from_latest_report(self, runtime_payload: dict[str, Any]) -> bool:
+        latest = self.read_latest()
+        if not isinstance(latest, dict):
+            return False
+
+        latest_run_id = str(latest.get("run_id") or "").strip()
+        latest_created_raw = str(latest.get("created_at") or "").strip()
+        if not latest_run_id or not latest_created_raw:
+            return False
+
+        latest_created = _parse_iso_datetime(latest_created_raw)
+        if latest_created is None:
+            return False
+
+        runtime_started_raw = str(
+            runtime_payload.get("started_at") or runtime_payload.get("updated_at") or ""
+        ).strip()
+        runtime_started = _parse_iso_datetime(runtime_started_raw) if runtime_started_raw else None
+        if runtime_started is not None and latest_created < runtime_started:
+            return False
+
+        runtime_payload["status"] = "idle"
+        runtime_payload["finished_at"] = latest_created_raw
+        runtime_payload["updated_at"] = latest_created_raw
+        runtime_payload["last_report_run_id"] = latest_run_id
+        runtime_payload["last_report_status"] = str(latest.get("status") or "").strip() or None
+        runtime_payload["last_error_code"] = str(latest.get("error_code") or "").strip() or None
+        self._write_runtime(runtime_payload)
+        return True
 
     def _collect_evidence(
         self,

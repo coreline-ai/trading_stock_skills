@@ -135,6 +135,15 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
             "report": latest,
         }
 
+    @app.get("/api/v2/ai-report/runtime")
+    def ai_report_runtime(request: Request) -> dict:
+        service: AIReportService = request.app.state.ai_report_service
+        runtime = service.read_runtime()
+        return {
+            "api_configured": service.api_configured(),
+            "runtime": runtime,
+        }
+
     @app.get("/robots.txt", response_class=PlainTextResponse)
     def robots_txt() -> PlainTextResponse:
         return PlainTextResponse("User-agent: *\nAllow: /\nSitemap: /sitemap.xml\n")
@@ -316,6 +325,11 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
             return RedirectResponse(url="/dashboard?ai_report=missing_key", status_code=303)
         background_tasks.add_task(service.run_with_runtime)
         return RedirectResponse(url="/dashboard?ai_report=queued", status_code=303)
+
+    @app.get("/dashboard/ai-report/run")
+    def dashboard_ai_report_run_get() -> RedirectResponse:
+        # Browser address-bar access sends GET; guide users back to dashboard action flow.
+        return RedirectResponse(url="/dashboard", status_code=303)
 
     return app
 

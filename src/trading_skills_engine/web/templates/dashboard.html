@@ -201,14 +201,20 @@
             {% endif %}
             {% set ai_notice = request.query_params.get('ai_report') %}
             <p id="ai-run-status" class="text-[11px] text-muted">
-              {% if ai_notice == 'queued' and model.ai_runtime.is_running %}
+              {% if ai_notice == 'queued' and model.ai_runtime.is_running and model.ai_runtime.is_running_delayed %}
+                AI 리포트 생성이 지연되고 있습니다 ({{ model.ai_runtime.running_elapsed_sec }}초 경과). 실행 실패 가능성이 있어 잠시 후 상태를 확인해 주세요.
+              {% elif ai_notice == 'queued' and model.ai_runtime.is_running %}
                 AI 리포트 생성 요청이 접수되었습니다. 잠시 후 자동 반영됩니다.
-              {% elif ai_notice == 'queued' and model.ai_runtime.status == 'idle' and model.ai_runtime.latest_report and model.ai_runtime.latest_report.status == 'ok' %}
+              {% elif ai_notice == 'queued' %}
+                AI 리포트 상태를 확인 중입니다...
+              {% elif ai_notice == 'completed' %}
                 AI 리포트 생성이 완료되었습니다.
-              {% elif ai_notice == 'queued' and model.ai_runtime.status == 'idle' and model.ai_runtime.latest_report and model.ai_runtime.latest_report.status != 'ok' %}
-                AI 리포트 실행이 종료되었습니다. 결과 상태를 확인해 주세요.
+              {% elif ai_notice == 'failed' %}
+                AI 리포트 실행이 종료되었습니다. 실패 상태를 확인해 주세요.
               {% elif ai_notice == 'running' and model.ai_runtime.is_running %}
                 이미 AI 리포트 생성이 진행 중입니다.
+              {% elif ai_notice == 'running' and not model.ai_runtime.is_running %}
+                AI 리포트 실행 상태가 변경되었습니다. 결과를 확인해 주세요.
               {% elif ai_notice == 'missing_key' %}
                 GLM API Key가 없어 실행되지 않았습니다.
               {% endif %}
@@ -951,12 +957,134 @@
         });
       }
 
-      // Prevent stale query notices (e.g., ?ai_report=queued) from lingering after completion.
+      const aiRuntimeStatus = '{{ model.ai_runtime.status }}';
+      const aiDelayWarnSec = Number('{{ model.ai_runtime.running_delay_warn_sec }}' || '300');
+      const initialAiRunId = '{{ model.ai_runtime.latest_report.run_id if model.ai_runtime.latest_report else "" }}';
+
+      const readAiNotice = () => {
+        try {
+          return new URLSearchParams(window.location.search).get('ai_report');
+        } catch (e) {
+          return null;
+        }
+      };
+
+      const updateAiPendingText = (elapsedSec) => {
+        if (!aiStatusEl) return;
+        if (elapsedSec >= aiDelayWarnSec) {
+          aiStatusEl.textContent = `AI 리포트 생성이 지연되고 있습니다 (${elapsedSec}초 경과). 실행 실패 가능성이 있어 잠시 후 상태를 확인해 주세요.`;
+          return;
+        }
+        aiStatusEl.textContent = 'AI 리포트 생성 요청이 접수되었습니다. 잠시 후 자동 반영됩니다.';
+      };
+
+      const redirectWithAiNotice = (notice) => {
+        const params = new URLSearchParams(window.location.search);
+        params.set('ai_report', notice);
+        const query = params.toString();
+        window.location.href = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+      };
+
+      const resolveNoticeFromLatest = (latestPayload) => {
+        const report = latestPayload && latestPayload.report ? latestPayload.report : null;
+        const status = String(report && report.status ? report.status : '').toLowerCase();
+        if (status === 'ok') return 'completed';
+        return 'failed';
+      };
+
+      const pollAiRuntimeUntilDone = () => {
+        const aiNotice = readAiNotice();
+        const shouldTrack = aiNotice === 'queued' || aiNotice === 'running' || aiRuntimeStatus === 'running';
+        if (!shouldTrack) return;
+
+        const startedMs = Date.now();
+        const idleGraceMs = 15000;
+        const deadlineMs = 20 * 60 * 1000;
+        const intervalMs = 5000;
+
+        const tick = async () => {
+          try {
+            const runtimeRes = await fetch('/api/v2/ai-report/runtime', { cache: 'no-store' });
+            const runtimePayload = await runtimeRes.json();
+            const runtime = runtimePayload && runtimePayload.runtime ? runtimePayload.runtime : {};
+            const status = String(runtime.status || '').toLowerCase();
+            if (status === 'running') {
+              const startedRaw = String(runtime.started_at || runtime.updated_at || '');
+              let elapsedSec = 0;
+              if (startedRaw) {
+                const parsed = Date.parse(startedRaw);
+                if (!Number.isNaN(parsed)) {
+                  elapsedSec = Math.max(0, Math.floor((Date.now() - parsed) / 1000));
+                }
+              }
+              updateAiPendingText(elapsedSec);
+              return;
+            }
+            if (status === 'failed') {
+              redirectWithAiNotice('failed');
+              return;
+            }
+
+            const runtimeLastRunId = String(runtime.last_report_run_id || '');
+            const runtimeLastStatus = String(runtime.last_report_status || '').toLowerCase();
+            const runtimeHasNewRun = initialAiRunId
+              ? runtimeLastRunId && runtimeLastRunId !== initialAiRunId
+              : Boolean(runtimeLastRunId);
+            if (runtimeHasNewRun) {
+              if (runtimeLastStatus === 'ok') {
+                redirectWithAiNotice('completed');
+              } else {
+                redirectWithAiNotice('failed');
+              }
+              return;
+            }
+
+            const latestRes = await fetch('/api/v2/ai-report/latest', { cache: 'no-store' });
+            const latestPayload = await latestRes.json();
+            const latestRunId = String(
+              latestPayload && latestPayload.report && latestPayload.report.run_id
+                ? latestPayload.report.run_id
+                : ''
+            );
+            if (initialAiRunId && latestRunId && latestRunId === initialAiRunId) {
+              if ((Date.now() - startedMs) >= idleGraceMs) {
+                redirectWithAiNotice('failed');
+                return;
+              }
+              if (aiStatusEl) aiStatusEl.textContent = 'AI 리포트 상태를 확인 중입니다...';
+              return;
+            }
+            if (!latestRunId && (Date.now() - startedMs) >= idleGraceMs) {
+              redirectWithAiNotice('failed');
+              return;
+            }
+            redirectWithAiNotice(resolveNoticeFromLatest(latestPayload));
+          } catch (e) {
+            if ((Date.now() - startedMs) >= deadlineMs) {
+              redirectWithAiNotice('failed');
+            }
+          }
+        };
+
+        tick();
+        const timer = setInterval(() => {
+          if ((Date.now() - startedMs) >= deadlineMs) {
+            clearInterval(timer);
+            redirectWithAiNotice('failed');
+            return;
+          }
+          tick();
+        }, intervalMs);
+      };
+
+      pollAiRuntimeUntilDone();
+
+      // Prevent stale query notices from lingering after terminal states.
       try {
         const params = new URLSearchParams(window.location.search);
         const aiNotice = params.get('ai_report');
-        const aiRuntimeStatus = '{{ model.ai_runtime.status }}';
-        if (aiNotice && aiRuntimeStatus !== 'running') {
+        const keepNotice = aiNotice === 'queued' || aiNotice === 'running';
+        if (aiNotice && !keepNotice && aiRuntimeStatus !== 'running') {
           params.delete('ai_report');
           const nextQuery = params.toString();
           const nextUrl = nextQuery ? `${window.location.pathname}?${nextQuery}` : window.location.pathname;
