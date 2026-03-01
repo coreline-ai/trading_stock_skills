@@ -37,6 +37,7 @@ def engine_status_v2() -> dict:
     runtime = get_fmp_runtime_state()
     orchestrator = SkillEngineOrchestratorV2()
     latest = orchestrator.read_latest()
+    universe_meta_default = orchestrator.market_provider.get_universe_meta()
     if not latest:
         return {
             "ready": False,
@@ -45,6 +46,7 @@ def engine_status_v2() -> dict:
             "catalog_count": len(SKILL_CATALOG),
             "fmp_api_configured": runtime["api_configured"],
             "fmp_runtime": runtime,
+            "universe_meta": universe_meta_default,
         }
 
     results = latest.get("results") if isinstance(latest.get("results"), list) else []
@@ -75,4 +77,5 @@ def engine_status_v2() -> dict:
         "latest_report_path": str(orchestrator.report_path),
         "fmp_api_configured": runtime["api_configured"],
         "fmp_runtime": runtime,
+        "universe_meta": latest.get("universe_meta", universe_meta_default),
     }

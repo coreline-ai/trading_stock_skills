@@ -55,11 +55,21 @@
 
       <section class="rounded-2xl border border-line bg-panel p-4 md:p-5">
         <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 class="text-2xl font-bold">{{ model.header.app_name }}</h1>
-            <p class="text-sm text-muted">기준일 {{ model.date_display_ko }}</p>
+          <div class="md:shrink-0">
+            <div class="flex items-center gap-2">
+              <span
+                class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-300 text-pri"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" focusable="false" aria-hidden="true">
+                  <path d="M3 18h18v2H3zM5 16h2v-5H5zm4 0h2V8H9zm4 0h2v-3h-2zm4 0h2V5h-2z" />
+                </svg>
+              </span>
+              <h1 class="whitespace-nowrap text-2xl font-bold leading-tight">{{ model.header.app_name }}</h1>
+            </div>
+            <p class="mt-1 text-right text-sm text-muted">기준일 {{ model.date_display_ko }}</p>
           </div>
-          <div class="flex flex-wrap items-center gap-2 text-xs">
+          <div class="flex flex-wrap items-center gap-2 text-xs md:flex-1 md:justify-end">
             <form method="post" action="/dashboard/fmp-toggle">
               <input type="hidden" name="enabled" value="{% if model.fmp_runtime.toggle_enabled %}0{% else %}1{% endif %}" />
               <button
@@ -76,6 +86,12 @@
               API Key {% if model.fmp_runtime.api_configured %}configured{% else %}missing{% endif %}
             </span>
             <span class="rounded-full border px-2 py-1 font-medium">데이터 소스</span>
+            <span class="rounded-full px-2 py-1 font-semibold {% if model.universe_meta.source == 'live' %}bg-emerald-100 text-ok{% elif model.universe_meta.source == 'stale' %}bg-amber-100 text-warn{% else %}bg-red-100 text-bad{% endif %}">
+              {{ model.universe_meta.scope }} Universe: {{ model.universe_meta.source }}
+            </span>
+            <span class="rounded-full border border-line px-2 py-1 text-muted">
+              {{ model.universe_meta.selected_count }}/{{ model.universe_meta.filtered_count }}/{{ model.universe_meta.raw_count }}
+            </span>
             <span class="rounded-full px-2 py-1 font-semibold {% if model.data_sources.fmp == 'live' %}bg-emerald-100 text-ok{% elif model.data_sources.fmp == 'stale' %}bg-amber-100 text-warn{% else %}bg-red-100 text-bad{% endif %}">
               FMP: {{ model.data_sources.fmp }}
             </span>
@@ -107,24 +123,44 @@
               <p class="mb-2 text-xs text-muted">직접 추천 가능한 스킬만 표시 (최대 {{ model.left_menu.max_recommender }}개)</p>
               <div class="max-h-[280px] space-y-2 overflow-y-auto pr-1">
                 {% for skill in model.left_menu.recommender_skills %}
-                  <label class="block rounded-xl border border-line bg-white p-2">
-                    <div class="flex items-start gap-2">
-                      <input
-                        type="checkbox"
-                        name="recommender_skills"
-                        value="{{ skill.slug }}"
-                        data-role-group="recommender"
-                        {% if skill.selected %}checked{% endif %}
-                        class="mt-1"
-                      />
-                      <span class="min-w-0">
-                        <span class="block truncate text-sm font-semibold">{{ skill.display_name }}</span>
-                        <span class="block truncate text-xs text-muted">{{ skill.slug }} · {{ skill.family }}</span>
-                        <span class="mt-1 inline-block rounded bg-emerald-100 px-1.5 py-0.5 text-[11px] font-medium text-ok">추천 가능</span>
-                        <span class="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">{{ skill.trait_role }}</span>
-                      </span>
+                  <div class="rounded-xl border border-line bg-white p-2">
+                    <div class="flex items-start justify-between gap-2">
+                      <label class="flex min-w-0 cursor-pointer items-start gap-2 pr-2">
+                        <input
+                          type="checkbox"
+                          name="recommender_skills"
+                          value="{{ skill.slug }}"
+                          data-role-group="recommender"
+                          {% if skill.selected %}checked{% endif %}
+                          class="mt-1"
+                        />
+                        <span class="min-w-0">
+                          <span class="block truncate text-sm font-semibold">{{ skill.display_name }}</span>
+                          <span class="block truncate text-xs text-muted">{{ skill.slug }} · {{ skill.family }}</span>
+                          <span class="mt-1 inline-block rounded bg-emerald-100 px-1.5 py-0.5 text-[11px] font-medium text-ok">추천 가능</span>
+                          <span class="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">{{ skill.trait_role }}</span>
+                        </span>
+                      </label>
+                      <button
+                        type="button"
+                        class="skill-detail-btn shrink-0 rounded-lg border border-line px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                        data-skill-display-name="{{ skill.display_name }}"
+                        data-skill-slug="{{ skill.slug }}"
+                        data-skill-family="{{ skill.family }}"
+                        data-skill-family-ko="{{ skill.family_ko }}"
+                        data-skill-role="{{ skill.trait_role }}"
+                        data-skill-role-ko="{{ skill.role_ko }}"
+                        data-skill-style="{{ skill.trait_style }}"
+                        data-skill-methodology="{{ skill.methodology }}"
+                        data-skill-uses-llm="{{ skill.uses_llm_ko }}"
+                        data-skill-requires-api="{{ skill.requires_api_ko }}"
+                        data-skill-signals='{{ skill.trait_signals|tojson|forceescape }}'
+                        data-skill-axes='{{ skill.trait_axes|tojson|forceescape }}'
+                      >
+                        상세
+                      </button>
                     </div>
-                  </label>
+                  </div>
                 {% endfor %}
               </div>
             </div>
@@ -134,31 +170,58 @@
               <p class="mb-2 text-xs text-muted">추천 후보를 재평가하는 분석 전용 스킬 (최대 {{ model.left_menu.max_analyzer }}개)</p>
               <div class="max-h-[280px] space-y-2 overflow-y-auto pr-1">
                 {% for skill in model.left_menu.analyzer_skills %}
-                  <label class="block rounded-xl border border-line bg-white p-2">
-                    <div class="flex items-start gap-2">
-                      <input
-                        type="checkbox"
-                        name="analyzer_skills"
-                        value="{{ skill.slug }}"
-                        data-role-group="analyzer"
-                        {% if skill.selected %}checked{% endif %}
-                        class="mt-1"
-                      />
-                      <span class="min-w-0">
-                        <span class="block truncate text-sm font-semibold">{{ skill.display_name }}</span>
-                        <span class="block truncate text-xs text-muted">{{ skill.slug }} · {{ skill.family }}</span>
-                        <span class="mt-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-medium text-warn">분석 전용</span>
-                        <span class="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">{{ skill.trait_role }}</span>
-                      </span>
+                  <div class="rounded-xl border border-line bg-white p-2">
+                    <div class="flex items-start justify-between gap-2">
+                      <label class="flex min-w-0 cursor-pointer items-start gap-2 pr-2">
+                        <input
+                          type="checkbox"
+                          name="analyzer_skills"
+                          value="{{ skill.slug }}"
+                          data-role-group="analyzer"
+                          {% if skill.selected %}checked{% endif %}
+                          class="mt-1"
+                        />
+                        <span class="min-w-0">
+                          <span class="block truncate text-sm font-semibold">{{ skill.display_name }}</span>
+                          <span class="block truncate text-xs text-muted">{{ skill.slug }} · {{ skill.family }}</span>
+                          <span class="mt-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-medium text-warn">분석 전용</span>
+                          <span class="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">{{ skill.trait_role }}</span>
+                        </span>
+                      </label>
+                      <button
+                        type="button"
+                        class="skill-detail-btn shrink-0 rounded-lg border border-line px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                        data-skill-display-name="{{ skill.display_name }}"
+                        data-skill-slug="{{ skill.slug }}"
+                        data-skill-family="{{ skill.family }}"
+                        data-skill-family-ko="{{ skill.family_ko }}"
+                        data-skill-role="{{ skill.trait_role }}"
+                        data-skill-role-ko="{{ skill.role_ko }}"
+                        data-skill-style="{{ skill.trait_style }}"
+                        data-skill-methodology="{{ skill.methodology }}"
+                        data-skill-uses-llm="{{ skill.uses_llm_ko }}"
+                        data-skill-requires-api="{{ skill.requires_api_ko }}"
+                        data-skill-signals='{{ skill.trait_signals|tojson|forceescape }}'
+                        data-skill-axes='{{ skill.trait_axes|tojson|forceescape }}'
+                      >
+                        상세
+                      </button>
                     </div>
-                  </label>
+                  </div>
                 {% endfor %}
               </div>
             </div>
 
             <div class="rounded-2xl border border-line bg-slate-50 p-2">
               <h3 class="mb-2 text-sm font-semibold">티커 필터 (선택)</h3>
-              <p class="mb-2 text-xs text-muted">입력한 티커만 후보/분석 대상으로 사용합니다. 비워두면 전체 후보를 사용합니다.</p>
+              <p class="mb-2 text-xs text-muted">
+                입력한 티커만 후보/분석 대상으로 사용합니다.
+                {% if model.universe_meta.universe_mode == 'SP500_PLUS_NASDAQ_TOP500' %}
+                  비워두면 S&amp;P500 + NASDAQ top500 합집합 유니버스를 사용합니다.
+                {% else %}
+                  비워두면 US 유니버스(필터 후 상위 {{ model.universe_meta.selected_count or 2000 }})를 사용합니다.
+                {% endif %}
+              </p>
               <label class="mb-2 block">
                 <span class="mb-1 block text-xs font-semibold text-slate-700">개별 티커</span>
                 <input
@@ -850,6 +913,113 @@
       </section>
     </main>
 
+    <div
+      id="skill-detail-modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="skill-detail-title"
+    >
+      <div
+        data-skill-detail-panel
+        class="w-full max-w-xl overflow-hidden rounded-2xl border border-line bg-panel shadow-xl"
+      >
+        <div class="flex items-center justify-between border-b border-line px-4 py-3">
+          <h3 id="skill-detail-title" class="text-base font-semibold">스킬 상세</h3>
+          <button
+            id="skill-detail-close"
+            type="button"
+            class="rounded-md border border-line px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            aria-label="스킬 상세 닫기"
+          >
+            닫기
+          </button>
+        </div>
+        <div class="max-h-[75vh] space-y-3 overflow-y-auto px-4 py-3 text-sm">
+          <div class="rounded-lg border border-line bg-slate-50 p-3">
+            <p id="skill-detail-slug" class="text-xs text-muted"></p>
+            <p id="skill-detail-family" class="mt-1 text-xs text-muted"></p>
+          </div>
+
+          <dl class="grid grid-cols-1 gap-2 rounded-lg border border-line p-3 text-sm md:grid-cols-2">
+            <div>
+              <dt class="text-xs text-muted">역할</dt>
+              <dd id="skill-detail-role" class="mt-1 font-medium"></dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted">스타일</dt>
+              <dd id="skill-detail-style" class="mt-1 font-medium"></dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted">LLM 사용</dt>
+              <dd id="skill-detail-uses-llm" class="mt-1 font-medium"></dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted">외부 API</dt>
+              <dd id="skill-detail-requires-api" class="mt-1 font-medium"></dd>
+            </div>
+          </dl>
+
+          <div class="rounded-lg border border-line p-3">
+            <p class="text-xs text-muted">Methodology</p>
+            <p id="skill-detail-methodology" class="mt-1 whitespace-pre-wrap text-sm"></p>
+          </div>
+
+          <div class="rounded-lg border border-line p-3">
+            <p class="text-xs text-muted">Signals</p>
+            <div id="skill-detail-signals" class="mt-2 flex flex-wrap gap-1.5"></div>
+          </div>
+
+          <div class="rounded-lg border border-line p-3">
+            <p class="text-xs text-muted">데이터 관측 축</p>
+            <div id="skill-detail-axes" class="mt-2 flex flex-wrap gap-1.5"></div>
+          </div>
+
+          <div class="rounded-lg border border-line p-3">
+            <p class="text-xs text-muted">참고 상세 분석 · Overview</p>
+            <p id="skill-detail-ref-overview" class="mt-1 whitespace-pre-wrap text-xs"></p>
+          </div>
+
+          <div class="rounded-lg border border-line p-3">
+            <p class="text-xs text-muted">참고 상세 분석 · When to Use</p>
+            <p id="skill-detail-ref-when" class="mt-1 whitespace-pre-wrap text-xs"></p>
+          </div>
+
+          <div class="rounded-lg border border-line p-3">
+            <p class="text-xs text-muted">참고 상세 분석 · Data Sources</p>
+            <p id="skill-detail-ref-data" class="mt-1 whitespace-pre-wrap text-xs"></p>
+          </div>
+
+          <div class="rounded-lg border border-line p-3">
+            <p class="text-xs text-muted">참고 상세 분석 · Workflow</p>
+            <p id="skill-detail-ref-workflow" class="mt-1 whitespace-pre-wrap text-xs"></p>
+          </div>
+
+          <div class="rounded-lg border border-line p-3">
+            <p class="text-xs text-muted">참고 상세 분석 · Output</p>
+            <p id="skill-detail-ref-output" class="mt-1 whitespace-pre-wrap text-xs"></p>
+          </div>
+
+          <div class="rounded-lg border border-line p-3">
+            <p class="text-xs text-muted">참고 상세 분석 · Prerequisites</p>
+            <p id="skill-detail-ref-prereq" class="mt-1 whitespace-pre-wrap text-xs"></p>
+          </div>
+
+          <div class="rounded-lg border border-line bg-slate-50 p-3">
+            <p class="text-xs text-muted">참조 소스</p>
+            <p id="skill-detail-ref-source" class="mt-1 text-xs text-muted"></p>
+            <a
+              id="skill-detail-ref-link"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-1 inline-block text-xs font-medium text-pri hover:underline"
+            >원문 열기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       const form = document.getElementById('skill-form');
       const statusEl = document.getElementById('run-status');
@@ -859,8 +1029,151 @@
       const aiForm = document.getElementById('ai-report-form');
       const aiStatusEl = document.getElementById('ai-run-status');
       const aiButton = document.getElementById('ai-report-btn');
+      const skillDetailMap = {{ (model.skill_detail_map | default({})) | tojson }};
+      const detailModal = document.getElementById('skill-detail-modal');
+      const detailCloseBtn = document.getElementById('skill-detail-close');
+      const detailTitleEl = document.getElementById('skill-detail-title');
+      const detailSlugEl = document.getElementById('skill-detail-slug');
+      const detailFamilyEl = document.getElementById('skill-detail-family');
+      const detailRoleEl = document.getElementById('skill-detail-role');
+      const detailStyleEl = document.getElementById('skill-detail-style');
+      const detailUsesLlmEl = document.getElementById('skill-detail-uses-llm');
+      const detailRequiresApiEl = document.getElementById('skill-detail-requires-api');
+      const detailMethodologyEl = document.getElementById('skill-detail-methodology');
+      const detailSignalsEl = document.getElementById('skill-detail-signals');
+      const detailAxesEl = document.getElementById('skill-detail-axes');
+      const detailRefOverviewEl = document.getElementById('skill-detail-ref-overview');
+      const detailRefWhenEl = document.getElementById('skill-detail-ref-when');
+      const detailRefDataEl = document.getElementById('skill-detail-ref-data');
+      const detailRefWorkflowEl = document.getElementById('skill-detail-ref-workflow');
+      const detailRefOutputEl = document.getElementById('skill-detail-ref-output');
+      const detailRefPrereqEl = document.getElementById('skill-detail-ref-prereq');
+      const detailRefSourceEl = document.getElementById('skill-detail-ref-source');
+      const detailRefLinkEl = document.getElementById('skill-detail-ref-link');
       const skillBoxes = () => [...document.querySelectorAll('input[name="recommender_skills"], input[name="analyzer_skills"]')];
       const roleMax = { recommender: 5, analyzer: 3 };
+      let detailLastTrigger = null;
+
+      const parseJsonSafe = (raw, fallback) => {
+        const text = String(raw || '').trim();
+        if (!text) return fallback;
+        try {
+          const parsed = JSON.parse(text);
+          return parsed;
+        } catch (e) {
+          return fallback;
+        }
+      };
+
+      const renderBadgeList = (container, rows, fallback) => {
+        if (!container) return;
+        container.textContent = '';
+        if (!rows || rows.length === 0) {
+          const emptyEl = document.createElement('span');
+          emptyEl.className = 'rounded bg-slate-100 px-2 py-0.5 text-xs text-muted';
+          emptyEl.textContent = fallback;
+          container.appendChild(emptyEl);
+          return;
+        }
+        rows.forEach((item) => {
+          const badge = document.createElement('span');
+          badge.className = 'rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-700';
+          badge.textContent = String(item || '-');
+          container.appendChild(badge);
+        });
+      };
+
+      const closeSkillDetailModal = () => {
+        if (!detailModal) return;
+        detailModal.classList.add('hidden');
+        detailModal.classList.remove('flex');
+        document.body.classList.remove('overflow-hidden');
+        if (detailLastTrigger && typeof detailLastTrigger.focus === 'function') {
+          detailLastTrigger.focus();
+        }
+      };
+
+      const setDetailText = (targetEl, value, fallback = '정보 없음') => {
+        if (!targetEl) return;
+        const text = String(value || '').trim();
+        targetEl.textContent = text || fallback;
+      };
+
+      const openSkillDetailModal = (buttonEl) => {
+        if (!buttonEl || !detailModal) return;
+        const dataset = buttonEl.dataset || {};
+        detailLastTrigger = buttonEl;
+        const skillSlug = String(dataset.skillSlug || '').trim();
+        const detail = (skillSlug && skillDetailMap && skillDetailMap[skillSlug]) ? skillDetailMap[skillSlug] : {};
+
+        const displayName = String(detail.display_name || dataset.skillDisplayName || '스킬 상세').trim() || '스킬 상세';
+        const slug = String(detail.slug || dataset.skillSlug || '-').trim() || '-';
+        const familyKo = String(detail.family_ko || dataset.skillFamilyKo || detail.family || dataset.skillFamily || '-').trim() || '-';
+        const familyRaw = String(detail.family || dataset.skillFamily || '-').trim() || '-';
+        const roleKo = String(detail.role_ko || dataset.skillRoleKo || detail.role || dataset.skillRole || '-').trim() || '-';
+        const roleRaw = String(detail.role || dataset.skillRole || '-').trim() || '-';
+        const style = String(detail.style || dataset.skillStyle || '-').trim() || '-';
+        const methodology = String(detail.methodology || dataset.skillMethodology || '정보 없음').trim() || '정보 없음';
+        const usesLlm = String(detail.uses_llm_ko || dataset.skillUsesLlm || '정보 없음').trim() || '정보 없음';
+        const requiresApi = String(detail.requires_api_ko || dataset.skillRequiresApi || '정보 없음').trim() || '정보 없음';
+        const signals = Array.isArray(detail.signals) ? detail.signals : parseJsonSafe(dataset.skillSignals, []);
+        const axesMap = (detail.axes && typeof detail.axes === 'object' && !Array.isArray(detail.axes))
+          ? detail.axes
+          : parseJsonSafe(dataset.skillAxes, {});
+
+        if (detailTitleEl) detailTitleEl.textContent = displayName;
+        if (detailSlugEl) detailSlugEl.textContent = `slug: ${slug}`;
+        if (detailFamilyEl) detailFamilyEl.textContent = `family: ${familyKo} (${familyRaw})`;
+        if (detailRoleEl) detailRoleEl.textContent = `${roleKo} (${roleRaw})`;
+        if (detailStyleEl) detailStyleEl.textContent = style;
+        if (detailUsesLlmEl) detailUsesLlmEl.textContent = usesLlm;
+        if (detailRequiresApiEl) detailRequiresApiEl.textContent = requiresApi;
+        if (detailMethodologyEl) detailMethodologyEl.textContent = methodology;
+
+        const signalRows = Array.isArray(signals)
+          ? signals.map((item) => String(item || '').trim()).filter(Boolean)
+          : [];
+        renderBadgeList(detailSignalsEl, signalRows, '정보 없음');
+
+        const axisRows = [];
+        if (axesMap && typeof axesMap === 'object' && !Array.isArray(axesMap)) {
+          Object.entries(axesMap).forEach(([key, value]) => {
+            const axisKey = String(key || '').trim();
+            if (!axisKey) return;
+            const axisValue = Number(value);
+            if (Number.isFinite(axisValue)) {
+              axisRows.push(`${axisKey}: ${axisValue}`);
+            } else {
+              axisRows.push(axisKey);
+            }
+          });
+        }
+        renderBadgeList(detailAxesEl, axisRows, '정보 없음');
+
+        setDetailText(detailRefOverviewEl, detail.reference_overview);
+        setDetailText(detailRefWhenEl, detail.reference_when_to_use);
+        setDetailText(detailRefDataEl, detail.reference_data_sources);
+        setDetailText(detailRefWorkflowEl, detail.reference_workflow);
+        setDetailText(detailRefOutputEl, detail.reference_output);
+        setDetailText(detailRefPrereqEl, detail.reference_prerequisites);
+        setDetailText(detailRefSourceEl, detail.reference_source || '참조 없음');
+        if (detailRefLinkEl) {
+          const sourceUrl = String(detail.reference_source_url || '').trim();
+          detailRefLinkEl.href = sourceUrl || '#';
+          if (!sourceUrl) {
+            detailRefLinkEl.classList.add('pointer-events-none', 'opacity-50');
+          } else {
+            detailRefLinkEl.classList.remove('pointer-events-none', 'opacity-50');
+          }
+        }
+
+        detailModal.classList.remove('hidden');
+        detailModal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+        if (detailCloseBtn) {
+          detailCloseBtn.focus();
+        }
+      };
 
       const roleOf = (box) => {
         const role = box.dataset.roleGroup;
@@ -956,6 +1269,35 @@
           }
         });
       }
+
+      if (detailCloseBtn) {
+        detailCloseBtn.addEventListener('click', () => {
+          closeSkillDetailModal();
+        });
+      }
+
+      document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!target || !(target instanceof Element)) return;
+
+        const detailBtn = target.closest('.skill-detail-btn');
+        if (detailBtn) {
+          event.preventDefault();
+          event.stopPropagation();
+          openSkillDetailModal(detailBtn);
+          return;
+        }
+
+        if (detailModal && target === detailModal) {
+          closeSkillDetailModal();
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        if (!detailModal || detailModal.classList.contains('hidden')) return;
+        closeSkillDetailModal();
+      });
 
       const aiRuntimeStatus = '{{ model.ai_runtime.status }}';
       const aiDelayWarnSec = Number('{{ model.ai_runtime.running_delay_warn_sec }}' || '300');

@@ -1,0 +1,382 @@
+{
+  "sector-analyst": {
+    "overview": "This skill enables comprehensive analysis of sector and industry performance charts to identify market cycle positioning and predict likely rotation scenarios. The analysis combines observed performance data with established sector rotation principles to provide objective market assessment and probabilistic scenario forecasting.",
+    "when_to_use": "Use this skill when:\n• User provides sector performance charts (typically 1-week and 1-month timeframes)\n• User provides industry performance charts showing relative performance data\n• User requests analysis of current market cycle positioning\n• User asks for sector rotation assessment or predictions\n• User needs probability-weighted scenarios for market positioning\n\nExample user requests:\n• \"Analyze these sector performance charts and tell me where we are in the market cycle\"\n• \"Based on these performance charts, what sectors should outperform next?\"\n• \"What's the probability of a defensive rotation based on this data?\"\n• \"Review these sector and industry charts and provide scenario analysis\"",
+    "data_sources": "",
+    "workflow": "Follow this structured workflow when analyzing sector/industry performance charts:",
+    "output": "Save analysis results as a Markdown file with naming convention: `sector_analysis_YYYY-MM-DD.md`\n\nUse this structure:",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/sector-analyst/SKILL.md"
+  },
+  "breadth-chart-analyst": {
+    "overview": "This skill enables specialized analysis of two complementary market breadth charts that provide strategic (medium to long-term) and tactical (short-term) market perspectives. Analyze breadth chart images to assess market health, identify trading signals based on backtested strategies, and develop positioning recommendations. All thinking and output are conducted exclusively in English.",
+    "when_to_use": "Use this skill when:\n• User provides S&P 500 Breadth Index (200-Day MA based) chart images for analysis\n• User provides US Stock Market Uptrend Stock Ratio chart images for analysis\n• User requests market breadth assessment or market health evaluation\n• User asks about medium-term strategic positioning based on breadth indicators\n• User needs short-term tactical timing signals for swing trading\n• User wants combined strategic and tactical market outlook\n\nDo NOT use this skill when:\n• User asks about individual stock analysis (use `us-stock-analysis` skill instead)\n• User needs sector rotation analysis without breadth charts (use `sector-analyst` skill instead)\n• User wants news-based market analysis (use `market-news-analyst` skill instead)",
+    "data_sources": "",
+    "workflow": "",
+    "output": "This skill generates markdown analysis reports saved to the `reports/` directory:\n• Chart 1 only: `breadth_200ma_analysis_[YYYY-MM-DD].md`\n• Chart 2 only: `uptrend_ratio_analysis_[YYYY-MM-DD].md`\n• Both charts: `breadth_combined_analysis_[YYYY-MM-DD].md`\n\nReports include executive summaries, current readings, signal identification, scenario analysis with probabilities, and actionable positioning recommendations for different trader types.",
+    "prerequisites": "• **Chart Images Required**: User must provide one or both breadth chart images:\n• Chart 1: S&P 500 Breadth Index (200-Day MA based)\n• Chart 2: US Stock Market Uptrend Stock Ratio\n• **No API Keys Required**: This skill analyzes user-provided images; no external data sources needed\n• **Language**: All analysis and output conducted in English",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/breadth-chart-analyst/SKILL.md"
+  },
+  "technical-analyst": {
+    "overview": "This skill enables comprehensive technical analysis of weekly price charts. Analyze chart images to identify trends, support and resistance levels, moving average relationships, volume patterns, and develop probabilistic scenarios for future price movement. All analysis is conducted objectively using only chart data, without influence from news, fundamentals, or market sentiment.",
+    "when_to_use": "",
+    "data_sources": "",
+    "workflow": "",
+    "output": "",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/technical-analyst/SKILL.md"
+  },
+  "market-news-analyst": {
+    "overview": "This skill enables comprehensive analysis of market-moving news events from the past 10 days, focusing on their impact on US equity markets and commodities. The skill automatically collects news from trusted sources using WebSearch and WebFetch tools, evaluates market impact magnitude, analyzes actual market reactions, and produces structured English reports ranked by market impact significance.",
+    "when_to_use": "Use this skill when:\n• User requests analysis of recent major market news (past 10 days)\n• User wants to understand market reactions to specific events (FOMC decisions, earnings, geopolitical)\n• User needs comprehensive market news summary with impact assessment\n• User asks about correlations between news events and commodity price movements\n• User requests analysis of how central bank policy announcements affected markets\n\nExample user requests:\n• \"Analyze the major market news from the past 10 days\"\n• \"How did the latest FOMC decision impact the market?\"\n• \"What were the most important market-moving events this week?\"\n• \"Analyze recent geopolitical news and commodity price reactions\"\n• \"Review mega-cap tech earnings and their market impact\"",
+    "data_sources": "",
+    "workflow": "Follow this structured 6-step workflow when analyzing market news:",
+    "output": "",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/market-news-analyst/SKILL.md"
+  },
+  "us-stock-analysis": {
+    "overview": "Perform comprehensive analysis of US stocks covering fundamental analysis (financials, business quality, valuation), technical analysis (indicators, trends, patterns), peer comparisons, and generate detailed investment reports. Fetch real-time market data via web search tools and apply structured analytical frameworks.",
+    "when_to_use": "",
+    "data_sources": "Always use web search tools to gather current market data:\n\n**Primary Data to Fetch:**\n• **Current stock price and trading data** (price, volume, 52-week range)\n• **Financial statements** (income statement, balance sheet, cash flow)\n• **Key metrics** (P/E, EPS, revenue, margins, debt ratios)\n• **Analyst ratings and price targets**\n• **Recent news and developments**\n• **Peer/competitor data** (for comparisons)\n• **Technical data** (moving averages, RSI, MACD when available)\n\n**Search Strategy:**\n• Use ticker symbol + specific data needed (e.g., \"AAPL financial metrics 2024\")\n• For comprehensive data: Search for earnings reports, investor presentations, or SEC filings\n• For technical data: Search for \"AAPL technical analysis\" or use financial data sites\n• Always verify data recency (prefer data from last quarter)\n\n**Quality Sources:**\n• Yahoo Finance, Google Finance, MarketWatch, Seeking Alpha, Bloomberg, CNBC\n• Company investor relations pages\n• SEC filings (10-K, 10-Q) for detailed financials\n• TradingView, StockCharts for technical data",
+    "workflow": "",
+    "output": "**General Principles:**\n• Use tables for financial data and comparisons (easy to scan)\n• Bold key metrics and findings\n• Include data sources and dates\n• Quantify whenever possible\n• Present both bull and bear perspectives\n• Be clear about assumptions and uncertainties\n\n**Formatting:**\n• **Headers** for clear section separation\n• **Tables** for metrics, comparisons, historical data\n• **Bullet points** for lists, factors, risks\n• **Bold text** for key findings, important metrics\n• **Percentages** for growth rates, returns, margins\n• **Currency** formatted consistently ($B for billions, $M for millions)\n\n**Tone:**\n• Objective and balanced\n• Acknowledge uncertainty\n• Support claims with data\n• Avoid hyperbole\n• Present risks clearly",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/us-stock-analysis/SKILL.md"
+  },
+  "market-environment-analysis": {
+    "overview": "---\nname: market-environment-analysis\ndescription: Comprehensive market environment analysis and reporting tool. Analyzes global markets including US, European, Asian markets, forex, commodities, and economic indicators. Provides risk-on/risk-off assessment, sector analysis, and technical indicator interpretation. Triggers on keywords like market analysis, market environment, global markets, trading environment, market conditions, investment climate, market sentiment, forex analysis, stock market analysis, 相場環境, 市場分析, マーケット状況, 投資環境.\n---\n\nComprehensive analysis tool for understanding market conditions and creating professional market reports anytime.",
+    "when_to_use": "",
+    "data_sources": "• Official releases (Central banks, Government statistics)\n• Major financial media (Bloomberg, Reuters)\n• Broker reports\n• Analyst consensus estimates",
+    "workflow": "",
+    "output": "",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/market-environment-analysis/SKILL.md"
+  },
+  "market-breadth-analyzer": {
+    "overview": "---\nname: market-breadth-analyzer\ndescription: Quantifies market breadth health using TraderMonty's public CSV data. Generates a 0-100 composite score across 6 components (100 = healthy). No API key required. Use when user asks about market breadth, participation rate, advance-decline health, whether the rally is broad-based, or general market health assessment.\n---",
+    "when_to_use": "**English:**\n• User asks \"Is the market rally broad-based?\" or \"How healthy is market breadth?\"\n• User wants to assess market participation rate\n• User asks about advance-decline indicators or breadth thrust\n• User wants to know if the market is narrowing (fewer stocks participating)\n• User asks about equity exposure levels based on breadth conditions\n\n**Japanese:**\n• 「マーケットブレッドスはどうですか？」「市場の参加率は？」\n• 「上昇は広がっている？」「一部の銘柄だけの上昇？」\n• ブレッドス指標に基づくエクスポージャー判断\n• 市場の健康度をデータで確認したい",
+    "data_sources": "**Detail CSV:** `market_breadth_data.csv`\n• ~2,500 rows from 2016-02 to present\n• Columns: Date, S&P500_Price, Breadth_Index_Raw, Breadth_Index_200MA, Breadth_Index_8MA, Breadth_200MA_Trend, Bearish_Signal, Is_Peak, Is_Trough, Is_Trough_8MA_Below_04\n\n**Summary CSV:** `market_breadth_summary.csv`\n• 8 aggregate metrics (average peaks, average troughs, counts, analysis period)\n\nBoth are publicly hosted on GitHub Pages - no authentication required.",
+    "workflow": "",
+    "output": "• JSON: `market_breadth_YYYY-MM-DD_HHMMSS.json`\n• Markdown: `market_breadth_YYYY-MM-DD_HHMMSS.md`\n• History: `market_breadth_history.json` (persists across runs, max 20 entries)",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/market-breadth-analyzer/SKILL.md"
+  },
+  "uptrend-analyzer": {
+    "overview": "---\nname: uptrend-analyzer\ndescription: Analyzes market breadth using Monty's Uptrend Ratio Dashboard data to diagnose the current market environment. Generates a 0-100 composite score from 5 components (breadth, sector participation, rotation, momentum, historical context). Use when asking about market breadth, uptrend ratios, or whether the market environment supports equity exposure. No API key required.\n---",
+    "when_to_use": "**English:**\n• User asks \"Is the market breadth healthy?\" or \"How broad is the rally?\"\n• User wants to assess uptrend ratios across sectors\n• User asks about market participation or breadth conditions\n• User needs exposure guidance based on breadth analysis\n• User references Monty's Uptrend Dashboard or uptrend ratios\n\n**Japanese:**\n• 「市場のブレドスは健全？」「上昇の裾野は広い？」\n• セクター別のアップトレンド比率を確認したい\n• 相場参加率・ブレドス状況を診断したい\n• ブレドス分析に基づくエクスポージャーガイダンスが欲しい\n• Montyのアップトレンドダッシュボードについて質問",
+    "data_sources": "",
+    "workflow": "",
+    "output": "• JSON: `uptrend_analysis_YYYY-MM-DD_HHMMSS.json`\n• Markdown: `uptrend_analysis_YYYY-MM-DD_HHMMSS.md`",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/uptrend-analyzer/SKILL.md"
+  },
+  "macro-regime-detector": {
+    "overview": "---\nname: macro-regime-detector\ndescription: Detect structural macro regime transitions (1-2 year horizon) using cross-asset ratio analysis. Analyze RSP/SPY concentration, yield curve, credit conditions, size factor, equity-bond relationship, and sector rotation to identify regime shifts between Concentration, Broadening, Contraction, Inflationary, and Transitional states. Run when user asks about macro regime, market regime change, structural rotation, or long-term market positioning.\n---\n\nDetect structural macro regime transitions using monthly-frequency cross-asset ratio analysis. This skill identifies 1-2 year regime shifts that inform strategic portfolio positioning.",
+    "when_to_use": "• User asks about current macro regime or regime transitions\n• User wants to understand structural market rotations (concentration vs broadening)\n• User asks about long-term positioning based on yield curve, credit, or cross-asset signals\n• User references RSP/SPY ratio, IWM/SPY, HYG/LQD, or other cross-asset ratios\n• User wants to assess whether a regime change is underway",
+    "data_sources": "",
+    "workflow": "• Load reference documents for methodology context:\n• `references/regime_detection_methodology.md`\n• `references/indicator_interpretation_guide.md`\n\n• Execute the main analysis script:\npython3 skills/macro-regime-detector/scripts/macro_regime_detector.py\nThis fetches 600 days of data for 9 ETFs + Treasury rates (10 API calls total).\n\n• Read the generated Markdown report and present findings to user.\n\n• Provide additional context using `references/historical_regimes.md` when user asks about historical parallels.",
+    "output": "• `macro_regime_YYYY-MM-DD_HHMMSS.json` — Structured data for programmatic use\n• `macro_regime_YYYY-MM-DD_HHMMSS.md` — Human-readable report with:\n• Current Regime Assessment\n• Transition Signal Dashboard\n• Component Details\n• Regime Classification Evidence\n• Portfolio Posture Recommendations",
+    "prerequisites": "• **FMP API Key** (required): Set `FMP_API_KEY` environment variable or pass `--api-key`\n• Free tier (250 calls/day) is sufficient (script uses ~10 calls)",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/macro-regime-detector/SKILL.md"
+  },
+  "institutional-flow-tracker": {
+    "overview": "This skill tracks institutional investor activity through 13F SEC filings to identify \"smart money\" flows into and out of stocks. By analyzing quarterly changes in institutional ownership, you can discover stocks that sophisticated investors are accumulating before major price moves, or identify potential risks when institutions are reducing positions.\n\n**Key Insight:** Institutional investors (hedge funds, pension funds, mutual funds) manage trillions of dollars and conduct extensive research. Their collective buying/selling patterns often precede significant price movements by 1-3 quarters.",
+    "when_to_use": "Use this skill when:\n• Validating investment ideas (checking if smart money agrees with your thesis)\n• Discovering new opportunities (finding stocks institutions are accumulating)\n• Risk assessment (identifying stocks institutions are exiting)\n• Portfolio monitoring (tracking institutional support for your holdings)\n• Following specific investors (tracking Warren Buffett, Cathie Wood, etc.)\n• Sector rotation analysis (identifying where institutions are rotating capital)\n\n**Do NOT use when:**\n• Seeking real-time intraday signals (13F data has 45-day reporting lag)\n• Analyzing micro-cap stocks (<$100M market cap with limited institutional interest)\n• Looking for short-term trading signals (<3 months horizon)",
+    "data_sources": "",
+    "workflow": "",
+    "output": "All analysis generates structured markdown reports saved to repository root:\n\n**Filename convention:** `institutional_flow_analysis_<TICKER/THEME>_<DATE>.md`\n\n**Report sections:**\n• Executive Summary (key findings)\n• Institutional Ownership Trend (current vs historical)\n• Top Holders and Changes\n• New Buyers vs Sellers\n• Concentration Analysis\n• Interpretation and Recommendations\n• Data Sources and Timestamp",
+    "prerequisites": "• **FMP API Key:** Set `FMP_API_KEY` environment variable or pass `--api-key` to scripts\n• **Python 3.8+:** Required for running analysis scripts\n• **Dependencies:** `pip install requests` (scripts handle missing dependencies gracefully)",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/institutional-flow-tracker/SKILL.md"
+  },
+  "theme-detector": {
+    "overview": "This skill detects and ranks trending market themes by analyzing cross-sector momentum, volume, and breadth signals. It identifies both bullish (upward momentum) and bearish (downward pressure) themes, assesses lifecycle maturity (early/mid/late/exhaustion), and provides a confidence score combining quantitative data with narrative analysis.\n\n**3-Dimensional Scoring Model:**\n• **Theme Heat** (0-100): Direction-neutral strength of the theme (momentum, volume, uptrend ratio, breadth)\n• **Lifecycle Maturity**: Stage classification (Early / Mid / Late / Exhaustion) based on duration, extremity clustering, valuation, and ETF proliferation\n• **Confidence** (Low / Medium / High): Reliability of the detection, combining quantitative breadth with narrative confirmation\n\n**Key Features:**\n• Cross-sector theme detection using FINVIZ industry data\n• Direction-aware scoring (bullish and bearish themes)\n• Lifecycle maturity assessment to identify crowded vs. emerging trades\n• ETF proliferation scoring (more ETFs = more mature/crowded theme)\n• Integration with uptrend-dashboard for 3-point evaluation\n• Dual-mode operation: FINVIZ Elite (fast) or public scraping (slower, limited)\n• WebSearch-based narrative confirmation for top themes",
+    "when_to_use": "**Explicit Triggers:**\n• \"What market themes are trending right now?\"\n• \"Which sectors are hot/cold?\"\n• \"Detect current market themes\"\n• \"What are the strongest bullish/bearish narratives?\"\n• \"Is AI/clean energy/defense still a strong theme?\"\n• \"Where is sector rotation heading?\"\n• \"Show me thematic investing opportunities\"\n\n**Implicit Triggers:**\n• User wants to understand broad market narrative shifts\n• User is looking for thematic ETF or sector allocation ideas\n• User asks about crowded trades or late-cycle themes\n• User wants to know which themes are emerging vs. exhausted\n\n**When NOT to Use:**\n• Individual stock analysis (use us-stock-analysis instead)\n• Specific sector deep-dive with chart reading (use sector-analyst instead)\n• Portfolio rebalancing (use portfolio-manager instead)\n• Dividend/income investing (use value-dividend-screener instead)\n\n---",
+    "data_sources": "",
+    "workflow": "",
+    "output": "",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/theme-detector/SKILL.md"
+  },
+  "economic-calendar-fetcher": {
+    "overview": "Retrieve upcoming economic events and data releases from the Financial Modeling Prep (FMP) Economic Calendar API. This skill fetches scheduled economic indicators including central bank monetary policy decisions, employment reports, inflation data (CPI/PPI), GDP releases, retail sales, manufacturing data, and other market-moving events that impact financial markets.\n\nThe skill uses a Python script to query the FMP API and generates chronological markdown reports with impact assessment for each scheduled event.\n\n**Key Capabilities:**\n• Fetch economic events for specified date ranges (max 90 days)\n• Support flexible API key provision (environment variable or user input)\n• Filter by impact level, country, or event type\n• Generate structured markdown reports with impact analysis\n• Default to next 7 days for quick market outlook\n\n**Data Source:**\n• FMP Economic Calendar API: `https://financialmodelingprep.com/api/v3/economic_calendar`\n• Covers major economies: US, EU, UK, Japan, China, Canada, Australia\n• Event types: Central bank decisions, employment, inflation, GDP, trade, housing, surveys",
+    "when_to_use": "Use this skill when the user requests:\n\n• **Economic Calendar Queries:**\n• \"What economic events are coming up this week?\"\n• \"Show me the economic calendar for the next two weeks\"\n• \"When is the next FOMC meeting?\"\n• \"What major economic data is being released next month?\"\n\n• **Market Event Planning:**\n• \"What should I watch for in the markets this week?\"\n• \"Are there any high-impact economic releases coming?\"\n• \"When is the next jobs report / CPI release / GDP report?\"\n\n• **Specific Date Range Requests:**\n• \"Get economic events from January 1 to January 31\"\n• \"What's on the economic calendar for Q1 2025?\"\n\n• **Country-Specific Queries:**\n• \"Show me US economic data releases next week\"\n• \"What ECB events are scheduled?\"\n• \"When is Japan releasing their inflation data?\"\n\n**DO NOT use this skill for:**\n• Past economic events (use market-news-analyst for historical analysis)\n• Corporate earnings calendars (this skill excludes earnings)\n• Real-time market data or live quotes\n• Technical analysis or chart interpretation",
+    "data_sources": "",
+    "workflow": "Follow these steps to fetch and analyze the economic calendar:",
+    "output": "**File naming convention:**\neconomic_calendar_2025-01-01_to_2025-01-31.md\neconomic_calendar_2025-01-15_to_2025-01-21.md  (weekly)\neconomic_calendar_high_impact_2025-01.md  (with filters)\n\n**Markdown structure requirements:**\n\n• **Chronological ordering:** Events sorted by date and time (earliest first)\n• **Impact level indicators:** Use (High Impact), (Medium Impact), (Low Impact) labels\n• **Time zone clarity:** Always specify UTC and provide ET/PT conversions for US events\n• **Data completeness:** Include all available fields (previous, estimate, actual if past)\n• **Null handling:** Display \"N/A\" or \"No estimate\" for null values\n• **Impact assessment:** Every high/medium impact event must have market implications analysis\n\n**Table format option (for dense listings):**\n\n| Date/Time (UTC) | Event | Country | Impact | Previous | Estimate | Assessment |\n|-----------------|-------|---------|--------|----------|----------|------------|\n| 01-15 14:30 | CPI YoY | US | High | 2.6% | 2.7% | Core inflation metric |\n\n**Language:** All reports in English",
+    "prerequisites": "• **FMP API Key** (required): Sign up at https://financialmodelingprep.com for a free key (250 requests/day). Set via `FMP_API_KEY` environment variable or pass `--api-key` to the script.\n• **Python 3.10+**: Required to run `skills/economic-calendar-fetcher/scripts/get_economic_calendar.py`.\n• **No third-party packages**: The script uses only the Python standard library.",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/economic-calendar-fetcher/SKILL.md"
+  },
+  "earnings-calendar": {
+    "overview": "This skill retrieves upcoming earnings announcements for US stocks using the Financial Modeling Prep (FMP) API. It focuses on companies with significant market capitalization (mid-cap and above, over $2B) that are likely to impact market movements. The skill generates organized markdown reports showing which companies are reporting earnings over the next week, grouped by date and timing (before market open, after market close, or time not announced).\n\n**Key Features**:\n• Uses FMP API for reliable, structured earnings data\n• Filters by market cap (>$2B) to focus on market-moving companies\n• Includes EPS and revenue estimates\n• Multi-environment support (CLI, Desktop, Web)\n• Flexible API key management\n• Organized by date, timing, and market cap",
+    "when_to_use": "",
+    "data_sources": "",
+    "workflow": "",
+    "output": "",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/earnings-calendar/SKILL.md"
+  },
+  "scenario-analyzer": {
+    "overview": "このスキルは、ニュースヘッドラインを起点として中長期（18ヶ月）の投資シナリオを分析します。\n2つの専門エージェント（`scenario-analyst`と`strategy-reviewer`）を順次呼び出し、\n多角的な分析と批判的レビューを統合した包括的なレポートを生成します。",
+    "when_to_use": "以下の場合にこのスキルを使用してください：\n\n• ニュースヘッドラインから中長期の投資影響を分析したい\n• 18ヶ月後のシナリオを複数構築したい\n• セクター・銘柄への影響を1次/2次/3次で整理したい\n• セカンドオピニオンを含む包括的な分析が必要\n• 日本語でのレポート出力が必要\n\n**使用例:**\n/headline-scenario-analyzer \"Fed raises interest rates by 50bp, signals more hikes ahead\"\n/headline-scenario-analyzer \"China announces new tariffs on US semiconductors\"\n/headline-scenario-analyzer \"OPEC+ agrees to cut oil production by 2 million barrels per day\"",
+    "data_sources": "",
+    "workflow": "",
+    "output": "",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/scenario-analyzer/SKILL.md"
+  },
+  "backtest-expert": {
+    "overview": "**Goal**: Find strategies that \"break the least\", not strategies that \"profit the most\" on paper.\n\n**Principle**: Add friction, stress test assumptions, and see what survives. If a strategy holds up under pessimistic conditions, it's more likely to work in live trading.",
+    "when_to_use": "Use this skill when:\n• Developing or validating systematic trading strategies\n• Evaluating whether a trading idea is robust enough for live implementation\n• Troubleshooting why a backtest might be misleading\n• Learning proper backtesting methodology\n• Avoiding common pitfalls (curve-fitting, look-ahead bias, survivorship bias)\n• Assessing parameter sensitivity and regime dependence\n• Setting realistic expectations for slippage and execution costs",
+    "data_sources": "",
+    "workflow": "",
+    "output": "• `reports/backtest_eval_<timestamp>.json` — structured evaluation with per-dimension scores, red flags, and verdict\n• `reports/backtest_eval_<timestamp>.md` — human-readable report with dimension table, key metrics, and red flag details",
+    "prerequisites": "• Python 3.9+ (for evaluation script)\n• No API keys required\n• No external data dependencies — metrics are user-provided",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/backtest-expert/SKILL.md"
+  },
+  "stanley-druckenmiller-investment": {
+    "overview": "---\nname: stanley-druckenmiller-investment\ndescription: Druckenmiller Strategy Synthesizer - Integrates 8 upstream skill outputs (Market Breadth, Uptrend Analysis, Market Top, Macro Regime, FTD Detector, VCP Screener, Theme Detector, CANSLIM Screener) into a unified conviction score (0-100), pattern classification, and allocation recommendation. Use when user asks about overall market conviction, portfolio positioning, asset allocation, strategy synthesis, or Druckenmiller-style analysis. Triggers on queries like \"What is my conviction level?\", \"How should I position?\", \"Run the strategy synthesizer\", \"Druckenmiller analysis\", \"総合的な市場判断\", \"確信度スコア\", \"ポートフォリオ配分\", \"ドラッケンミラー分析\".\n---",
+    "when_to_use": "**English:**\n• User asks \"What's my overall conviction?\" or \"How should I be positioned?\"\n• User wants a unified view synthesizing breadth, uptrend, top risk, macro, and FTD signals\n• User asks about Druckenmiller-style portfolio positioning\n• User requests strategy synthesis after running individual analysis skills\n• User asks \"Should I increase or decrease exposure?\"\n• User wants pattern classification (policy pivot, distortion, contrarian, wait)\n\n**Japanese:**\n• 「総合的な市場判断は？」「今のポジショニングは？」\n• ブレッドス、アップトレンド、天井リスク、マクロの統合判断\n• 「エクスポージャーを増やすべき？減らすべき？」\n• 「ドラッケンミラー分析を実行して」\n• 個別スキル実行後の戦略統合レポート\n\n---",
+    "data_sources": "",
+    "workflow": "",
+    "output": "• `druckenmiller_strategy_YYYY-MM-DD_HHMMSS.json` — Structured analysis data\n• `druckenmiller_strategy_YYYY-MM-DD_HHMMSS.md` — Human-readable report",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/stanley-druckenmiller-investment/SKILL.md"
+  },
+  "us-market-bubble-detector": {
+    "overview": "---\nname: us-market-bubble-detector\ndescription: Evaluates market bubble risk through quantitative data-driven analysis using the revised Minsky/Kindleberger framework v2.1. Prioritizes objective metrics (Put/Call, VIX, margin debt, breadth, IPO data) over subjective impressions. Features strict qualitative adjustment criteria with confirmation bias prevention. Supports practical investment decisions with mandatory data collection and mechanical scoring. Use when user asks about bubble risk, valuation concerns, or profit-taking timing.\n---",
+    "when_to_use": "Use this skill when:\n\n**English:**\n• User asks \"Is the market in a bubble?\" or \"Are we in a bubble?\"\n• User seeks advice on profit-taking, new entry timing, or short-selling decisions\n• User reports social phenomena (non-investors entering, media frenzy, IPO flood)\n• User mentions narratives like \"this time is different\" or \"revolutionary technology\" becoming mainstream\n• User consults about risk management for existing positions\n\n**Japanese:**\n• ユーザーが「今の相場はバブルか?」と尋ねる\n• 投資の利確・新規参入・空売りのタイミング判断を求める\n• 社会現象(非投資家の参入、メディア過熱、IPO氾濫)を観察し懸念を表明\n• 「今回は違う」「革命的技術」などの物語が主流化している状況を報告\n• 保有ポジションのリスク管理方法を相談\n\n---",
+    "data_sources": "",
+    "workflow": "",
+    "output": "",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/us-market-bubble-detector/SKILL.md"
+  },
+  "options-strategy-advisor": {
+    "overview": "This skill provides comprehensive options strategy analysis and education using theoretical pricing models. It helps traders understand, analyze, and simulate options strategies without requiring real-time market data subscriptions.\n\n**Core Capabilities:**\n• **Black-Scholes Pricing**: Theoretical option prices and Greeks calculation\n• **Strategy Simulation**: P/L analysis for major options strategies\n• **Earnings Strategies**: Pre-earnings volatility plays integrated with Earnings Calendar\n• **Risk Management**: Position sizing, Greeks exposure, max loss/profit analysis\n• **Educational Focus**: Detailed explanations of strategies and risk metrics\n\n**Data Sources:**\n• FMP API: Stock prices, historical volatility, dividends, earnings dates\n• User Input: Implied volatility (IV), risk-free rate\n• Theoretical Models: Black-Scholes for pricing and Greeks",
+    "when_to_use": "Use this skill when:\n• User asks about options strategies (\"What's a covered call?\", \"How does an iron condor work?\")\n• User wants to simulate strategy P/L (\"What's my max profit on a bull call spread?\")\n• User needs Greeks analysis (\"What's my delta exposure?\")\n• User asks about earnings strategies (\"Should I buy a straddle before earnings?\")\n• User wants to compare strategies (\"Covered call vs protective put?\")\n• User needs position sizing guidance (\"How many contracts should I trade?\")\n• User asks about volatility (\"Is IV high right now?\")\n\nExample requests:\n• \"Analyze a covered call on AAPL\"\n• \"What's the P/L on a $100/$105 bull call spread on MSFT?\"\n• \"Should I trade a straddle before NVDA earnings?\"\n• \"Calculate Greeks for my iron condor position\"\n• \"Compare protective put vs covered call for downside protection\"",
+    "data_sources": "",
+    "workflow": "",
+    "output": "**Strategy Analysis Report Template:**\n\n**Symbol:** [TICKER]\n**Strategy:** [Strategy Type]\n**Expiration:** [Date] ([DTE] days)\n**Contracts:** [Number]\n\n---",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/options-strategy-advisor/SKILL.md"
+  },
+  "portfolio-manager": {
+    "overview": "Analyze and manage investment portfolios by integrating with Alpaca MCP Server to fetch real-time holdings data, then performing comprehensive analysis covering asset allocation, diversification, risk metrics, individual position evaluation, and rebalancing recommendations. Generate detailed portfolio reports with actionable insights.\n\nThis skill leverages Alpaca's brokerage API through MCP (Model Context Protocol) to access live portfolio data, ensuring analysis is based on actual current positions rather than manually entered data.",
+    "when_to_use": "Invoke this skill when the user requests:\n• \"Analyze my portfolio\"\n• \"Review my current positions\"\n• \"What's my asset allocation?\"\n• \"Check my portfolio risk\"\n• \"Should I rebalance my portfolio?\"\n• \"Evaluate my holdings\"\n• \"Portfolio performance review\"\n• \"What stocks should I buy or sell?\"\n• Any request involving portfolio-level analysis or management",
+    "data_sources": "",
+    "workflow": "",
+    "output": "**Tone and Style:**\n• Objective and analytical\n• Actionable recommendations with clear rationale\n• Acknowledge uncertainty in market forecasts\n• Balance optimism with risk awareness\n• Quantify whenever possible\n\n**Data Presentation:**\n• Tables for comparisons and metrics\n• Percentages for allocations and returns\n• Dollar amounts for absolute values\n• Consistent formatting throughout report\n\n**Recommendation Clarity:**\n• Explicit action verbs (TRIM, ADD, HOLD, SELL)\n• Specific quantities (sell XX shares, add $X,XXX)\n• Priority levels (Immediate, High, Medium, Low)\n• Supporting rationale for each recommendation\n\n**Visual Descriptions:**\n• Describe allocation breakdowns as if creating pie charts\n• Sector weights as bar chart equivalents\n• Performance trends with directional indicators (↑ ↓ →)",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/portfolio-manager/SKILL.md"
+  },
+  "strategy-pivot-designer": {
+    "overview": "Detect when a strategy's backtest iteration loop has stalled and propose structurally different strategy architectures. This skill acts as the feedback loop for the Edge pipeline (hint-extractor -> concept-synthesizer -> strategy-designer -> candidate-agent), breaking out of local optima by redesigning the strategy's skeleton rather than tweaking parameters.",
+    "when_to_use": "• Backtest scores have plateaued despite multiple refinement iterations.\n• A strategy shows signs of overfitting (high in-sample, low robustness).\n• Transaction costs defeat the strategy's thin edge.\n• Tail risk or drawdown exceeds acceptable thresholds.\n• You want to explore fundamentally different strategy architectures for the same market hypothesis.",
+    "data_sources": "",
+    "workflow": "• Accumulate backtest evaluation results into an iteration history file using `--append-eval`.\n• Run stagnation detection on the history to identify triggers (plateau, overfitting, cost defeat, tail risk).\n• If stagnation detected, generate pivot proposals using three techniques: assumption inversion, archetype switch, objective reframe.\n• Review ranked proposals (scored by quality potential + novelty).\n• For exportable proposals, ticket YAML is ready for edge-candidate-agent pipeline.\n• For research_only proposals, manual strategy design needed before pipeline integration.\n• Feed the selected pivot draft back into backtest-expert for the next iteration cycle.",
+    "output": "• `pivot_drafts/research_only/*.yaml` — strategy_draft compatible YAML proposals\n• `pivot_drafts/exportable/*.yaml` — export-ready drafts + ticket YAML for candidate-agent\n• `pivot_report_*.md` — human-readable pivot analysis\n• `pivot_manifest_*.json` — metadata for all generated files\n• `pivot_diagnosis_*.json` — stagnation detection results",
+    "prerequisites": "• Python 3.9+\n• `PyYAML`\n• Iteration history JSON (accumulated backtest-expert evaluations)\n• Source strategy draft YAML (from edge-strategy-designer)",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/strategy-pivot-designer/SKILL.md"
+  },
+  "market-top-detector": {
+    "overview": "---\nname: market-top-detector\ndescription: Detects market top probability using O'Neil Distribution Days, Minervini Leading Stock Deterioration, and Monty Defensive Sector Rotation. Generates a 0-100 composite score with risk zone classification. Use when user asks about market top risk, distribution days, defensive rotation, leadership breakdown, or whether to reduce equity exposure. Focuses on 2-8 week tactical timing signals for 10-20% corrections.\n---",
+    "when_to_use": "**English:**\n• User asks \"Is the market topping?\" or \"Are we near a top?\"\n• User notices distribution days accumulating\n• User observes defensive sectors outperforming growth\n• User sees leading stocks breaking down while indices hold\n• User asks about reducing equity exposure timing\n• User wants to assess correction probability for the next 2-8 weeks\n\n**Japanese:**\n• 「天井が近い？」「今は利確すべき？」\n• ディストリビューションデーの蓄積を懸念\n• ディフェンシブセクターがグロースをアウトパフォーム\n• 先導株が崩れ始めているが指数はまだ持ちこたえている\n• エクスポージャー縮小のタイミング判断\n• 今後2〜8週間の調整確率を評価したい",
+    "data_sources": "",
+    "workflow": "",
+    "output": "• JSON: `market_top_YYYY-MM-DD_HHMMSS.json`\n• Markdown: `market_top_YYYY-MM-DD_HHMMSS.md`",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/market-top-detector/SKILL.md"
+  },
+  "ftd-detector": {
+    "overview": "---\nname: ftd-detector\ndescription: Detects Follow-Through Day (FTD) signals for market bottom confirmation using William O'Neil's methodology. Dual-index tracking (S&P 500 + NASDAQ) with state machine for rally attempt, FTD qualification, and post-FTD health monitoring. Use when user asks about market bottom signals, follow-through days, rally attempts, re-entry timing after corrections, or whether it's safe to increase equity exposure. Complementary to market-top-detector (defensive) - this skill is offensive (bottom confirmation).\n---",
+    "when_to_use": "**English:**\n• User asks \"Is the market bottoming?\" or \"Is it safe to buy again?\"\n• User observes a market correction (3%+ decline) and wants re-entry timing\n• User asks about Follow-Through Days or rally attempts\n• User wants to assess if a recent bounce is sustainable\n• User asks about increasing equity exposure after a correction\n• Market Top Detector shows elevated risk and user wants bottom signals\n\n**Japanese:**\n• 「底打ちした？」「買い戻して良い？」\n• 調整局面（3%以上の下落）からのエントリータイミング\n• フォロースルーデーやラリーアテンプトについて\n• 直近の反発が持続可能か評価したい\n• 調整後のエクスポージャー拡大の判断\n• Market Top Detectorが高リスク表示の後の底打ちシグナル確認",
+    "data_sources": "",
+    "workflow": "",
+    "output": "• JSON: `ftd_detector_YYYY-MM-DD_HHMMSS.json`\n• Markdown: `ftd_detector_YYYY-MM-DD_HHMMSS.md`",
+    "prerequisites": "• **FMP API Key:** Required. Set `FMP_API_KEY` environment variable or pass via `--api-key` flag.\n• **Python 3.8+:** With `requests` library installed.\n• **API Budget:** 4 calls per execution (well within FMP free tier of 250/day).",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/ftd-detector/SKILL.md"
+  },
+  "earnings-trade-analyzer": {
+    "overview": "---\nname: earnings-trade-analyzer\ndescription: Analyze recent post-earnings stocks using a 5-factor scoring system (Gap Size, Pre-Earnings Trend, Volume Trend, MA200 Position, MA50 Position). Scores each stock 0-100 and assigns A/B/C/D grades. Use when user asks about earnings trade analysis, post-earnings momentum screening, earnings gap scoring, or finding best recent earnings reactions.\n---\n\nAnalyze recent post-earnings stocks using a 5-factor weighted scoring system to identify the strongest earnings reactions for potential momentum trades.",
+    "when_to_use": "• User asks for post-earnings trade analysis or earnings gap screening\n• User wants to find the best recent earnings reactions\n• User requests earnings momentum scoring or grading\n• User asks about post-earnings accumulation day (PEAD) candidates",
+    "data_sources": "",
+    "workflow": "",
+    "output": "• `earnings_trade_analyzer_YYYY-MM-DD_HHMMSS.json` - Structured results with schema_version \"1.0\"\n• `earnings_trade_analyzer_YYYY-MM-DD_HHMMSS.md` - Human-readable report with tables",
+    "prerequisites": "• FMP API key (set `FMP_API_KEY` environment variable or pass `--api-key`)\n• Free tier (250 calls/day) is sufficient for default screening (lookback 2 days, top 20)\n• Paid tier recommended for larger lookback windows or full screening",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/earnings-trade-analyzer/SKILL.md"
+  },
+  "pead-screener": {
+    "overview": "---\nname: pead-screener\ndescription: Screen post-earnings gap-up stocks for PEAD (Post-Earnings Announcement Drift) patterns. Analyzes weekly candle formation to detect red candle pullbacks and breakout signals. Supports two input modes - FMP earnings calendar (Mode A) or earnings-trade-analyzer JSON output (Mode B). Use when user asks about PEAD screening, post-earnings drift, earnings gap follow-through, red candle breakout patterns, or weekly earnings momentum setups.\n---\n\nScreen post-earnings gap-up stocks for PEAD (Post-Earnings Announcement Drift) patterns using weekly candle analysis to detect red candle pullbacks and breakout signals.",
+    "when_to_use": "• User asks for PEAD screening or post-earnings drift analysis\n• User wants to find earnings gap-up stocks with follow-through potential\n• User requests red candle breakout patterns after earnings\n• User asks for weekly earnings momentum setups\n• User provides earnings-trade-analyzer JSON output for further screening",
+    "data_sources": "",
+    "workflow": "",
+    "output": "• `pead_screener_YYYY-MM-DD_HHMMSS.json` - Structured results with stage classification\n• `pead_screener_YYYY-MM-DD_HHMMSS.md` - Human-readable report grouped by stage",
+    "prerequisites": "• FMP API key (set `FMP_API_KEY` environment variable or pass `--api-key`)\n• Free tier (250 calls/day) is sufficient for default screening\n• For Mode B: earnings-trade-analyzer JSON output file with schema_version \"1.0\"",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/pead-screener/SKILL.md"
+  },
+  "vcp-screener": {
+    "overview": "---\nname: vcp-screener\ndescription: Screen S&P 500 stocks for Mark Minervini's Volatility Contraction Pattern (VCP). Identifies Stage 2 uptrend stocks forming tight bases with contracting volatility near breakout pivot points. Use when user requests VCP screening, Minervini-style setups, tight base patterns, volatility contraction breakout candidates, or Stage 2 momentum stock scanning.\n---\n\nScreen S&P 500 stocks for Mark Minervini's Volatility Contraction Pattern (VCP), identifying Stage 2 uptrend stocks with contracting volatility near breakout pivot points.",
+    "when_to_use": "• User asks for VCP screening or Minervini-style setups\n• User wants to find tight base / volatility contraction patterns\n• User requests Stage 2 momentum stock scanning\n• User asks for breakout candidates with defined risk",
+    "data_sources": "",
+    "workflow": "",
+    "output": "• `vcp_screener_YYYY-MM-DD_HHMMSS.json` - Structured results\n• `vcp_screener_YYYY-MM-DD_HHMMSS.md` - Human-readable report",
+    "prerequisites": "• FMP API key (set `FMP_API_KEY` environment variable or pass `--api-key`)\n• Free tier (250 calls/day) is sufficient for default screening (top 100 candidates)\n• Paid tier recommended for full S&P 500 screening (`--full-sp500`)",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/vcp-screener/SKILL.md"
+  },
+  "canslim-screener": {
+    "overview": "This skill screens US stocks using William O'Neil's proven CANSLIM methodology, a systematic approach for identifying growth stocks with strong fundamentals and price momentum. CANSLIM analyzes 7 key components: **C**urrent Earnings, **A**nnual Growth, **N**ewness/New Highs, **S**upply/Demand, **L**eadership/RS Rank, **I**nstitutional Sponsorship, and **M**arket Direction.\n\n**Phase 3** implements all 7 of 7 components (C, A, N, S, L, I, M), representing **100% of the full methodology**.\n\n**Two-Stage Approach:**\n• **Stage 1 (FMP API + Finviz)**: Analyze stock universe with all 7 CANSLIM components\n• **Stage 2 (Reporting)**: Rank by composite score and generate actionable reports\n\n**Key Features:**\n• Composite scoring (0-100 scale) with weighted components\n• **Finviz fallback** for institutional ownership data (automatic when FMP data incomplete)\n• Progressive filtering to optimize API usage\n• JSON + Markdown output formats\n• Interpretation bands: Exceptional+ (90+), Exceptional (80-89), Strong (70-79), Above Average (60-69)\n• Bear market protection (M component gating)\n\n**Phase 3 Component Weights (Original O'Neil weights):**\n• C (Current Earnings): 15%\n• A (Annual Growth): 20%\n• N (Newness): 15%",
+    "when_to_use": "**Explicit Triggers:**\n• \"Find CANSLIM stocks\"\n• \"Screen for growth stocks using O'Neil's method\"\n• \"Which stocks have strong earnings and momentum?\"\n• \"Identify stocks near 52-week highs with accelerating earnings\"\n• \"Run a CANSLIM screener on [sector/universe]\"\n\n**Implicit Triggers:**\n• User wants to identify multi-bagger candidates\n• User is looking for growth stocks with proven fundamentals\n• User wants systematic stock selection based on historical winners\n• User needs a ranked list of stocks meeting O'Neil's criteria\n\n**When NOT to Use:**\n• Value investing focus (use value-dividend-screener instead)\n• Income/dividend focus (use dividend-growth-pullback-screener instead)\n• Bear market conditions (M component will flag - consider raising cash)\n\n---",
+    "data_sources": "• **FMP API**: Income statements, quotes, historical prices, key metrics, institutional holders\n• **Finviz**: Institutional ownership % (fallback), market data\n• **Methodology**: William O'Neil's \"How to Make Money in Stocks\" (4th edition)\n• **Scoring System**: Adapted from IBD MarketSmith proprietary system",
+    "workflow": "",
+    "output": "**Output Directory:** `reports/` (default) or custom via `--output-dir`\n\n**Generated Files:**\n• `canslim_screener_YYYY-MM-DD_HHMMSS.json` - Structured data for programmatic use\n• `canslim_screener_YYYY-MM-DD_HHMMSS.md` - Human-readable report\n\n**Report Contents:**\n• Market Condition Summary (trend, M score, warnings)\n• Top N CANSLIM Candidates (ranked by composite score)\n• Component Breakdown for each stock (C, A, N, S, L, I, M scores with details)\n• Rating interpretation (Exceptional+/Exceptional/Strong/Above Average)\n• Quality warnings and data source notes\n• Summary statistics (rating distribution)\n\n**Rating Bands:**\n• **Exceptional+ (90-100):** All components near-perfect, aggressive buy\n• **Exceptional (80-89):** Outstanding fundamentals + momentum, strong buy\n• **Strong (70-79):** Solid across components, standard buy\n• **Above Average (60-69):** Meets thresholds with minor weaknesses, buy on pullback\n\n---",
+    "prerequisites": "**API Requirements:**\n• **FMP API key** (free tier: 250 calls/day, sufficient for 35 stocks; Starter tier $29.99/mo for 40+ stocks)\n• Sign up: https://site.financialmodelingprep.com/developer/docs\n• Set via environment variable: `export FMP_API_KEY=your_key_here`\n\n**Python Dependencies:**\n• Python 3.7+\n• `requests` (FMP API calls)\n• `beautifulsoup4` (Finviz web scraping)\n• `lxml` (HTML parsing)\n\n**Installation:**\npip install requests beautifulsoup4 lxml\n\n---",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/canslim-screener/SKILL.md"
+  },
+  "value-dividend-screener": {
+    "overview": "This skill identifies high-quality dividend stocks that combine value characteristics, attractive income generation, and consistent growth using a **two-stage screening approach**:\n\n• **FINVIZ Elite API (Optional but Recommended)**: Pre-screen stocks with basic criteria (fast, cost-effective)\n• **Financial Modeling Prep (FMP) API**: Detailed fundamental analysis of candidates\n\nScreen US equities based on quantitative criteria including valuation ratios, dividend metrics, financial health, and profitability. Generate comprehensive reports ranking stocks by composite quality scores with detailed fundamental analysis.\n\n**Efficiency Advantage**: Using FINVIZ pre-screening can reduce FMP API calls by 90%, making this approach ideal for free-tier API users.",
+    "when_to_use": "Invoke this skill when the user requests:\n• \"Find high-quality dividend stocks\"\n• \"Screen for value dividend opportunities\"\n• \"Show me stocks with strong dividend growth\"\n• \"Find income stocks trading at reasonable valuations\"\n• \"Screen for sustainable high-yield stocks\"\n• Any request combining dividend yield, valuation metrics, and fundamental analysis",
+    "data_sources": "",
+    "workflow": "",
+    "output": "",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/value-dividend-screener/SKILL.md"
+  },
+  "dividend-growth-pullback-screener": {
+    "overview": "This skill screens for dividend growth stocks that exhibit strong fundamental characteristics but are experiencing temporary technical weakness. It targets stocks with exceptional dividend growth rates (12%+ CAGR) that have pulled back to RSI oversold levels (≤40), creating potential entry opportunities for long-term dividend growth investors.\n\n**Investment Thesis:** High-quality dividend growth stocks (often yielding 1-2.5%) compound wealth through dividend increases rather than high current yield. Buying these stocks during temporary pullbacks (RSI ≤40) can enhance total returns by combining strong fundamental growth with favorable technical entry timing.",
+    "when_to_use": "Use this skill when:\n• Looking for dividend growth stocks with exceptional compounding potential (12%+ dividend CAGR)\n• Seeking entry opportunities in quality stocks during temporary market weakness\n• Willing to accept lower current yields (1.5-3%) for higher dividend growth\n• Focusing on total return over 5-10 years rather than current income\n• Market conditions show sector rotations or broad pullbacks affecting quality names\n\n**Do NOT use when:**\n• Seeking high current income (use value-dividend-screener instead)\n• Requiring immediate dividend yields >3%\n• Looking for deep value plays with strict P/E or P/B requirements\n• Short-term trading focus (<6 months)",
+    "data_sources": "",
+    "workflow": "",
+    "output": "",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/dividend-growth-pullback-screener/SKILL.md"
+  },
+  "kanchi-dividend-sop": {
+    "overview": "Implement Kanchi's 5-step method as a deterministic workflow for US dividend investing.\nPrioritize safety and repeatability over aggressive yield chasing.",
+    "when_to_use": "Use this skill when the user needs:\n• Kanchi-style dividend stock selection adapted for US equities.\n• A repeatable screening and pullback-entry process instead of ad-hoc picks.\n• One-page underwriting memos with explicit invalidation conditions.\n• A handoff package for monitoring and tax/account-location workflows.",
+    "data_sources": "",
+    "workflow": "",
+    "output": "Return and/or generate:\n• SOP screening summary in markdown.\n• Underwriting memo set based on\n`references/stock-note-template.md`.\n• Optional plan artifact file generated by\n`skills/kanchi-dividend-sop/scripts/build_sop_plan.py` in `reports/`.\n• Optional Step 5 entry-signal artifacts generated by\n`skills/kanchi-dividend-sop/scripts/build_entry_signals.py` in `reports/`.",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/kanchi-dividend-sop/SKILL.md"
+  },
+  "kanchi-dividend-review-monitor": {
+    "overview": "Detect abnormal dividend-risk signals and route them into a human review queue.\nTreat automation as anomaly detection, not automated trade execution.",
+    "when_to_use": "Use this skill when the user needs:\n• Daily/weekly/quarterly anomaly detection for dividend holdings.\n• Forced review queueing for T1-T5 risk triggers.\n• 8-K/governance keyword scans tied to portfolio tickers.\n• Deterministic `OK/WARN/REVIEW` output before manual decision making.",
+    "data_sources": "",
+    "workflow": "",
+    "output": "Always return:\n• Queue JSON with summary counts and ticker-level findings.\n• Markdown dashboard for quick triage.\n• List of immediate `REVIEW` tickets.",
+    "prerequisites": "Provide normalized input JSON that follows:\n• `references/input-schema.md`\n\nIf upstream data is unavailable, provide at least:\n• `ticker`\n• `instrument_type`\n• `dividend.latest_regular`\n• `dividend.prior_regular`",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/kanchi-dividend-review-monitor/SKILL.md"
+  },
+  "kanchi-dividend-us-tax-accounting": {
+    "overview": "Apply a practical US-tax workflow for dividend investors while keeping decisions auditable.\nFocus on account placement and classification, not legal/tax advice replacement.",
+    "when_to_use": "Use this skill when the user needs:\n• US dividend tax classification planning (qualified vs ordinary assumptions).\n• Holding-period checks before year-end tax planning.\n• Account-location decisions for stock/REIT/BDC/MLP income holdings.\n• A standardized annual dividend tax memo format.",
+    "data_sources": "",
+    "workflow": "",
+    "output": "Always output:\n• Holding-level distribution classification table.\n• Account-location recommendation table with rationale.\n• Open-risk checklist for unresolved tax assumptions.\n• Optional generated artifacts from\n`skills/kanchi-dividend-us-tax-accounting/scripts/build_tax_planning_sheet.py`.",
+    "prerequisites": "Prepare holding-level inputs:\n• `ticker`\n• `instrument_type`\n• `account_type`\n• `hold_days_in_window` (if available)\n\nFor deterministic output artifacts, provide JSON input and run:\n\npython3 skills/kanchi-dividend-us-tax-accounting/scripts/build_tax_planning_sheet.py \\\n--input /path/to/tax_input.json \\\n--output-dir reports/",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/kanchi-dividend-us-tax-accounting/SKILL.md"
+  },
+  "pair-trade-screener": {
+    "overview": "This skill identifies and analyzes statistical arbitrage opportunities through pair trading. Pair trading is a market-neutral strategy that profits from the relative price movements of two correlated securities, regardless of overall market direction. The skill uses rigorous statistical methods including correlation analysis and cointegration testing to find robust trading pairs.\n\n**Core Methodology:**\n• Identify pairs of stocks with high correlation and similar sector/industry exposure\n• Test for cointegration (long-term statistical relationship)\n• Calculate spread z-scores to identify mean-reversion opportunities\n• Generate entry/exit signals based on statistical thresholds\n• Provide position sizing for market-neutral exposure\n\n**Key Advantages:**\n• Market-neutral: Profits in up, down, or sideways markets\n• Risk management: Limited exposure to broad market movements\n• Statistical foundation: Data-driven, not discretionary\n• Diversification: Uncorrelated to traditional long-only strategies",
+    "when_to_use": "Use this skill when:\n• User asks for \"pair trading opportunities\"\n• User wants \"market-neutral strategies\"\n• User requests \"statistical arbitrage screening\"\n• User asks \"which stocks move together?\"\n• User wants to hedge sector exposure\n• User requests mean-reversion trade ideas\n• User asks about relative value trading\n\nExample user requests:\n• \"Find pair trading opportunities in the tech sector\"\n• \"Which stocks are cointegrated?\"\n• \"Screen for statistical arbitrage opportunities\"\n• \"Find mean-reversion pairs\"\n• \"What are good market-neutral trades right now?\"",
+    "data_sources": "",
+    "workflow": "",
+    "output": "",
+    "prerequisites": "",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/pair-trade-screener/SKILL.md"
+  },
+  "edge-candidate-agent": {
+    "overview": "Convert daily market observations into reproducible research tickets and Phase I-compatible candidate specs.\nPrioritize signal quality and interface compatibility over aggressive strategy proliferation.\nThis skill can run end-to-end standalone, but in the split workflow it primarily serves the final export/validation stage.",
+    "when_to_use": "• Convert market observations, anomalies, or hypotheses into structured research tickets.\n• Run daily auto-detection to discover new edge candidates from EOD OHLCV and optional hints.\n• Export validated tickets as `strategy.yaml` + `metadata.json` for `trade-strategy-pipeline` Phase I.\n• Run preflight compatibility checks for `edge-finder-candidate/v1` before pipeline execution.",
+    "data_sources": "",
+    "workflow": "• Run auto-detection from EOD OHLCV:\n• `skills/edge-candidate-agent/scripts/auto_detect_candidates.py`\n• Optional: `--hints` for human ideation input\n• Optional: `--llm-ideas-cmd` for external LLM ideation loop\n• Load the contract and mapping references:\n• `references/pipeline_if_v1.md`\n• `references/signal_mapping.md`\n• `references/research_ticket_schema.md`\n• `references/ideation_loop.md`\n• Build or update a research ticket using `references/research_ticket_schema.md`.\n• Export candidate artifacts with `skills/edge-candidate-agent/scripts/export_candidate.py`.\n• Validate interface and Phase I constraints with `skills/edge-candidate-agent/scripts/validate_candidate.py`.\n• Hand off candidate directory to `trade-strategy-pipeline` and run dry-run first.",
+    "output": "• `strategies/<candidate_id>/strategy.yaml`: Phase I-compatible strategy spec.\n• `strategies/<candidate_id>/metadata.json`: provenance metadata including interface version and ticket context.\n• Validation status from `scripts/validate_candidate.py` (pass/fail + reasons).\n• Daily detection artifacts:\n• `daily_report.md`\n• `market_summary.json`\n• `anomalies.json`\n• `watchlist.csv`\n• `tickets/exportable/*.yaml`\n• `tickets/research_only/*.yaml`",
+    "prerequisites": "• Python 3.9+ with `PyYAML` installed.\n• Access to the target `trade-strategy-pipeline` repository for schema/stage validation.\n• `uv` available when running pipeline-managed validation via `--pipeline-root`.",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/edge-candidate-agent/SKILL.md"
+  },
+  "edge-concept-synthesizer": {
+    "overview": "Create an abstraction layer between detection and strategy implementation.\nThis skill clusters ticket evidence, summarizes recurring conditions, and outputs `edge_concepts.yaml` with explicit thesis and invalidation logic.",
+    "when_to_use": "• You have many raw tickets and need mechanism-level structure.\n• You want to avoid direct ticket-to-strategy overfitting.\n• You need concept-level review before strategy drafting.",
+    "data_sources": "",
+    "workflow": "• Collect ticket YAML files from auto-detection output.\n• Optionally provide `hints.yaml` for context matching.\n• Run `scripts/synthesize_edge_concepts.py`.\n• Review concepts and promote only high-support concepts into strategy drafting.",
+    "output": "• `edge_concepts.yaml` containing:\n• concept clusters\n• support statistics\n• abstract thesis\n• invalidation signals\n• export readiness flag",
+    "prerequisites": "• Python 3.9+\n• `PyYAML`\n• Ticket YAML directory from detector output (`tickets/exportable`, `tickets/research_only`)\n• Optional `hints.yaml`",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/edge-concept-synthesizer/SKILL.md"
+  },
+  "edge-hint-extractor": {
+    "overview": "Convert raw observation signals (`market_summary`, `anomalies`, `news reactions`) into structured edge hints.\nThis skill is the first stage in the split workflow: `observe -> abstract -> design -> pipeline`.",
+    "when_to_use": "• You want to turn daily market observations into reusable hint objects.\n• You want LLM-generated ideas constrained by current anomalies/news context.\n• You need a clean `hints.yaml` input for concept synthesis or auto detection.",
+    "data_sources": "",
+    "workflow": "• Gather observation files (`market_summary`, `anomalies`, optional news reactions).\n• Run `scripts/build_hints.py` to generate deterministic hints.\n• Optionally add `--llm-ideas-cmd` to augment hints.\n• Pass `hints.yaml` into concept synthesis or auto detection.",
+    "output": "• `hints.yaml` containing:\n• `hints` list\n• generation metadata\n• rule/LLM hint counts",
+    "prerequisites": "• Python 3.9+\n• `PyYAML`\n• Optional inputs from detector run:\n• `market_summary.json`\n• `anomalies.json`\n• `news_reactions.csv` or `news_reactions.json`",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/edge-hint-extractor/SKILL.md"
+  },
+  "edge-strategy-designer": {
+    "overview": "Translate concept-level hypotheses into concrete strategy draft specs.\nThis skill sits after concept synthesis and before pipeline export validation.",
+    "when_to_use": "• You have `edge_concepts.yaml` and need strategy candidates.\n• You want multiple variants (core/conservative/research-probe) per concept.\n• You want optional exportable ticket files for interface v1 families.",
+    "data_sources": "",
+    "workflow": "• Load `edge_concepts.yaml`.\n• Choose risk profile (`conservative`, `balanced`, `aggressive`).\n• Generate per-concept variants.\n• Export v1-ready ticket YAML when applicable.\n• Hand off exportable tickets to `skills/edge-candidate-agent/scripts/export_candidate.py`.",
+    "output": "• `strategy_drafts/*.yaml`\n• `strategy_drafts/run_manifest.json`\n• Optional `exportable_tickets/*.yaml` for downstream `export_candidate.py`",
+    "prerequisites": "• Python 3.9+\n• `PyYAML`\n• `edge_concepts.yaml` produced by concept synthesis",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/edge-strategy-designer/SKILL.md"
+  },
+  "dual-axis-skill-reviewer": {
+    "overview": "---\nname: dual-axis-skill-reviewer\ndescription: \"Review skills in any project using a dual-axis method: (1) deterministic code-based checks (structure, scripts, tests, execution safety) and (2) LLM deep review findings. Use when you need reproducible quality scoring for `skills/*/SKILL.md`, want to gate merges with a score threshold (for example 90+), or need concrete improvement items for low-scoring skills. Works across projects via --project-root.\"\n---\n\nRun the dual-axis reviewer script and save reports to `reports/`.\n\nThe script supports:\n• Random or fixed skill selection\n• Auto-axis scoring with optional test execution\n• LLM prompt generation\n• LLM JSON review merge with weighted final score\n• Cross-project review via `--project-root`",
+    "when_to_use": "• Need reproducible scoring for one skill in `skills/*/SKILL.md`.\n• Need improvement items when final score is below 90.\n• Need both deterministic checks and qualitative LLM code/content review.\n• Need to review skills in a **different project** from the command line.",
+    "data_sources": "",
+    "workflow": "Determine the correct script path based on your context:\n\n• **Same project**: `skills/dual-axis-skill-reviewer/scripts/run_dual_axis_review.py`\n• **Global install**: `~/.claude/skills/dual-axis-skill-reviewer/scripts/run_dual_axis_review.py`\n\nThe examples below use `REVIEWER` as a placeholder. Set it once:\n\nREVIEWER=skills/dual-axis-skill-reviewer/scripts/run_dual_axis_review.py\n\nREVIEWER=~/.claude/skills/dual-axis-skill-reviewer/scripts/run_dual_axis_review.py",
+    "output": "• `reports/skill_review_<skill>_<timestamp>.json`\n• `reports/skill_review_<skill>_<timestamp>.md`\n• `reports/skill_review_prompt_<skill>_<timestamp>.md` (when `--emit-llm-prompt` is enabled)",
+    "prerequisites": "• Python 3.9+\n• `uv` (recommended — auto-resolves `pyyaml` dependency via inline metadata)\n• For tests: `uv sync --extra dev` or equivalent in the target project\n• For LLM-axis merge: JSON file that follows the LLM review schema (see Resources)",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/dual-axis-skill-reviewer/SKILL.md"
+  },
+  "weekly-trade-strategy": {
+    "overview": "Weekly Trade Strategy는 단일 지표 스킬이 아니라 주간 리포트 오케스트레이션 전략입니다. 차트 기반 기술 분석, 시장 환경/버블 리스크 평가, 뉴스·이벤트 분석을 순차 실행한 뒤, 실행 결과를 통합해 주간 트레이드 전략 블로그(실행 액션 포함)로 변환합니다. 필요 시 Druckenmiller 스타일의 18개월 시나리오 전략(Base/Bull/Bear/Tail)까지 확장합니다.",
+    "when_to_use": "• 매주 시장 점검 루틴을 표준화하고 싶을 때\n• 기술/매크로/뉴스를 분리하지 않고 하나의 실행 전략으로 통합하고 싶을 때\n• 다음 주 액션(포지션, 섹터 배분, 이벤트 대응)을 문서화해야 할 때\n• 팀/개인 주간 투자 노트를 반복 가능한 형식으로 생성할 때",
+    "data_sources": "• 주간 차트 이미지 세트(VIX, 10Y yield, Breadth, 주요 지수, 원자재, 섹터/인더스트리 성과)\n• market-news-analyst 결과(최근 10일 이벤트 영향)\n• economic-calendar-fetcher / earnings-calendar 결과(향후 7일 이벤트)\n• 선택: 이전 주 블로그(배분 연속성 점검)",
+    "workflow": "• 1) technical-market-analyst: charts/YYYY-MM-DD를 분석해 technical-market-analysis.md 생성\n• 2) us-market-analyst: 시장 레짐/버블 리스크 평가(us-market-analysis.md)\n• 3) market-news-analyzer: 뉴스/이벤트 영향 분석(market-news-analysis.md)\n• 4) weekly-trade-blog-writer: 3개 보고서를 통합해 주간 전략 블로그 생성\n• 5) (선택) druckenmiller-strategy-planner: 18개월 시나리오 전략 보고서 생성",
+    "output": "• reports/YYYY-MM-DD/technical-market-analysis.md\n• reports/YYYY-MM-DD/us-market-analysis.md\n• reports/YYYY-MM-DD/market-news-analysis.md\n• blogs/YYYY-MM-DD-weekly-strategy.md\n• (선택) reports/YYYY-MM-DD/druckenmiller-strategy.md",
+    "prerequisites": "• Claude Code CLI 또는 Claude Desktop\n• 연계 스킬 가용: technical-analyst, breadth-chart-analyst, sector-analyst, market-environment-analysis, us-market-bubble-detector, market-news-analyst, economic-calendar-fetcher, earnings-calendar\n• FMP_API_KEY (캘린더/일부 데이터 수집용)\n• charts/, reports/, blogs/ 폴더 구조 준비",
+    "source": "tradermonty/claude-trading-skills",
+    "source_url": "https://github.com/tradermonty/claude-trading-skills/tree/main/skills/weekly-trade-strategy/README.md"
+  }
+}

@@ -24,6 +24,7 @@ def test_dashboard_template_renders_required_sections(client):
     assert "요약 TOP5" in html
     assert "최종 교집합 TOP5" in html
     assert "선택 스킬 점수 TOP5" in html
+    assert "상세" in html
     assert "추천 스킬별 결과 테이블" in html
     assert "추천 교집합 테이블" in html
     assert "추천 합집합 정규화 TOP10 테이블" in html
@@ -31,7 +32,15 @@ def test_dashboard_template_renders_required_sections(client):
     assert "최종 결과 요약 (교집합 + TOP5)" in html
     assert "AI 최종 리포트 생성" in html
     assert "AI 최종 리포트 (GLM 4.5)" in html
+    assert 'id="skill-detail-modal"' in html
+    assert 'id="skill-detail-close"' in html
+    assert "데이터 관측 축" in html
+    assert "Methodology" in html
+    assert "참고 상세 분석 · Overview" in html
+    assert "참고 상세 분석 · Workflow" in html
+    assert "참조 소스" in html
     assert "데이터 소스" in html
+    assert "US Universe" in html
     assert "투자 권유 아님" in html
     assert "무효화 레벨 확인" in html
     assert "추천 생성 방식" not in html

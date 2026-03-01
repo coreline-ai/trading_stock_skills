@@ -190,7 +190,7 @@ class DashboardBFF:
 
     def get_data_source(self) -> str:
         context = self._load_report()
-        return str(context.payload.get("data_source") or "sample")
+        return str(context.payload.get("data_source") or "unavailable")
 
     def get_skill_catalog(self) -> list[SkillCatalogItem]:
         selected = set(self.get_selected_skills())

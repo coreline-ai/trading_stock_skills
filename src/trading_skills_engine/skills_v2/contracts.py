@@ -145,6 +145,7 @@ class EngineRunResponseV2(BaseModel):
     data_sources: dict[str, DataSourceState]
     results: list[SkillRunResultV2]
     top_picks: list[TopPickV2]
+    universe_meta: dict[str, Any] | None = None
     pipeline: PipelineResultV2 | None = None
     warnings: list[str] = Field(default_factory=list)
 

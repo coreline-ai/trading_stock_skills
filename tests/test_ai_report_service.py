@@ -57,6 +57,22 @@ class _FakeGLMClient:
         }
 
 
+class _FakeZAISearchClient:
+    def search_symbol_evidence(self, symbol: str) -> list[dict]:
+        return [
+            {
+                "source": "zai_search_mcp",
+                "url": f"https://example.com/{symbol}/news",
+                "metrics": {
+                    "title": f"{symbol} latest news",
+                    "snippet": "recent catalyst summary",
+                    "publish_date": "2026-03-01",
+                    "media": "Example",
+                },
+            }
+        ]
+
+
 def test_ai_report_service_generates_and_persists_with_fallback(monkeypatch, tmp_path: Path):
     source_path = tmp_path / "latest_skill_runs_v2.json"
     ai_path = tmp_path / "latest_ai_report.json"
@@ -65,6 +81,7 @@ def test_ai_report_service_generates_and_persists_with_fallback(monkeypatch, tmp
     monkeypatch.setenv("GLM_API_KEY", "test-glm-key")
     monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
     monkeypatch.setattr("trading_skills_engine.ai.report_service.GLMClient.from_env", lambda: _FakeGLMClient())
+    monkeypatch.setattr("trading_skills_engine.ai.report_service.ZAISearchMCPClient.from_env", lambda: None)
     monkeypatch.setattr("trading_skills_engine.ai.report_service.FMPClient.from_env", lambda: None)
     monkeypatch.setattr(
         "trading_skills_engine.data.yahoo_finance_client.YahooFinanceClient.fetch_quote",
@@ -189,6 +206,7 @@ def test_ai_report_service_suppresses_yahoo_warning_when_stooq_fallback_succeeds
     monkeypatch.setenv("GLM_API_KEY", "test-glm-key")
     monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
     monkeypatch.setattr("trading_skills_engine.ai.report_service.GLMClient.from_env", lambda: _FakeGLMClient())
+    monkeypatch.setattr("trading_skills_engine.ai.report_service.ZAISearchMCPClient.from_env", lambda: None)
     monkeypatch.setattr("trading_skills_engine.ai.report_service.FMPClient.from_env", lambda: None)
     monkeypatch.setattr(
         "trading_skills_engine.data.yahoo_finance_client.YahooFinanceClient.fetch_quote",
@@ -209,6 +227,69 @@ def test_ai_report_service_suppresses_yahoo_warning_when_stooq_fallback_succeeds
     assert report.status == "ok"
     assert all(not str(item).startswith("YAHOO_FAIL:") for item in (report.warnings or []))
     assert all(any(ev.source == "stooq" for ev in row.evidence) for row in report.symbols)
+
+
+def test_ai_report_service_uses_zai_search_when_price_sources_fail(monkeypatch, tmp_path: Path):
+    source_path = tmp_path / "latest_skill_runs_v2.json"
+    ai_path = tmp_path / "latest_ai_report.json"
+    _write_source_report(source_path, with_top5=False)
+
+    monkeypatch.setenv("GLM_API_KEY", "test-glm-key")
+    monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
+    monkeypatch.setattr("trading_skills_engine.ai.report_service.GLMClient.from_env", lambda: _FakeGLMClient())
+    monkeypatch.setattr("trading_skills_engine.ai.report_service.ZAISearchMCPClient.from_env", lambda: _FakeZAISearchClient())
+    monkeypatch.setattr("trading_skills_engine.ai.report_service.FMPClient.from_env", lambda: None)
+    monkeypatch.setattr(
+        "trading_skills_engine.data.yahoo_finance_client.YahooFinanceClient.fetch_quote",
+        lambda self, symbol: (_ for _ in ()).throw(RuntimeError("YAHOO_HTTP_401")),  # noqa: ARG005
+    )
+    monkeypatch.setattr(
+        "trading_skills_engine.data.stooq_client.StooqClient.fetch_quote",
+        lambda self, symbol: (_ for _ in ()).throw(RuntimeError("STOOQ_NO_ROWS")),  # noqa: ARG005
+    )
+
+    service = AIReportService(source_report_path=source_path, ai_report_path=ai_path)
+    report = service.generate_and_persist()
+
+    assert report.status == "ok"
+    assert all(any(ev.source == "zai_search_mcp" for ev in row.evidence) for row in report.symbols)
+    assert any(str(item).startswith("YAHOO_FAIL:") for item in (report.warnings or []))
+    assert any(str(item).startswith("STOOQ_FAIL:") for item in (report.warnings or []))
+
+
+def test_ai_report_service_always_includes_zai_search_evidence(monkeypatch, tmp_path: Path):
+    source_path = tmp_path / "latest_skill_runs_v2.json"
+    ai_path = tmp_path / "latest_ai_report.json"
+    _write_source_report(source_path, with_top5=False)
+
+    monkeypatch.setenv("GLM_API_KEY", "test-glm-key")
+    monkeypatch.setenv("TRADING_SKILLS_DISABLE_DOTENV", "1")
+    monkeypatch.setattr("trading_skills_engine.ai.report_service.GLMClient.from_env", lambda: _FakeGLMClient())
+    monkeypatch.setattr("trading_skills_engine.ai.report_service.ZAISearchMCPClient.from_env", lambda: _FakeZAISearchClient())
+    monkeypatch.setattr("trading_skills_engine.ai.report_service.FMPClient.from_env", lambda: None)
+    monkeypatch.setattr(
+        "trading_skills_engine.data.yahoo_finance_client.YahooFinanceClient.fetch_quote",
+        lambda self, symbol: {  # noqa: ARG005
+            "source": "yahoo",
+            "url": f"https://finance.yahoo.com/quote/{symbol}",
+            "metrics": {"price": 100.0},
+        },
+    )
+    monkeypatch.setattr(
+        "trading_skills_engine.data.stooq_client.StooqClient.fetch_quote",
+        lambda self, symbol: {  # noqa: ARG005
+            "source": "stooq",
+            "url": f"https://stooq.com/{symbol}",
+            "metrics": {"close": 99.0},
+        },
+    )
+
+    service = AIReportService(source_report_path=source_path, ai_report_path=ai_path)
+    report = service.generate_and_persist()
+
+    assert report.status == "ok"
+    assert all(any(ev.source == "yahoo" for ev in row.evidence) for row in report.symbols)
+    assert all(any(ev.source == "zai_search_mcp" for ev in row.evidence) for row in report.symbols)
 
 
 def test_ai_report_service_read_runtime_respects_glm_worst_case_budget(monkeypatch, tmp_path: Path):

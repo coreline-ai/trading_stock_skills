@@ -72,3 +72,13 @@ class FMPClient:
             if isinstance(data, list) and data and isinstance(data[0], dict):
                 rows.append(data[0])
         return rows
+
+    def fetch_us_stock_list(self) -> list[dict[str, Any]]:
+        data = self._get("/stock-list")
+        if not isinstance(data, list):
+            raise RuntimeError("FMP_STOCK_LIST_INVALID")
+        rows: list[dict[str, Any]] = []
+        for item in data:
+            if isinstance(item, dict):
+                rows.append(item)
+        return rows

@@ -4,6 +4,7 @@ import json
 import os
 import re
 from datetime import date, datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,7 @@ from trading_skills_engine.skills_v2.traits import get_skill_trait
 
 DEFAULT_REPORT_PATH = Path("reports/skill_runs/latest_skill_runs_v2.json")
 DEFAULT_APP_NAME = "Coreline Stock AI"
+SKILL_DETAIL_REFERENCE_PATH = Path(__file__).resolve().with_name("skill_detail_reference.json")
 
 DEFAULT_PARAMS_BY_SKILL: dict[str, dict[str, Any]] = {
     "top-picks": {
@@ -110,24 +112,71 @@ class DashboardBFFV2:
         raw_pipeline = report.get("pipeline", {})
         inferred_mode = _infer_top_picks_mode(report.get("top_picks", []), raw_pipeline)
         params_defaults = _params_defaults_with_mode(inferred_mode, raw_pipeline)
+        detail_reference_map = _load_skill_detail_reference_map()
 
         catalog: list[dict[str, Any]] = []
         for item in SKILL_CATALOG:
             trait = get_skill_trait(item.slug)
+            trait_role = trait.recommendation_role if trait else "analysis_only"
+            trait_style = trait.style if trait else item.family
+            ref = detail_reference_map.get(item.slug, {})
             catalog.append(
                 {
                     "slug": item.slug,
                     "display_name": item.display_name,
                     "family": item.family,
+                    "family_ko": _family_label_ko(item.family),
+                    "methodology": item.methodology,
                     "implemented": is_implemented(item.slug),
                     "recommendation_capable": is_recommendation_capable(item.slug, mode=inferred_mode),
-                    "trait_role": trait.recommendation_role if trait else "analysis_only",
-                    "trait_style": trait.style if trait else item.family,
-                    "trait_axes": list((trait.axis_weights or {}).keys()) if trait else [],
+                    "trait_role": trait_role,
+                    "role_ko": _role_label_ko(trait_role),
+                    "trait_style": trait_style,
+                    "trait_signals": list((trait.signals or ())) if trait else [],
+                    "trait_axes": dict(trait.axis_weights or {}) if trait else {},
+                    "uses_llm": bool(item.uses_llm),
+                    "uses_llm_ko": _bool_label_ko(bool(item.uses_llm)),
+                    "requires_api": bool(item.requires_api),
+                    "requires_api_ko": _api_required_label_ko(bool(item.requires_api)),
+                    "reference_overview": str(ref.get("overview") or ""),
+                    "reference_when_to_use": str(ref.get("when_to_use") or ""),
+                    "reference_data_sources": str(ref.get("data_sources") or ""),
+                    "reference_workflow": str(ref.get("workflow") or ""),
+                    "reference_output": str(ref.get("output") or ""),
+                    "reference_prerequisites": str(ref.get("prerequisites") or ""),
+                    "reference_source": str(ref.get("source") or ""),
+                    "reference_source_url": str(ref.get("source_url") or ""),
                     "selected": item.slug in selected_slugs,
                 }
             )
         catalog_by_slug = {item["slug"]: item for item in catalog}
+        skill_detail_map: dict[str, dict[str, Any]] = {}
+        for item in catalog:
+            slug = str(item.get("slug") or "").strip()
+            if not slug:
+                continue
+            skill_detail_map[slug] = {
+                "display_name": item.get("display_name", ""),
+                "slug": slug,
+                "family": item.get("family", ""),
+                "family_ko": item.get("family_ko", ""),
+                "role": item.get("trait_role", ""),
+                "role_ko": item.get("role_ko", ""),
+                "style": item.get("trait_style", ""),
+                "methodology": item.get("methodology", ""),
+                "signals": item.get("trait_signals", []),
+                "axes": item.get("trait_axes", {}),
+                "uses_llm_ko": item.get("uses_llm_ko", ""),
+                "requires_api_ko": item.get("requires_api_ko", ""),
+                "reference_overview": item.get("reference_overview", ""),
+                "reference_when_to_use": item.get("reference_when_to_use", ""),
+                "reference_data_sources": item.get("reference_data_sources", ""),
+                "reference_workflow": item.get("reference_workflow", ""),
+                "reference_output": item.get("reference_output", ""),
+                "reference_prerequisites": item.get("reference_prerequisites", ""),
+                "reference_source": item.get("reference_source", ""),
+                "reference_source_url": item.get("reference_source_url", ""),
+            }
 
         results_enriched: list[dict[str, Any]] = []
         for raw in results:
@@ -170,8 +219,24 @@ class DashboardBFFV2:
             "date_display_ko": _format_ko_date(report["as_of_date"]),
             "fmp_runtime": get_fmp_runtime_state(),
             "data_sources": report.get("data_sources", {"fmp": "unavailable", "rss": "unavailable"}),
+            "universe_meta": report.get(
+                "universe_meta",
+                {
+                    "scope": "US",
+                    "source": "unavailable",
+                    "source_provider": "",
+                    "universe_mode": "SP500_PLUS_NASDAQ_TOP500",
+                    "raw_count": 0,
+                    "filtered_count": 0,
+                    "selected_count": 0,
+                    "sp500_count": 0,
+                    "nasdaq_top500_count": 0,
+                    "fetched_at": "",
+                },
+            ),
             "warnings": report.get("warnings", []),
             "skill_catalog": catalog,
+            "skill_detail_map": skill_detail_map,
             "results": results_enriched,
             "top_picks": top_picks,
             "pipeline_tables": pipeline_tables,
@@ -236,6 +301,21 @@ class DashboardBFFV2:
         return {
             "as_of_date": _parse_iso_date(str(payload.get("as_of_date") or date.today().isoformat())),
             "data_sources": payload.get("data_sources", {"fmp": "unavailable", "rss": "unavailable"}),
+            "universe_meta": payload.get(
+                "universe_meta",
+                {
+                    "scope": "US",
+                    "source": "unavailable",
+                    "source_provider": "",
+                    "universe_mode": "SP500_PLUS_NASDAQ_TOP500",
+                    "raw_count": 0,
+                    "filtered_count": 0,
+                    "selected_count": 0,
+                    "sp500_count": 0,
+                    "nasdaq_top500_count": 0,
+                    "fetched_at": "",
+                },
+            ),
             "warnings": payload.get("warnings", []) if isinstance(payload.get("warnings"), list) else [],
             "results": results if isinstance(results, list) else [],
             "top_picks": top_picks if isinstance(top_picks, list) else [],
@@ -247,6 +327,18 @@ def _empty_report() -> dict[str, Any]:
     return {
         "as_of_date": date.today().isoformat(),
         "data_sources": {"fmp": "unavailable", "rss": "unavailable"},
+        "universe_meta": {
+            "scope": "US",
+            "source": "unavailable",
+            "source_provider": "",
+            "universe_mode": "SP500_PLUS_NASDAQ_TOP500",
+            "raw_count": 0,
+            "filtered_count": 0,
+            "selected_count": 0,
+            "sp500_count": 0,
+            "nasdaq_top500_count": 0,
+            "fetched_at": "",
+        },
         "warnings": ["아직 v2 실행 결과가 없습니다. 왼쪽에서 스킬을 선택하고 실행하세요."],
         "results": [],
         "top_picks": [],
@@ -1016,6 +1108,61 @@ def _coerce_int(raw: str | None, default: int, min_value: int, max_value: int) -
     return max(min_value, min(max_value, value))
 
 
+@lru_cache(maxsize=1)
+def _load_skill_detail_reference_map() -> dict[str, dict[str, str]]:
+    try:
+        payload = json.loads(SKILL_DETAIL_REFERENCE_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    normalized: dict[str, dict[str, str]] = {}
+    for raw_slug, raw_data in payload.items():
+        slug = str(raw_slug or "").strip()
+        if not slug or not isinstance(raw_data, dict):
+            continue
+        normalized[slug] = {
+            "overview": str(raw_data.get("overview") or ""),
+            "when_to_use": str(raw_data.get("when_to_use") or ""),
+            "data_sources": str(raw_data.get("data_sources") or ""),
+            "workflow": str(raw_data.get("workflow") or ""),
+            "output": str(raw_data.get("output") or ""),
+            "prerequisites": str(raw_data.get("prerequisites") or ""),
+            "source": str(raw_data.get("source") or ""),
+            "source_url": str(raw_data.get("source_url") or ""),
+        }
+    return normalized
+
+
+def _family_label_ko(family: str) -> str:
+    return {
+        "market_analysis": "시장 분석",
+        "calendar": "캘린더",
+        "strategy_risk": "전략/리스크",
+        "market_timing": "타이밍",
+        "earnings_momentum": "실적 모멘텀",
+        "screening": "스크리닝",
+        "quality_orchestration": "품질 오케스트레이션",
+        "edge_research": "엣지 리서치",
+    }.get(str(family or ""), str(family or "-"))
+
+
+def _role_label_ko(role: str) -> str:
+    return {
+        "direct": "직접 추천",
+        "candidate": "추천 후보",
+        "analysis_only": "분석 전용",
+    }.get(str(role or ""), "분석 전용")
+
+
+def _bool_label_ko(value: bool) -> str:
+    return "예" if value else "아니오"
+
+
+def _api_required_label_ko(value: bool) -> str:
+    return "필요" if value else "불필요"
+
+
 def _normalize_ai_report(raw: dict[str, Any]) -> dict[str, Any]:
     symbols_raw = raw.get("symbols")
     symbols_raw = symbols_raw if isinstance(symbols_raw, list) else []
@@ -1039,7 +1186,7 @@ def _normalize_ai_report(raw: dict[str, Any]) -> dict[str, Any]:
             if not isinstance(item, dict):
                 continue
             source = str(item.get("source") or "").strip().lower()
-            if source not in {"yahoo", "stooq", "fmp", "internal"}:
+            if source not in {"yahoo", "stooq", "fmp", "internal", "zai_search_mcp"}:
                 continue
             evidence.append(
                 {
@@ -1049,6 +1196,7 @@ def _normalize_ai_report(raw: dict[str, Any]) -> dict[str, Any]:
                         "stooq": "Stooq",
                         "fmp": "FMP",
                         "internal": "내부 파이프라인",
+                        "zai_search_mcp": "Z.ai Search MCP",
                     }.get(source, source),
                     "url": str(item.get("url") or ""),
                     "metrics": item.get("metrics", {}) if isinstance(item.get("metrics"), dict) else {},

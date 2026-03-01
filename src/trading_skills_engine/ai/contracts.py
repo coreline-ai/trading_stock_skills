@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 DecisionLabel = Literal["BUY", "WATCH", "AVOID"]
 AIReportStatus = Literal["ok", "unavailable"]
-EvidenceSource = Literal["yahoo", "stooq", "fmp", "internal"]
+EvidenceSource = Literal["yahoo", "stooq", "fmp", "internal", "zai_search_mcp"]
 
 
 class EvidenceItem(BaseModel):
@@ -42,4 +42,3 @@ class AIReport(BaseModel):
     portfolio_summary_ko: str = ""
     warnings: list[str] = Field(default_factory=list)
     error_code: str | None = None
-

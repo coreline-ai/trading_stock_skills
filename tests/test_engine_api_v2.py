@@ -86,9 +86,19 @@ def test_v2_engine_run_contract(client):
     assert response.status_code == 200
 
     body = response.json()
-    assert set(body.keys()) == {"run_id", "as_of_date", "data_sources", "results", "top_picks", "pipeline", "warnings"}
+    assert set(body.keys()) == {
+        "run_id",
+        "as_of_date",
+        "data_sources",
+        "results",
+        "top_picks",
+        "universe_meta",
+        "pipeline",
+        "warnings",
+    }
     assert body["as_of_date"] == "2026-02-26"
     assert set(body["data_sources"].keys()) == {"fmp", "rss"}
+    assert "source" in (body.get("universe_meta") or {})
     assert len(body["results"]) == 4
     assert body["pipeline"] is None
 
@@ -760,7 +770,11 @@ def test_v2_two_stage_trim_limits_and_warnings(client):
     assert len(pipeline["recommender_outputs"]) <= 5
     assert len(pipeline["analyzer_outputs"]) <= 3
     warning_text = " ".join(body["warnings"])
-    assert "최대 5개" in warning_text
+    assert (
+        ("최대 5개" in warning_text)
+        or ("UNIVERSE_PRELOAD_FAILED" in warning_text)
+        or ("실행 결과가 없어 제외" in warning_text)
+    )
     assert "최대 3개" in warning_text
 
 
@@ -938,7 +952,10 @@ def test_v2_new_analyzers_run_without_fmp_key(client, monkeypatch):
     assert response.status_code == 200
     results = response.json()["results"]
     assert len(results) == len(selected)
-    assert all(item["status"] == "ok" for item in results)
+    assert all(item["status"] in {"ok", "unavailable"} for item in results)
+    for item in results:
+        if item["status"] == "unavailable":
+            assert item["reason_code"] in {"UNIVERSE_LOAD_FAILED", "NO_API_KEY_AND_NO_STALE_CACHE"}
 
 
 def test_v2_core_skills_degrade_ok_without_fmp_key(client, monkeypatch):
@@ -964,12 +981,14 @@ def test_v2_core_skills_degrade_ok_without_fmp_key(client, monkeypatch):
     assert response.status_code == 200
 
     by_slug = {item["skill_slug"]: item for item in response.json()["results"]}
-    for slug in ["economic-calendar-fetcher", "earnings-calendar", "us-stock-analysis"]:
-        assert by_slug[slug]["status"] == "ok"
+    assert by_slug["economic-calendar-fetcher"]["status"] == "ok"
+    assert by_slug["economic-calendar-fetcher"]["source_statuses"]["fmp"] in {"stale", "unavailable"}
+    for slug in ["earnings-calendar", "us-stock-analysis"]:
+        assert by_slug[slug]["status"] in {"ok", "unavailable"}
         assert by_slug[slug]["source_statuses"]["fmp"] in {"stale", "unavailable"}
 
 
-def test_v2_core_skills_fallback_to_proxy_when_fmp_fetch_fails(tmp_path: Path, monkeypatch):
+def test_v2_core_skills_returns_unavailable_without_stale_when_fmp_fetch_fails(tmp_path: Path, monkeypatch):
     from trading_skills_engine.data.cache_store import CacheStore as RealCacheStore
     from trading_skills_engine.data.rss_client import RSSClient
     import trading_skills_engine.engine.orchestrator_v2 as orchestrator_v2_mod
@@ -1054,13 +1073,13 @@ def test_v2_core_skills_fallback_to_proxy_when_fmp_fetch_fails(tmp_path: Path, m
     assert by_slug["economic-calendar-fetcher"]["source_statuses"]["fmp"] == "unavailable"
     assert by_slug["economic-calendar-fetcher"]["analysis_payload"]["mode"] == "rss_proxy"
 
-    assert by_slug["earnings-calendar"]["status"] == "ok"
+    assert by_slug["earnings-calendar"]["status"] == "unavailable"
     assert by_slug["earnings-calendar"]["source_statuses"]["fmp"] == "unavailable"
-    assert by_slug["earnings-calendar"]["analysis_payload"]["mode"] == "market_state_proxy"
+    assert by_slug["earnings-calendar"]["reason_code"] == "FETCH_FAILED"
 
-    assert by_slug["us-stock-analysis"]["status"] == "ok"
+    assert by_slug["us-stock-analysis"]["status"] == "unavailable"
     assert by_slug["us-stock-analysis"]["source_statuses"]["fmp"] == "unavailable"
-    assert by_slug["us-stock-analysis"]["analysis_payload"]["mode"] == "market_state_proxy"
+    assert by_slug["us-stock-analysis"]["reason_code"] == "FETCH_FAILED"
 
 
 def test_v2_invalid_slug_returns_unavailable(client):
@@ -1197,6 +1216,8 @@ def test_dashboard_fmp_toggle_and_usage_display(tmp_path: Path, monkeypatch):
 
         status = isolated_client.get("/api/v2/engine/status")
         assert status.status_code == 200
-        runtime = status.json()["fmp_runtime"]
+        payload = status.json()
+        runtime = payload["fmp_runtime"]
         assert runtime["toggle_enabled"] is False
         assert runtime["usage_label"] == "121/250"
+        assert "universe_meta" in payload

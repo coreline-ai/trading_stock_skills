@@ -110,6 +110,12 @@ class SkillEngineOrchestratorV2:
             rss_client=self.rss_client,
             warnings=[],
         )
+        try:
+            preload_state, preload_source = self.market_provider.load_market_state_with_source()
+            setattr(context, "_shared_market_state_snapshot", (preload_state, preload_source))
+        except Exception as exc:
+            logger.warning("universe preload failed", exc_info=True)
+            context.warnings.append(f"UNIVERSE_PRELOAD_FAILED:{exc}")
 
         results: list[SkillRunResultV2] = []
         for slug in selected:
@@ -167,6 +173,7 @@ class SkillEngineOrchestratorV2:
             data_sources=self._merge_data_sources(results),
             results=results,
             top_picks=top_picks,
+            universe_meta=self.market_provider.get_universe_meta(),
             pipeline=pipeline,
             warnings=context.warnings,
         )

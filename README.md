@@ -39,10 +39,11 @@ FastAPI 기반 트레이딩 스킬 실행 엔진과 대시보드입니다.
   - 추천 스킬(최대 5) + 분석 스킬(최대 3) 분리 선택
   - `two_stage_intersection` 파이프라인 고정 실행
   - 티커 필터(개별/멀티) 지원
+  - US 유니버스 배지 표시 (`US Universe · source · selected/filtered/raw`)
   - 한글 티커 별칭 표시, 단계별 테이블/최종 TOP5 제공
 - **운영 안전장치**
   - FMP ON/OFF 토글 + 일일 호출량 표시(예: `121/250`)
-  - API/네트워크 장애 시 stale cache/대체 소스 처리
+  - API/네트워크 장애 시 stale cache(실데이터 캐시) fallback
   - 자동 회귀 검증 + uniqueness/independence 감사 스크립트
 
 ## 아키텍처 개요
@@ -264,6 +265,8 @@ EOF
 기본값:
 - 일일 호출 한도: `250`
 - Base URL: `https://financialmodelingprep.com/stable`
+- US 유니버스 TTL: `60분`
+- US 유니버스 모드: `SP500_PLUS_NASDAQ_TOP500` (S&P500 + NASDAQ 시총 상위 500 합집합)
 
 추가 환경 변수:
 - `TRADING_SKILLS_ENV_FILE` : `.env` 경로 오버라이드
@@ -271,6 +274,21 @@ EOF
 - `SKILL_RUN_REPORT_V2_PATH` : v2 리포트 저장 위치 변경
 - `FMP_RUNTIME_SETTINGS_PATH` : FMP 런타임 설정 파일 경로 변경
 - `FMP_USAGE_PATH` : FMP 사용량 파일 경로 변경
+- `US_UNIVERSE_CACHE_PATH` : US 유니버스 캐시 파일 경로 변경
+- `US_UNIVERSE_TTL_MIN` : US 유니버스 캐시 TTL(분)
+- `US_UNIVERSE_MODE` : 유니버스 선택 모드 (`SP500_PLUS_NASDAQ_TOP500` 또는 `US_TOP_LIQUIDITY`)
+- `US_UNIVERSE_MAX_SYMBOLS` : 실행 유니버스 상한
+- `US_UNIVERSE_MIN_MARKET_CAP` : 최소 시가총액 필터
+- `US_UNIVERSE_MIN_VOLUME` : 최소 거래량 필터
+- `US_UNIVERSE_PUBLIC_FALLBACK` : FMP `stock-list` 차단(402/403) 시 공개 심볼 디렉터리 폴백 사용 여부 (`1/0`)
+- `ZAI_SEARCH_MCP_ENABLED` : Z.AI Search MCP 근거 수집 활성화 (`1/0`)
+- `ZAI_SEARCH_MCP_API_KEY` : Search MCP 전용 키 (비우면 `GLM_API_KEY` 재사용)
+- `ZAI_SEARCH_MCP_URL` : Search MCP endpoint URL
+- `ZAI_SEARCH_MCP_TIMEOUT_SEC` : Search MCP 호출 타임아웃(초)
+- `ZAI_SEARCH_MCP_MAX_RESULTS` : 종목당 검색 근거 최대 개수
+- `ZAI_SEARCH_MCP_RECENCY` : 검색 기간 필터 (`oneDay/oneWeek/oneMonth/oneYear/noLimit`)
+- `ZAI_SEARCH_MCP_CONTENT_SIZE` : 응답 길이 (`medium/high`)
+- `ZAI_SEARCH_MCP_LOCATION` : 검색 지역 (`us/cn`)
 - `AI_REPORT_PATH` : AI 리포트 저장 위치 변경
 - `AI_REPORT_RUNTIME_PATH` : AI 실행 상태(runtime) 파일 경로 변경
 
@@ -291,6 +309,21 @@ EOF
 | `SKILL_RUN_HISTORY_MAX_DAYS` | `0` | v2 history 보관 일수 (`0`이면 기간 제한 비활성) |
 | `FMP_RUNTIME_SETTINGS_PATH` | `reports/runtime/fmp_settings.json` | FMP 런타임 설정 경로 |
 | `FMP_USAGE_PATH` | `reports/runtime/fmp_usage.json` | FMP 호출 사용량 경로 |
+| `US_UNIVERSE_CACHE_PATH` | `reports/cache/universe/us_universe.json` | US 유니버스 캐시 경로 |
+| `US_UNIVERSE_TTL_MIN` | `60` | US 유니버스 캐시 TTL(분) |
+| `US_UNIVERSE_MODE` | `SP500_PLUS_NASDAQ_TOP500` | `S&P500 + NASDAQ top500` 모드 또는 `US_TOP_LIQUIDITY` |
+| `US_UNIVERSE_MAX_SYMBOLS` | `2000` | 실행 유니버스 종목 상한 |
+| `US_UNIVERSE_MIN_MARKET_CAP` | `500000000` | 최소 시가총액 필터 |
+| `US_UNIVERSE_MIN_VOLUME` | `100000` | 최소 거래량 필터 |
+| `US_UNIVERSE_PUBLIC_FALLBACK` | `1` | FMP 차단 시 Nasdaq Trader 심볼 디렉터리 폴백 허용 |
+| `ZAI_SEARCH_MCP_ENABLED` | `1` | AI 리포트 생성 시 Z.AI Search MCP 근거를 항상 수집 (실패 시 warning만 추가) |
+| `ZAI_SEARCH_MCP_API_KEY` | `` | Search MCP 전용 키 (`GLM_API_KEY` 대체 가능) |
+| `ZAI_SEARCH_MCP_URL` | `https://api.z.ai/api/mcp/web_search_prime/mcp` | Search MCP endpoint |
+| `ZAI_SEARCH_MCP_TIMEOUT_SEC` | `20` | Search MCP timeout(초) |
+| `ZAI_SEARCH_MCP_MAX_RESULTS` | `2` | 종목당 search evidence 최대 개수 |
+| `ZAI_SEARCH_MCP_RECENCY` | `oneWeek` | 검색 기간 필터 |
+| `ZAI_SEARCH_MCP_CONTENT_SIZE` | `medium` | 검색 응답 길이 |
+| `ZAI_SEARCH_MCP_LOCATION` | `us` | 검색 지역 |
 | `AI_REPORT_PATH` | `reports/ai/latest_ai_report.json` | AI 최신 리포트 경로 |
 | `AI_REPORT_RUNTIME_PATH` | `reports/ai/runtime.json` | AI 실행 상태 경로 |
 | `AI_REPORT_RUNNING_TTL_SEC` | `600` | `running` 상태 stale 자동 복구 기준(초, 기본 10분) |
@@ -309,7 +342,7 @@ EOF
   - 현재 프로세스에서 API 키를 읽었는지 여부
 - `FMP: live/stale/unavailable`
   - `live`: 실시간 조회 성공
-  - `stale`: 캐시/샘플 등 대체 데이터
+  - `stale`: 이전 실데이터 캐시
   - `unavailable`: 조회 실패 또는 미구성
 - `RSS: live/stale/unavailable`
   - 뉴스 소스 상태

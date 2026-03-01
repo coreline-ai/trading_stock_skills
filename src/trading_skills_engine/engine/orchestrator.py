@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from statistics import mean
 
 from trading_skills_engine.core.models import SkillRunResult
-from trading_skills_engine.data.provider import MarketDataProvider
+from trading_skills_engine.data.provider import MarketDataProvider, MarketDataUnavailableError
 from trading_skills_engine.engine.workflows import build_workflow_results
 from trading_skills_engine.skills.catalog import SKILL_CATALOG
 from trading_skills_engine.skills.evaluator import evaluate_skill
@@ -18,23 +18,38 @@ class SkillEngineOrchestrator:
         self.provider = provider or MarketDataProvider()
 
     def run_all_skills(self, selected_slugs: list[str] | None = None) -> dict:
-        market_state, data_source = self.provider.load_market_state_with_source()
         selected = self._select_skills(selected_slugs)
-        results: list[SkillRunResult] = [evaluate_skill(skill, market_state) for skill in selected]
-        workflows = build_workflow_results(results)
-        market_state_dict = asdict(market_state)
-        market_state_dict["as_of_date"] = market_state.as_of_date.isoformat()
+        market_state = None
+        failure_reason = ""
+        try:
+            market_state, data_source = self.provider.load_market_state_with_source()
+            results: list[SkillRunResult] = [evaluate_skill(skill, market_state) for skill in selected]
+            workflows = build_workflow_results(results)
+            market_state_dict = asdict(market_state)
+            market_state_dict["as_of_date"] = market_state.as_of_date.isoformat()
+        except MarketDataUnavailableError as exc:
+            market_state_dict = {}
+            data_source = "unavailable"
+            results = []
+            workflows = []
+            failure_reason = str(exc)
 
         status_counts = {"growth": 0, "neutral": 0, "decline": 0}
         for item in results:
             status_counts[item.status] += 1
 
-        top_candidates = self._aggregate_top_candidates(results)
-        top_picks = self._build_top_picks(market_state.symbols, top_candidates)
+        if results and market_state_dict:
+            top_candidates = self._aggregate_top_candidates(results)
+            top_picks = self._build_top_picks(
+                symbols=market_state.symbols if market_state else [],
+                candidates=top_candidates,
+            )
+        else:
+            top_picks = []
 
         report = {
             "app_name": "Coreline Stock AI",
-            "as_of_date": market_state.as_of_date.isoformat(),
+            "as_of_date": market_state_dict.get("as_of_date", date.today().isoformat()),
             "generated_at": datetime.now(UTC).isoformat(),
             "data_source": data_source,
             "selected_skills": [item.slug for item in selected],
@@ -51,8 +66,9 @@ class SkillEngineOrchestrator:
             "skill_runs": [asdict(item) for item in results],
             "workflows": [asdict(item) for item in workflows],
             "top_picks": top_picks,
+            "failure_reason": failure_reason,
             "quality_summary": {
-                "avg_score": round(mean(item.score_0_100 for item in results), 2),
+                "avg_score": round(mean(item.score_0_100 for item in results), 2) if results else 0.0,
                 "low_score_skills": [item.skill_slug for item in results if item.score_0_100 < 45],
             },
         }

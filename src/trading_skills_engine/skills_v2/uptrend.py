@@ -5,7 +5,7 @@ from hashlib import sha256
 from typing import Any
 
 from trading_skills_engine.data.cache_store import CacheStore
-from trading_skills_engine.skills_v2.base import AnalyzerContext, SkillAnalyzer
+from trading_skills_engine.skills_v2.base import AnalyzerContext, SkillAnalyzer, unavailable_result
 from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV2
 
 
@@ -28,7 +28,15 @@ class UptrendAnalyzer(SkillAnalyzer):
         if cached:
             return self._build_ok(cached.payload, CacheStore.cache_info("fresh", cached), "stale")
 
-        state, source = context.market_provider.load_market_state_with_source()
+        try:
+            state, source = context.market_provider.load_market_state_with_source()
+        except Exception:
+            return unavailable_result(
+                skill_slug=self.slug,
+                summary_ko="US 유니버스를 불러오지 못해 상승추세 분석을 수행할 수 없습니다.",
+                reason_code="UNIVERSE_LOAD_FAILED",
+                source_statuses={"fmp": "unavailable"},
+            )
         source_state = "live" if source == "fmp_live" else "stale"
 
         tradable = list(state.symbols)

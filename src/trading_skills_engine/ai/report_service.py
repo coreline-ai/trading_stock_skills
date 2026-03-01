@@ -9,6 +9,7 @@ from typing import Any
 
 from trading_skills_engine.ai.contracts import AIReport, AISymbolDecision, EvidenceItem
 from trading_skills_engine.ai.glm_client import GLMClient, GLMClientError
+from trading_skills_engine.ai.zai_search_mcp_client import ZAISearchMCPClient
 from trading_skills_engine.config.env import ensure_project_env_loaded
 from trading_skills_engine.core.history_retention import prune_history_files
 from trading_skills_engine.data.fmp_client import FMPClient
@@ -58,6 +59,7 @@ class AIReportService:
 
         self.yahoo_client = YahooFinanceClient()
         self.stooq_client = StooqClient()
+        self.zai_search_client = ZAISearchMCPClient.from_env()
 
     def api_configured(self) -> bool:
         ensure_project_env_loaded()
@@ -436,6 +438,14 @@ class AIReportService:
                 except Exception as exc:
                     logger.warning("fmp evidence fetch failed symbol=%s error=%s", symbol, exc)
                     warnings.append(f"FMP_FAIL:{symbol}:{exc}")
+
+        # Always include search evidence when MCP client is available.
+        if self.zai_search_client is not None:
+            try:
+                evidence.extend(self.zai_search_client.search_symbol_evidence(symbol))
+            except Exception as exc:
+                logger.warning("zai search evidence fetch failed symbol=%s error=%s", symbol, exc)
+                warnings.append(f"ZAI_SEARCH_FAIL:{symbol}:{exc}")
         return evidence
 
 
@@ -511,6 +521,7 @@ def _build_glm_prompts(packets: list[dict[str, Any]]) -> tuple[str, str]:
         f"출력 스키마: {json.dumps(schema_hint, ensure_ascii=False)}\n"
         "규칙:\n"
         "1) Yahoo 우선 근거를 반영하되, 보조 소스가 있으면 함께 반영\n"
+        "1-1) zai_search_mcp 소스가 있으면 최신 뉴스 이벤트를 정성 근거로 반영\n"
         "2) 근거 부족 시 WATCH로 보수적으로 판정\n"
         "3) reasons_ko/risks_ko는 각 2개 이상\n"
         "4) symbols 배열에는 입력된 종목을 모두 포함\n"
@@ -543,6 +554,10 @@ def _compact_packet(packet: dict[str, Any]) -> dict[str, Any]:
             "support_count",
             "analyzer_avg_score",
             "top_pick_score",
+            "title",
+            "snippet",
+            "publish_date",
+            "media",
         ):
             if key not in metrics:
                 continue

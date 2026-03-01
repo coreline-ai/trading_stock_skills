@@ -15,7 +15,7 @@ def sample_snapshot_path(tmp_path: Path) -> Path:
         "app_name": "Coreline Stock AI",
         "as_of_date": "2026-02-26",
         "notification_count": 3,
-        "data_source": "sample",
+        "data_source": "unavailable",
         "selected_skills": ["market-news-analyst", "us-stock-analysis"],
         "user_avatar_url": "https://example.com/avatar.png",
         "auto_rebalance_enabled": True,

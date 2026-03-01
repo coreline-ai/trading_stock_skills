@@ -48,18 +48,24 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
         report_path = Path("reports/skill_runs/latest_skill_runs.json")
         if not report_path.exists():
             orchestrator = SkillEngineOrchestrator()
-            orchestrator.write_report(report_path)
+            try:
+                orchestrator.write_report(report_path)
+            except Exception:
+                pass
 
         orchestrator_v2 = SkillEngineOrchestratorV2()
         if not orchestrator_v2.report_path.exists():
             default_v2_skills = [item.slug for item in SKILL_CATALOG if is_implemented(item.slug)]
-            await asyncio.to_thread(
-                orchestrator_v2.run_and_persist,
-                EngineRunRequestV2(
-                    selected_skills=default_v2_skills,
-                    as_of_date=date.today(),
-                ),
-            )
+            try:
+                await asyncio.to_thread(
+                    orchestrator_v2.run_and_persist,
+                    EngineRunRequestV2(
+                        selected_skills=default_v2_skills,
+                        as_of_date=date.today(),
+                    ),
+                )
+            except Exception:
+                pass
         yield
 
     app = FastAPI(title="Trading Skills Dashboard", lifespan=lifespan)
