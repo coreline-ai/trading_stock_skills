@@ -715,41 +715,61 @@ class SkillEngineOrchestratorV2:
 
         if recommender_intersection_symbols and analyzer_skills and not strict_intersection_symbols:
             dropped_by_stage.append(f"analyzer_filtered_intersection_empty[{analyzer_pass_policy}]")
-        if target_symbols["top10"] and analyzer_skills and not strict_top10_symbols:
+        top10_target_count = len(target_symbols.get("top10", []))
+        desired_top10_min_count = min(max(1, limit), top10_target_count)
+        top10_empty = target_symbols["top10"] and analyzer_skills and not strict_top10_symbols
+        top10_sparse = (
+            target_symbols["top10"]
+            and analyzer_skills
+            and strict_top10_symbols
+            and len(strict_top10_symbols) < desired_top10_min_count
+        )
+        if top10_empty:
             dropped_by_stage.append(f"analyzer_filtered_top10_empty[{analyzer_pass_policy}]")
-            if (
-                fallback_to_watch_on_empty
-                and analyzer_pass_policy == "all_pass"
-            ):
-                watch_intersection_symbols = filter_symbols_by_policy(
-                    symbols=target_symbols.get("intersection", []),
-                    analyzer_skills=analyzer_skills,
-                    analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("intersection", {}),
-                    analyzer_pass_policy="pass_or_watch",
-                )
-                watch_top10_symbols = filter_symbols_by_policy(
-                    symbols=target_symbols.get("top10", []),
-                    analyzer_skills=analyzer_skills,
-                    analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("top10", {}),
-                    analyzer_pass_policy="pass_or_watch",
-                )
-                if watch_top10_symbols:
-                    final_intersection_symbols = watch_intersection_symbols
-                    final_top10_symbols = watch_top10_symbols
-                    effective_policy = "pass_or_watch"
-                    warnings.append(
-                        "two-stage: all_pass 결과가 비어 pass_or_watch 폴백을 적용했습니다."
-                    )
+        elif top10_sparse:
+            dropped_by_stage.append(
+                f"analyzer_filtered_top10_sparse[{analyzer_pass_policy}]:{len(strict_top10_symbols)}/{desired_top10_min_count}"
+            )
+
+        if (
+            fallback_to_watch_on_empty
+            and analyzer_pass_policy == "all_pass"
+            and (top10_empty or top10_sparse)
+        ):
+            watch_intersection_symbols = filter_symbols_by_policy(
+                symbols=target_symbols.get("intersection", []),
+                analyzer_skills=analyzer_skills,
+                analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("intersection", {}),
+                analyzer_pass_policy="pass_or_watch",
+            )
+            watch_top10_symbols = filter_symbols_by_policy(
+                symbols=target_symbols.get("top10", []),
+                analyzer_skills=analyzer_skills,
+                analyzer_decisions_by_skill=analyzer_decisions_by_target_skill.get("top10", {}),
+                analyzer_pass_policy="pass_or_watch",
+            )
+
+            if len(watch_top10_symbols) > len(strict_top10_symbols):
+                final_intersection_symbols = watch_intersection_symbols
+                final_top10_symbols = watch_top10_symbols
+                effective_policy = "pass_or_watch"
+                if top10_empty:
+                    warnings.append("two-stage: all_pass 결과가 비어 pass_or_watch 폴백을 적용했습니다.")
                     dropped_by_stage.append("fallback_pass_or_watch_applied")
-                elif target_symbols.get("top10"):
-                    # 마지막 안전장치: analyzer가 전 종목을 걸러도 추천 파이프라인 결과는 노출한다.
-                    final_intersection_symbols = []
-                    final_top10_symbols = list(target_symbols.get("top10", []))
-                    effective_policy = "pass_or_watch"
+                else:
                     warnings.append(
-                        "two-stage: pass_or_watch 결과도 비어 analyzer 필터를 우회하고 recommender top10을 사용했습니다."
+                        "two-stage: all_pass 결과가 희소하여 pass_or_watch 폴백으로 후보 폭을 확장했습니다."
                     )
-                    dropped_by_stage.append("fallback_recommender_top10_applied")
+                    dropped_by_stage.append("fallback_pass_or_watch_sparse_applied")
+            elif top10_empty and target_symbols.get("top10"):
+                # 마지막 안전장치: analyzer가 전 종목을 걸러도 추천 파이프라인 결과는 노출한다.
+                final_intersection_symbols = []
+                final_top10_symbols = list(target_symbols.get("top10", []))
+                effective_policy = "pass_or_watch"
+                warnings.append(
+                    "two-stage: pass_or_watch 결과도 비어 analyzer 필터를 우회하고 recommender top10을 사용했습니다."
+                )
+                dropped_by_stage.append("fallback_recommender_top10_applied")
 
         intersection_ranking_rows = SkillEngineOrchestratorV2._build_rank_rows(
             symbols=final_intersection_symbols,

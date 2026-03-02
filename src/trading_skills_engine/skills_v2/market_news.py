@@ -257,4 +257,7 @@ def _extract_tickers(headline: str) -> list[str]:
             and clean not in _TICKER_STOPWORDS
         ):
             candidates.append(clean)
+            continue
+        if clean.isdigit() and len(clean) == 6:
+            candidates.append(clean)
     return candidates[:3]

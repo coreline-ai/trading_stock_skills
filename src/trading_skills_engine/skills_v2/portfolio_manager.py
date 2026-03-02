@@ -11,12 +11,22 @@ from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV
 
 class PortfolioManagerAnalyzer(SkillAnalyzer):
     slug = "portfolio-manager"
+    _CACHE_REVISION = 2
 
     def run(self, params: dict[str, Any], context: AnalyzerContext) -> SkillRunResultV2:
         risk_profile = str(params.get("risk_profile") or "balanced").strip().lower()
         risk_profile = risk_profile if risk_profile in {"aggressive", "balanced", "defensive"} else "balanced"
+        market_scope = str(context.market_provider.get_market_scope() or "US").upper()
 
-        cache_key = _cache_key(self.slug, {"as_of": context.as_of_date.isoformat(), "risk_profile": risk_profile})
+        cache_key = _cache_key(
+            self.slug,
+            {
+                "as_of": context.as_of_date.isoformat(),
+                "risk_profile": risk_profile,
+                "market_scope": market_scope,
+                "cache_revision": self._CACHE_REVISION,
+            },
+        )
         cached = context.cache_store.get_fresh(cache_key)
         if cached:
             return self._build_ok(cached.payload, CacheStore.cache_info("fresh", cached), "stale")
@@ -24,9 +34,10 @@ class PortfolioManagerAnalyzer(SkillAnalyzer):
         try:
             state, source = context.market_provider.load_market_state_with_source()
         except Exception:
+            scope = str(context.market_provider.get_market_scope() or "US").upper()
             return unavailable_result(
                 skill_slug=self.slug,
-                summary_ko="US 유니버스를 불러오지 못해 포트폴리오 제안을 수행할 수 없습니다.",
+                summary_ko=f"{scope} 유니버스를 불러오지 못해 포트폴리오 제안을 수행할 수 없습니다.",
                 reason_code="UNIVERSE_LOAD_FAILED",
                 source_statuses={"fmp": "unavailable"},
             )

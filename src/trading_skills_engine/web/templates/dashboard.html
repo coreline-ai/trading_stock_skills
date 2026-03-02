@@ -70,6 +70,25 @@
             <p class="mt-1 text-right text-sm text-muted">기준일 {{ model.date_display_ko }}</p>
           </div>
           <div class="flex flex-wrap items-center gap-2 text-xs md:flex-1 md:justify-end">
+            {% set active_scope = (model.market_scope_runtime.scope if model.market_scope_runtime else model.universe_meta.scope) or 'US' %}
+            <form method="post" action="/dashboard/market-scope" class="inline-flex items-center gap-1 rounded-full border border-line bg-white p-1">
+              <input type="hidden" name="scope" value="US" />
+              <button
+                type="submit"
+                class="rounded-full px-2 py-1 font-semibold {% if active_scope == 'US' %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-700{% endif %}"
+              >
+                US
+              </button>
+            </form>
+            <form method="post" action="/dashboard/market-scope" class="inline-flex items-center gap-1 rounded-full border border-line bg-white p-1">
+              <input type="hidden" name="scope" value="KR" />
+              <button
+                type="submit"
+                class="rounded-full px-2 py-1 font-semibold {% if active_scope == 'KR' %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-700{% endif %}"
+              >
+                KR
+              </button>
+            </form>
             <form method="post" action="/dashboard/fmp-toggle">
               <input type="hidden" name="enabled" value="{% if model.fmp_runtime.toggle_enabled %}0{% else %}1{% endif %}" />
               <button
@@ -216,7 +235,9 @@
               <h3 class="mb-2 text-sm font-semibold">티커 필터 (선택)</h3>
               <p class="mb-2 text-xs text-muted">
                 입력한 티커만 후보/분석 대상으로 사용합니다.
-                {% if model.universe_meta.universe_mode == 'SP500_PLUS_NASDAQ_TOP500' %}
+                {% if model.universe_meta.scope == 'KR' %}
+                  비워두면 코스피500 + 코스닥200(시가총액 기준) 유니버스를 사용합니다.
+                {% elif model.universe_meta.universe_mode == 'SP500_PLUS_NASDAQ_TOP500' %}
                   비워두면 S&amp;P500 + NASDAQ top500 합집합 유니버스를 사용합니다.
                 {% else %}
                   비워두면 US 유니버스(필터 후 상위 {{ model.universe_meta.selected_count or 2000 }})를 사용합니다.
@@ -228,7 +249,7 @@
                   type="text"
                   name="single_ticker"
                   value="{{ model.left_menu.single_ticker }}"
-                  placeholder="예: NVDA"
+                  placeholder="{% if model.universe_meta.scope == 'KR' %}예: 005930{% else %}예: NVDA{% endif %}"
                   class="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-sm outline-none ring-pri/20 focus:ring"
                 />
               </label>
@@ -237,7 +258,7 @@
                 <textarea
                   name="multi_tickers"
                   rows="3"
-                  placeholder="예: AVGO, LLY, MSFT"
+                  placeholder="{% if model.universe_meta.scope == 'KR' %}예: 000660, 035420{% else %}예: AVGO, LLY, MSFT{% endif %}"
                   class="w-full rounded-lg border border-line bg-white px-2 py-1.5 text-sm outline-none ring-pri/20 focus:ring"
                 >{{ model.left_menu.multi_tickers }}</textarea>
               </label>

@@ -41,6 +41,9 @@ def test_dashboard_template_renders_required_sections(client):
     assert "참조 소스" in html
     assert "데이터 소스" in html
     assert "US Universe" in html
+    assert 'action="/dashboard/market-scope"' in html
+    assert 'name="scope" value="US"' in html
+    assert 'name="scope" value="KR"' in html
     assert "투자 권유 아님" in html
     assert "무효화 레벨 확인" in html
     assert "추천 생성 방식" not in html

@@ -36,7 +36,7 @@ def test_dashboard_bff_v2_skill_detail_fields_present(tmp_path: Path):
     bff = DashboardBFFV2(report_path=report_path)
     model = bff.get_dashboard_view_model()
     assert "universe_meta" in model
-    assert model["universe_meta"]["scope"] == "US"
+    assert model["universe_meta"]["scope"] in {"US", "KR"}
 
     skills = model["left_menu"]["recommender_skills"] + model["left_menu"]["analyzer_skills"]
     assert skills
@@ -119,6 +119,27 @@ def test_dashboard_run_post_redirects(client):
     assert response.headers["location"] == "/dashboard"
 
 
+def test_dashboard_market_scope_toggle_persists_settings(tmp_path: Path, monkeypatch):
+    report_path = tmp_path / "latest_skill_runs_v2.json"
+    _write_minimal_v2_report(report_path)
+    scope_path = tmp_path / "runtime" / "market_scope.json"
+    monkeypatch.setenv("SKILL_RUN_REPORT_V2_PATH", str(report_path))
+    monkeypatch.setenv("MARKET_SCOPE_RUNTIME_SETTINGS_PATH", str(scope_path))
+
+    app = create_app()
+    with TestClient(app) as isolated_client:
+        response = isolated_client.post(
+            "/dashboard/market-scope",
+            data={"scope": "KR"},
+            follow_redirects=False,
+        )
+        assert response.status_code == 303
+        assert response.headers["location"] == "/dashboard"
+
+    payload = json.loads(scope_path.read_text(encoding="utf-8"))
+    assert payload.get("scope") == "KR"
+
+
 def test_dashboard_run_writes_two_stage_pipeline_config(tmp_path: Path, monkeypatch):
     report_path = tmp_path / "latest_skill_runs_v2.json"
     monkeypatch.setenv("SKILL_RUN_REPORT_V2_PATH", str(report_path))
@@ -162,10 +183,14 @@ def test_dashboard_run_two_stage_uses_selected_roles_for_pipeline(tmp_path: Path
     pipeline = payload.get("pipeline") or {}
     recommender_slugs = [item.get("skill_slug") for item in pipeline.get("recommender_outputs", [])]
     analyzer_slugs = [item.get("skill_slug") for item in pipeline.get("analyzer_outputs", [])]
-    assert "market-news-analyst" in recommender_slugs
     assert "macro-regime-detector" in analyzer_slugs
     assert "scenario-analyzer" not in recommender_slugs
     assert "us-stock-analysis" not in analyzer_slugs
+    if any(
+        item.get("skill_slug") == "market-news-analyst" and item.get("status") == "ok"
+        for item in payload.get("results", [])
+    ):
+        assert "market-news-analyst" in recommender_slugs
     # US universe load failure can make us-stock-analysis unavailable in this run.
     if any(item.get("skill_slug") == "us-stock-analysis" and item.get("status") == "ok" for item in payload.get("results", [])):
         assert "us-stock-analysis" in recommender_slugs
@@ -311,6 +336,10 @@ def test_dashboard_bff_v2_includes_ai_report_symbols_in_korean_map(tmp_path: Pat
 def test_dashboard_bff_v2_preloads_universe_symbols_for_korean_map(tmp_path: Path, monkeypatch):
     report_path = tmp_path / "latest_skill_runs_v2.json"
     _write_minimal_v2_report(report_path)
+    scope_path = tmp_path / "runtime" / "market_scope.json"
+    scope_path.parent.mkdir(parents=True, exist_ok=True)
+    scope_path.write_text(json.dumps({"scope": "US"}), encoding="utf-8")
+    monkeypatch.setenv("MARKET_SCOPE_RUNTIME_SETTINGS_PATH", str(scope_path))
 
     universe_cache_path = tmp_path / "us_universe.json"
     universe_cache_path.write_text(

@@ -13,6 +13,10 @@ from fastapi.templating import Jinja2Templates
 
 from trading_skills_engine.ai.report_service import AIReportService
 from trading_skills_engine.config.fmp_runtime import FMPRuntimeSettingsStore
+from trading_skills_engine.config.market_scope_runtime import (
+    MarketScopeRuntimeSettingsStore,
+    normalize_market_scope,
+)
 from trading_skills_engine.core.validators import parse_bool, parse_symbol_list
 from trading_skills_engine.engine.orchestrator import SkillEngineOrchestrator
 from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
@@ -226,6 +230,22 @@ def create_app(snapshot_path: Path | None = None) -> FastAPI:
 
         enabled = _form_bool(_first(parsed, "enabled", "1"), default=True)
         FMPRuntimeSettingsStore().set_enabled(enabled)
+        return RedirectResponse(url="/dashboard", status_code=303)
+
+    @app.post("/dashboard/market-scope")
+    async def dashboard_market_scope(request: Request) -> RedirectResponse:
+        raw_bytes = await request.body()
+        if len(raw_bytes) > 64_000:
+            return RedirectResponse(url="/dashboard", status_code=303)
+
+        raw_body = raw_bytes.decode("utf-8", errors="ignore")
+        try:
+            parsed = parse_qs(raw_body, max_num_fields=128)
+        except ValueError:
+            parsed = {}
+
+        scope = normalize_market_scope(_first(parsed, "scope", "US"))
+        MarketScopeRuntimeSettingsStore().set_scope(scope)
         return RedirectResponse(url="/dashboard", status_code=303)
 
     @app.post("/dashboard/run")

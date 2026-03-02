@@ -21,7 +21,7 @@ class StooqClient:
         normalized = str(symbol or "").strip().upper()
         if not normalized:
             raise StooqError("STOOQ_INVALID_SYMBOL")
-        stooq_symbol = f"{normalized.lower()}.us"
+        stooq_symbol = _to_stooq_symbol(normalized)
         url = f"{self.base_url}/q/l/?s={stooq_symbol}&i=d"
         req = Request(url, headers={"User-Agent": "trading-skills-engine/2.0"})
 
@@ -62,6 +62,15 @@ class StooqClient:
             "url": url,
             "metrics": metrics,
         }
+
+
+def _to_stooq_symbol(normalized: str) -> str:
+    upper = str(normalized or "").strip().upper()
+    if "." in upper:
+        return upper.lower()
+    if upper.isdigit() and len(upper) == 6:
+        return f"{upper}.kr"
+    return f"{upper}.us"
 
 
 def _parse_quote_row(csv_text: str) -> dict[str, str]:

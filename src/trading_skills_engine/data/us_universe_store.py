@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 from io import StringIO
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlencode
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
@@ -24,7 +25,7 @@ DEFAULT_US_UNIVERSE_TTL_MIN = 60
 DEFAULT_US_UNIVERSE_MAX_SYMBOLS = 2000
 DEFAULT_US_UNIVERSE_MIN_MARKET_CAP = 500_000_000.0
 DEFAULT_US_UNIVERSE_MIN_VOLUME = 100_000.0
-DEFAULT_US_UNIVERSE_PUBLIC_FALLBACK = True
+DEFAULT_US_UNIVERSE_REAL_FALLBACK = True
 DEFAULT_US_UNIVERSE_MODE = "SP500_PLUS_NASDAQ_TOP500"
 US_UNIVERSE_MODE_BROAD = "US_TOP_LIQUIDITY"
 US_UNIVERSE_MODE_SP500_NASDAQ500 = "SP500_PLUS_NASDAQ_TOP500"
@@ -61,12 +62,11 @@ EXCLUDED_NAME_KEYWORDS = (
     " nextshares",
     " depositary",
 )
-PUBLIC_NASDAQ_TRADED_URL = "https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt"
-PUBLIC_OTHER_LISTED_URL = "https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt"
 SP500_LIST_URLS = (
     "https://datahub.io/core/s-and-p-500-companies/r/constituents.csv",
     "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv",
 )
+NASDAQ_SCREENER_URL = "https://api.nasdaq.com/api/screener/stocks"
 
 
 class USUniverseLoadError(RuntimeError):
@@ -92,7 +92,7 @@ class USUniverseStore:
         universe_mode: str | None = None,
     ) -> None:
         self.client = client
-        self.cache_path = Path(os.getenv("US_UNIVERSE_CACHE_PATH") or cache_path or DEFAULT_US_UNIVERSE_CACHE_PATH)
+        self.cache_path = Path(cache_path or os.getenv("US_UNIVERSE_CACHE_PATH") or DEFAULT_US_UNIVERSE_CACHE_PATH)
         self.ttl_min = _to_int(os.getenv("US_UNIVERSE_TTL_MIN"), ttl_min or DEFAULT_US_UNIVERSE_TTL_MIN, lo=1, hi=1440)
         self.max_symbols = _to_int(
             os.getenv("US_UNIVERSE_MAX_SYMBOLS"),
@@ -108,9 +108,14 @@ class USUniverseStore:
             os.getenv("US_UNIVERSE_MIN_VOLUME"),
             min_volume if min_volume is not None else DEFAULT_US_UNIVERSE_MIN_VOLUME,
         )
-        self.allow_public_fallback = _to_bool(
-            os.getenv("US_UNIVERSE_PUBLIC_FALLBACK"),
-            default=allow_public_fallback if allow_public_fallback is not None else DEFAULT_US_UNIVERSE_PUBLIC_FALLBACK,
+        default_real_fallback = (
+            bool(allow_public_fallback)
+            if allow_public_fallback is not None
+            else DEFAULT_US_UNIVERSE_REAL_FALLBACK
+        )
+        self.allow_real_fallback = _to_bool(
+            os.getenv("US_UNIVERSE_REAL_FALLBACK"),
+            default=default_real_fallback,
         )
         self.universe_mode = _normalize_universe_mode(
             str(os.getenv("US_UNIVERSE_MODE") or universe_mode or DEFAULT_US_UNIVERSE_MODE)
@@ -119,6 +124,8 @@ class USUniverseStore:
 
     def load_symbols(self) -> USUniverseSnapshot:
         cached_payload = self._read_cache_payload()
+        if _is_disallowed_cached_source(cached_payload):
+            cached_payload = {}
         cached_snapshot = _snapshot_from_payload(cached_payload)
         cache_stale = self._is_cache_stale(cached_snapshot.meta.get("fetched_at"))
         cached_mode_raw = str(cached_payload.get("universe_mode") or "").strip()
@@ -134,12 +141,14 @@ class USUniverseStore:
                 logger.warning("us universe live refresh failed", exc_info=True)
                 if cached_snapshot.symbols:
                     return _with_source(cached_snapshot, "stale")
-                raise USUniverseLoadError("UNIVERSE_LOAD_FAILED") from exc
+                if isinstance(exc, USUniverseLoadError):
+                    raise
+                raise USUniverseLoadError(f"UNIVERSE_LOAD_FAILED:{_exc_code(exc)}") from exc
 
         if cached_snapshot.symbols:
             return _with_source(cached_snapshot, "stale")
 
-        if self.client is None and not self.allow_public_fallback:
+        if self.client is None:
             raise USUniverseLoadError("UNIVERSE_LOAD_FAILED:NO_FMP_CLIENT_AND_NO_CACHE")
         raise USUniverseLoadError("UNIVERSE_LOAD_FAILED:NO_CACHE")
 
@@ -161,7 +170,16 @@ class USUniverseStore:
         sp500_count = 0
         nasdaq_top500_count = 0
 
-        if self.client is not None:
+        if self.client is None:
+            if not self.allow_real_fallback:
+                raise USUniverseLoadError("UNIVERSE_LOAD_FAILED:NO_FMP_CLIENT")
+            logger.warning("fmp client unavailable. trying real backup provider=nasdaq_screener")
+            symbols, raw_count, filtered_count, selection_meta = self._load_nasdaq_screener_universe()
+            source_provider = "nasdaq_screener"
+            ranking_basis = "market_cap_volume_momentum"
+            sp500_count = int(selection_meta.get("sp500_count") or 0)
+            nasdaq_top500_count = int(selection_meta.get("nasdaq_top500_count") or 0)
+        else:
             try:
                 raw_rows = self.client.fetch_us_stock_list()
                 candidates = self._normalize_candidates(raw_rows)
@@ -177,33 +195,27 @@ class USUniverseStore:
                     selected = candidates[: self.max_symbols]
                 symbols = self._candidates_to_symbols(selected)
             except HTTPError as exc:
-                if exc.code not in {402, 403}:
-                    raise
-                if not self.allow_public_fallback:
-                    raise
-                logger.warning("fmp stock-list unavailable status=%s. falling back to public symbol directory", exc.code)
-                symbols, raw_count, filtered_count, selection_meta = self._load_public_universe()
-                source_provider = "public_symbol_directory"
-                ranking_basis = "liquidity_proxy"
+                if not self.allow_real_fallback:
+                    logger.warning("fmp stock-list unavailable status=%s. no fallback allowed", exc.code)
+                    raise USUniverseLoadError(f"UNIVERSE_LOAD_FAILED:FMP_HTTP_{exc.code}") from exc
+                logger.warning(
+                    "fmp stock-list unavailable status=%s. trying real backup provider=nasdaq_screener",
+                    exc.code,
+                )
+                symbols, raw_count, filtered_count, selection_meta = self._load_nasdaq_screener_universe()
+                source_provider = "nasdaq_screener"
+                ranking_basis = "market_cap_volume_momentum"
                 sp500_count = int(selection_meta.get("sp500_count") or 0)
                 nasdaq_top500_count = int(selection_meta.get("nasdaq_top500_count") or 0)
-            except Exception:
-                if not self.allow_public_fallback:
-                    raise
-                logger.warning("fmp stock-list unavailable. falling back to public symbol directory", exc_info=True)
-                symbols, raw_count, filtered_count, selection_meta = self._load_public_universe()
-                source_provider = "public_symbol_directory"
-                ranking_basis = "liquidity_proxy"
+            except Exception as exc:
+                if not self.allow_real_fallback:
+                    raise USUniverseLoadError(f"UNIVERSE_LOAD_FAILED:{_exc_code(exc)}") from exc
+                logger.warning("fmp stock-list failed. trying real backup provider=nasdaq_screener", exc_info=True)
+                symbols, raw_count, filtered_count, selection_meta = self._load_nasdaq_screener_universe()
+                source_provider = "nasdaq_screener"
+                ranking_basis = "market_cap_volume_momentum"
                 sp500_count = int(selection_meta.get("sp500_count") or 0)
                 nasdaq_top500_count = int(selection_meta.get("nasdaq_top500_count") or 0)
-        else:
-            if not self.allow_public_fallback:
-                raise USUniverseLoadError("UNIVERSE_LOAD_FAILED:NO_FMP_CLIENT")
-            symbols, raw_count, filtered_count, selection_meta = self._load_public_universe()
-            source_provider = "public_symbol_directory"
-            ranking_basis = "liquidity_proxy"
-            sp500_count = int(selection_meta.get("sp500_count") or 0)
-            nasdaq_top500_count = int(selection_meta.get("nasdaq_top500_count") or 0)
 
         if not symbols:
             raise USUniverseLoadError("UNIVERSE_EMPTY_AFTER_FILTER")
@@ -234,69 +246,6 @@ class USUniverseStore:
         }
         self._write_cache_payload(payload)
         return _snapshot_from_payload(payload)
-
-    def _load_public_universe(self) -> tuple[list[SymbolSignal], int, int, dict[str, int]]:
-        rows = self._fetch_public_symbol_rows()
-        raw_count = len(rows)
-
-        candidates: list[dict[str, Any]] = []
-        for row in rows:
-            candidate = self._public_row_to_candidate(row)
-            if candidate is not None:
-                candidates.append(candidate)
-
-        if self.universe_mode == US_UNIVERSE_MODE_SP500_NASDAQ500:
-            picked, selection_meta = self._select_sp500_plus_nasdaq_top500(candidates)
-            filtered_count = selection_meta["filtered_count"]
-        else:
-            candidates.sort(key=lambda item: float(item["liquidity_score"]), reverse=True)
-            filtered_count = len(candidates)
-            picked = candidates[: self.max_symbols]
-            selection_meta = {"sp500_count": 0, "nasdaq_top500_count": 0, "filtered_count": filtered_count}
-
-        symbols = self._candidates_to_symbols(picked)
-        return symbols, raw_count, filtered_count, selection_meta
-
-    def _fetch_public_symbol_rows(self) -> list[dict[str, str]]:
-        rows: list[dict[str, str]] = []
-        rows.extend(_parse_pipe_table(_download_text(PUBLIC_NASDAQ_TRADED_URL), "nasdaqtraded"))
-        rows.extend(_parse_pipe_table(_download_text(PUBLIC_OTHER_LISTED_URL), "otherlisted"))
-        return rows
-
-    def _public_row_to_candidate(self, row: dict[str, str]) -> dict[str, Any] | None:
-        symbol = str(row.get("symbol") or "").upper().strip()
-        if not symbol or SYMBOL_RE.fullmatch(symbol) is None:
-            return None
-
-        exchange = str(row.get("exchange") or "").upper().strip()
-        if exchange not in ALLOWED_EXCHANGES:
-            return None
-
-        if str(row.get("is_etf") or "").upper() == "Y":
-            return None
-        if str(row.get("is_test_issue") or "").upper() == "Y":
-            return None
-
-        name = str(row.get("name") or symbol).strip()
-        if _is_non_common_name(name):
-            return None
-
-        exchange_weight = {"NASDAQ": 3.0, "NYSE": 2.7, "AMEX": 2.2}.get(exchange, 1.5)
-        symbol_quality = 1.0
-        if "." in symbol or "-" in symbol:
-            symbol_quality -= 0.25
-        if len(symbol) > 4:
-            symbol_quality -= 0.15
-
-        liquidity_score = exchange_weight + symbol_quality
-        return {
-            "symbol": symbol,
-            "name": name,
-            "sector": "Unknown",
-            "exchange": exchange,
-            "market_cap": 0.0,
-            "liquidity_score": liquidity_score,
-        }
 
     def _normalize_candidates(self, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         candidates: list[dict[str, Any]] = []
@@ -370,6 +319,68 @@ class USUniverseStore:
             "sp500_count": len(sp500_rows),
             "nasdaq_top500_count": len(nasdaq_top500),
             "filtered_count": len(selected),
+        }
+
+    def _load_nasdaq_screener_universe(self) -> tuple[list[SymbolSignal], int, int, dict[str, int]]:
+        candidates: list[dict[str, Any]] = []
+        for exchange in ("NASDAQ", "NYSE", "AMEX"):
+            rows = _fetch_nasdaq_screener_rows(exchange=exchange)
+            for row in rows:
+                candidate = self._nasdaq_row_to_candidate(row=row, exchange=exchange)
+                if candidate is not None:
+                    candidates.append(candidate)
+
+        raw_count = len(candidates)
+        if raw_count <= 0:
+            raise USUniverseLoadError("UNIVERSE_LOAD_FAILED:NASDAQ_SCREENER_EMPTY")
+
+        if self.universe_mode == US_UNIVERSE_MODE_SP500_NASDAQ500:
+            selected, selection_meta = self._select_sp500_plus_nasdaq_top500(candidates)
+            filtered_count = int(selection_meta.get("filtered_count") or len(selected))
+        else:
+            candidates.sort(key=lambda item: float(item["liquidity_score"]), reverse=True)
+            filtered_count = len(candidates)
+            selected = candidates[: self.max_symbols]
+            selection_meta = {"sp500_count": 0, "nasdaq_top500_count": 0, "filtered_count": filtered_count}
+
+        symbols = self._candidates_to_symbols(selected)
+        if not symbols:
+            raise USUniverseLoadError("UNIVERSE_LOAD_FAILED:NASDAQ_SCREENER_FILTER_EMPTY")
+        return symbols, raw_count, filtered_count, selection_meta
+
+    def _nasdaq_row_to_candidate(self, row: dict[str, Any], exchange: str) -> dict[str, Any] | None:
+        symbol = str(row.get("symbol") or "").upper().strip()
+        if not symbol or SYMBOL_RE.fullmatch(symbol) is None:
+            return None
+
+        name = str(row.get("name") or symbol).strip()
+        if _is_non_common_name(name):
+            return None
+
+        price = _parse_number(row.get("lastsale"))
+        volume = _parse_number(row.get("volume"))
+        market_cap = _parse_number(row.get("marketCap"))
+        if price <= 0 or volume < self.min_volume or market_cap < self.min_market_cap:
+            return None
+
+        daily = _parse_number(row.get("pctchange"))
+        daily = max(-25.0, min(25.0, daily))
+        momentum = max(-40.0, min(40.0, daily * 2.2))
+        sector = str(row.get("sector") or row.get("industry") or "Unknown")
+        liquidity_score = (
+            math.log10(market_cap + 1.0) * 0.58
+            + math.log10(volume + 1.0) * 0.34
+            + math.log10(price + 1.0) * 0.08
+        )
+        return {
+            "symbol": symbol,
+            "name": name,
+            "sector": sector,
+            "exchange": exchange,
+            "market_cap": market_cap,
+            "daily_return_pct": round(daily, 4),
+            "momentum_20d": round(momentum, 4),
+            "liquidity_score": liquidity_score,
         }
 
     def _fetch_sp500_symbols(self) -> set[str]:
@@ -567,55 +578,41 @@ def _download_text(url: str) -> str:
         return response.read().decode("utf-8", errors="ignore")
 
 
-def _parse_pipe_table(text: str, source_name: str) -> list[dict[str, str]]:
-    lines = [line.strip() for line in text.splitlines() if line.strip()]
-    if not lines:
-        return []
-
-    headers = [item.strip() for item in lines[0].split("|")]
-    rows: list[dict[str, str]] = []
-    for line in lines[1:]:
-        if line.startswith("File Creation Time"):
-            break
-        parts = [item.strip() for item in line.split("|")]
-        if len(parts) < len(headers):
-            continue
-        record = {headers[idx]: parts[idx] for idx in range(len(headers))}
-        normalized = _normalize_public_row(source_name, record)
-        if normalized is not None:
-            rows.append(normalized)
-    return rows
+def _download_json(url: str, headers: dict[str, str] | None = None) -> dict[str, Any]:
+    req_headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json, text/plain, */*"}
+    if headers:
+        req_headers.update(headers)
+    req = Request(url, headers=req_headers)
+    with urlopen(req, timeout=20) as response:
+        payload = json.loads(response.read().decode("utf-8"))
+    return payload if isinstance(payload, dict) else {}
 
 
-def _normalize_public_row(source_name: str, record: dict[str, str]) -> dict[str, str] | None:
-    if source_name == "nasdaqtraded":
-        listing_exchange = str(record.get("Listing Exchange") or "").upper().strip()
-        exchange = {"Q": "NASDAQ", "N": "NYSE", "A": "AMEX"}.get(listing_exchange, "")
-        symbol = str(record.get("Symbol") or "").upper().strip()
-        if not symbol:
-            return None
-        return {
-            "symbol": symbol,
-            "name": str(record.get("Security Name") or symbol).strip(),
+def _fetch_nasdaq_screener_rows(exchange: str) -> list[dict[str, Any]]:
+    query = urlencode(
+        {
+            "tableonly": "true",
+            "limit": "10000",
+            "offset": "0",
+            "download": "true",
             "exchange": exchange,
-            "is_etf": str(record.get("ETF") or "").upper().strip(),
-            "is_test_issue": str(record.get("Test Issue") or "").upper().strip(),
         }
-
-    if source_name == "otherlisted":
-        exchange_code = str(record.get("Exchange") or "").upper().strip()
-        exchange = {"N": "NYSE", "A": "AMEX"}.get(exchange_code, "")
-        symbol = str(record.get("ACT Symbol") or "").upper().strip()
-        if not symbol:
-            return None
-        return {
-            "symbol": symbol,
-            "name": str(record.get("Security Name") or symbol).strip(),
-            "exchange": exchange,
-            "is_etf": str(record.get("ETF") or "").upper().strip(),
-            "is_test_issue": str(record.get("Test Issue") or "").upper().strip(),
-        }
-    return None
+    )
+    url = f"{NASDAQ_SCREENER_URL}?{query}"
+    payload = _download_json(
+        url,
+        headers={
+            "Referer": "https://www.nasdaq.com/market-activity/stocks/screener",
+        },
+    )
+    rows = (payload.get("data") or {}).get("rows") or []
+    if not isinstance(rows, list):
+        raise USUniverseLoadError("UNIVERSE_LOAD_FAILED:NASDAQ_SCREENER_INVALID_PAYLOAD")
+    result: list[dict[str, Any]] = []
+    for row in rows:
+        if isinstance(row, dict):
+            result.append(row)
+    return result
 
 
 def _parse_sp500_symbols_csv(text: str) -> set[str]:
@@ -677,3 +674,37 @@ def _to_float(value: Any, default: float) -> float:
         return float(value)
     except (TypeError, ValueError):
         return default
+
+
+def _parse_number(value: Any) -> float:
+    text = str(value or "").strip()
+    if not text:
+        return 0.0
+    cleaned = (
+        text.replace("$", "")
+        .replace(",", "")
+        .replace("%", "")
+        .replace("+", "")
+        .replace("\u2212", "-")
+    )
+    cleaned = re.sub(r"[^0-9.\-]", "", cleaned)
+    if not cleaned:
+        return 0.0
+    try:
+        return float(cleaned)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _is_disallowed_cached_source(payload: dict[str, Any]) -> bool:
+    source_provider = str(payload.get("source_provider") or "").strip().lower()
+    if source_provider == "public_symbol_directory":
+        logger.warning("ignoring us cache from disallowed source_provider=%s", source_provider)
+        return True
+    return False
+
+
+def _exc_code(exc: Exception) -> str:
+    if isinstance(exc, HTTPError):
+        return f"HTTP_{exc.code}"
+    return exc.__class__.__name__.upper()

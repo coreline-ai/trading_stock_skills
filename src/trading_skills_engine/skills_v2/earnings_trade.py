@@ -14,6 +14,7 @@ class EarningsTradeAnalyzer(SkillAnalyzer):
     slug = "earnings-trade-analyzer"
 
     def run(self, params: dict[str, Any], context: AnalyzerContext) -> SkillRunResultV2:
+        market_scope = str(context.market_provider.get_market_scope() or "US").upper()
         days = _to_int(params.get("days"), 7)
         min_market_cap = _to_float(params.get("min_market_cap"), 5_000_000_000)
 
@@ -23,6 +24,7 @@ class EarningsTradeAnalyzer(SkillAnalyzer):
                 "as_of": context.as_of_date.isoformat(),
                 "days": days,
                 "min_market_cap": min_market_cap,
+                "market_scope": market_scope,
             },
         )
 
@@ -49,7 +51,7 @@ class EarningsTradeAnalyzer(SkillAnalyzer):
                 start=context.as_of_date,
                 end=context.as_of_date + timedelta(days=max(1, days)),
             )
-            candidates = _from_fmp_events(raw, min_market_cap=min_market_cap)
+            candidates = _from_fmp_events(raw, min_market_cap=min_market_cap, market_scope=market_scope)
             if not candidates:
                 stale = context.cache_store.get_stale(cache_key)
                 if stale and _source_state(stale.payload) == "live":
@@ -104,7 +106,11 @@ class EarningsTradeAnalyzer(SkillAnalyzer):
         )
 
 
-def _from_fmp_events(raw: list[dict[str, Any]], min_market_cap: float) -> list[dict[str, Any]]:
+def _from_fmp_events(
+    raw: list[dict[str, Any]],
+    min_market_cap: float,
+    market_scope: str = "US",
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for item in raw[:500]:
         market_cap = _to_float(item.get("marketCap"), 0.0)
@@ -113,6 +119,8 @@ def _from_fmp_events(raw: list[dict[str, Any]], min_market_cap: float) -> list[d
 
         ticker = str(item.get("symbol") or "").upper()
         if not ticker:
+            continue
+        if not _ticker_matches_scope(ticker, market_scope):
             continue
 
         timing = _normalize_timing(item.get("time") or item.get("publishingTime"))
@@ -174,3 +182,13 @@ def _source_state(payload: Any) -> str:
     if isinstance(payload, dict):
         return str(payload.get("_source_state") or "stale")
     return "stale"
+
+
+def _ticker_matches_scope(ticker: str, market_scope: str) -> bool:
+    normalized = str(ticker or "").upper().strip()
+    if not normalized:
+        return False
+    if str(market_scope).upper() == "KR":
+        base = normalized.split(".")[0]
+        return base.isdigit() and len(base) == 6
+    return True

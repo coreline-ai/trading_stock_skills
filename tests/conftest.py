@@ -1,12 +1,68 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
 from trading_skills_engine.web.app import create_app
+
+
+@pytest.fixture(autouse=True)
+def isolate_market_scope_runtime(tmp_path: Path, monkeypatch):
+    scope_path = tmp_path / "market_scope.json"
+    scope_path.write_text(json.dumps({"scope": "US"}), encoding="utf-8")
+    monkeypatch.setenv("MARKET_SCOPE", "US")
+    monkeypatch.setenv("MARKET_SCOPE_RUNTIME_SETTINGS_PATH", str(scope_path))
+
+
+@pytest.fixture(autouse=True)
+def seed_us_universe_cache_for_app_tests(tmp_path: Path, monkeypatch, request):
+    # Keep provider unit tests in full control of cache_path inputs.
+    if str(request.node.fspath).endswith("test_market_data_provider.py"):
+        return
+
+    cache_path = tmp_path / "cache" / "us_universe.json"
+    symbols_list = [
+        "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "AVGO", "TSLA", "LLY", "JPM",
+        "V", "XOM", "UNH", "WMT", "MA", "COST", "ORCL", "HD", "PG", "NFLX",
+        "BAC", "ABBV", "KO", "CRM", "AMD", "PEP", "MRK", "ADBE", "LIN", "CSCO",
+        "INTU", "QCOM", "IBM", "MCD", "GE", "TXN", "AMAT", "NOW", "CAT", "PFE",
+    ]
+    sectors = ["Technology", "Health Care", "Financials", "Consumer", "Energy", "Industrials"]
+    rows = []
+    size = len(symbols_list)
+    for idx, symbol in enumerate(symbols_list):
+        ai_factor = 0.95 - (idx / max(1, size - 1)) * 0.6
+        rows.append(
+            {
+                "symbol": symbol,
+                "name": symbol,
+                "sector": sectors[idx % len(sectors)],
+                "daily_return_pct": round(((idx % 11) - 5) * 0.6, 3),
+                "momentum_20d": round(((idx % 13) - 6) * 1.4, 3),
+                "ai_factor": round(max(0.35, min(0.95, ai_factor)), 4),
+            }
+        )
+    payload = {
+        "scope": "US",
+        "source": "live",
+        "source_provider": "fmp",
+        "universe_mode": "SP500_PLUS_NASDAQ_TOP500",
+        "ranking_basis": "market_cap",
+        "raw_count": len(rows),
+        "filtered_count": len(rows),
+        "selected_count": len(rows),
+        "sp500_count": 25,
+        "nasdaq_top500_count": 25,
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "symbols": rows,
+    }
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setenv("US_UNIVERSE_CACHE_PATH", str(cache_path))
 
 
 @pytest.fixture()

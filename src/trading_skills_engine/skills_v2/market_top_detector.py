@@ -11,11 +11,12 @@ from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV
 
 class MarketTopDetectorAnalyzer(SkillAnalyzer):
     slug = "market-top-detector"
-    _CACHE_REVISION = 2
+    _CACHE_REVISION = 3
 
     def run(self, params: dict[str, Any], context: AnalyzerContext) -> SkillRunResultV2:
         vix_alert = _to_float(params.get("vix_alert"), 24.0)
         breadth_floor = _to_float(params.get("breadth_floor"), 0.52)
+        market_scope = str(context.market_provider.get_market_scope() or "US").upper()
 
         cache_key = _cache_key(
             self.slug,
@@ -23,6 +24,7 @@ class MarketTopDetectorAnalyzer(SkillAnalyzer):
                 "as_of": context.as_of_date.isoformat(),
                 "vix_alert": vix_alert,
                 "breadth_floor": breadth_floor,
+                "market_scope": market_scope,
                 "cache_revision": self._CACHE_REVISION,
             },
         )
@@ -34,9 +36,10 @@ class MarketTopDetectorAnalyzer(SkillAnalyzer):
         try:
             state, source = context.market_provider.load_market_state_with_source()
         except Exception:
+            scope = str(context.market_provider.get_market_scope() or "US").upper()
             return unavailable_result(
                 skill_slug=self.slug,
-                summary_ko="US 유니버스를 불러오지 못해 상단 리스크 분석을 수행할 수 없습니다.",
+                summary_ko=f"{scope} 유니버스를 불러오지 못해 상단 리스크 분석을 수행할 수 없습니다.",
                 reason_code="UNIVERSE_LOAD_FAILED",
                 source_statuses={"fmp": "unavailable"},
             )

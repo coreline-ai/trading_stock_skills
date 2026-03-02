@@ -10,6 +10,7 @@ from typing import Any
 
 from trading_skills_engine.ai.report_service import AIReportService
 from trading_skills_engine.config.fmp_runtime import get_fmp_runtime_state
+from trading_skills_engine.config.market_scope_runtime import get_market_scope_runtime_state
 from trading_skills_engine.skills.catalog import SKILL_CATALOG
 from trading_skills_engine.skills_v2.registry import is_implemented, is_recommendation_capable
 from trading_skills_engine.skills_v2.traits import get_skill_trait
@@ -251,6 +252,9 @@ class DashboardBFFV2:
 
     def get_dashboard_view_model(self) -> dict[str, Any]:
         report = self._load_report()
+        market_scope_runtime = get_market_scope_runtime_state()
+        runtime_scope = str(market_scope_runtime.get("scope") or "US")
+        universe_meta = _normalize_universe_meta(report.get("universe_meta"), runtime_scope)
         results = report["results"]
         selected_slugs = {str(item.get("skill_slug")) for item in results if isinstance(item, dict)}
         raw_pipeline = report.get("pipeline", {})
@@ -356,6 +360,7 @@ class DashboardBFFV2:
             top_picks=top_picks,
             pipeline_tables=pipeline_tables,
             results=results_enriched,
+            scope=str((report.get("universe_meta") or {}).get("scope") or "US"),
             ai_symbols=ai_symbols,
         )
         selected_skill_top5 = _build_selected_skill_top5(results_enriched)
@@ -372,22 +377,9 @@ class DashboardBFFV2:
             },
             "date_display_ko": _format_ko_date(report["as_of_date"]),
             "fmp_runtime": get_fmp_runtime_state(),
+            "market_scope_runtime": market_scope_runtime,
             "data_sources": report.get("data_sources", {"fmp": "unavailable", "rss": "unavailable"}),
-            "universe_meta": report.get(
-                "universe_meta",
-                {
-                    "scope": "US",
-                    "source": "unavailable",
-                    "source_provider": "",
-                    "universe_mode": "SP500_PLUS_NASDAQ_TOP500",
-                    "raw_count": 0,
-                    "filtered_count": 0,
-                    "selected_count": 0,
-                    "sp500_count": 0,
-                    "nasdaq_top500_count": 0,
-                    "fetched_at": "",
-                },
-            ),
+            "universe_meta": universe_meta,
             "warnings": report.get("warnings", []),
             "skill_catalog": catalog,
             "skill_detail_map": skill_detail_map,
@@ -458,15 +450,21 @@ class DashboardBFFV2:
             "universe_meta": payload.get(
                 "universe_meta",
                 {
-                    "scope": "US",
+                    "scope": get_market_scope_runtime_state().get("scope") or "US",
                     "source": "unavailable",
                     "source_provider": "",
-                    "universe_mode": "SP500_PLUS_NASDAQ_TOP500",
+                    "universe_mode": (
+                        "KOSPI500_KOSDAQ200"
+                        if str(get_market_scope_runtime_state().get("scope") or "US") == "KR"
+                        else "SP500_PLUS_NASDAQ_TOP500"
+                    ),
                     "raw_count": 0,
                     "filtered_count": 0,
                     "selected_count": 0,
                     "sp500_count": 0,
                     "nasdaq_top500_count": 0,
+                    "kospi500_count": 0,
+                    "kosdaq200_count": 0,
                     "fetched_at": "",
                 },
             ),
@@ -478,19 +476,22 @@ class DashboardBFFV2:
 
 
 def _empty_report() -> dict[str, Any]:
+    runtime_scope = str(get_market_scope_runtime_state().get("scope") or "US")
     return {
         "as_of_date": date.today().isoformat(),
         "data_sources": {"fmp": "unavailable", "rss": "unavailable"},
         "universe_meta": {
-            "scope": "US",
+            "scope": runtime_scope,
             "source": "unavailable",
             "source_provider": "",
-            "universe_mode": "SP500_PLUS_NASDAQ_TOP500",
+            "universe_mode": "KOSPI500_KOSDAQ200" if runtime_scope == "KR" else "SP500_PLUS_NASDAQ_TOP500",
             "raw_count": 0,
             "filtered_count": 0,
             "selected_count": 0,
             "sp500_count": 0,
             "nasdaq_top500_count": 0,
+            "kospi500_count": 0,
+            "kosdaq200_count": 0,
             "fetched_at": "",
         },
         "warnings": ["아직 v2 실행 결과가 없습니다. 왼쪽에서 스킬을 선택하고 실행하세요."],
@@ -498,6 +499,37 @@ def _empty_report() -> dict[str, Any]:
         "top_picks": [],
         "pipeline": {},
     }
+
+
+def _normalize_universe_meta(raw: Any, runtime_scope: str) -> dict[str, Any]:
+    scope = str(runtime_scope or "US").upper()
+    default_meta = {
+        "scope": scope,
+        "source": "unavailable",
+        "source_provider": "",
+        "universe_mode": "KOSPI500_KOSDAQ200" if scope == "KR" else "SP500_PLUS_NASDAQ_TOP500",
+        "ranking_basis": "",
+        "raw_count": 0,
+        "filtered_count": 0,
+        "selected_count": 0,
+        "sp500_count": 0,
+        "nasdaq_top500_count": 0,
+        "kospi500_count": 0,
+        "kosdaq200_count": 0,
+        "fetched_at": "",
+    }
+    if not isinstance(raw, dict):
+        return default_meta
+
+    source_scope = str(raw.get("scope") or "").upper()
+    if source_scope and source_scope != scope:
+        # 스코프 전환 직후에는 이전 리포트 메타를 숨기고 현재 스코프 기준으로 초기화한다.
+        return default_meta
+
+    merged = dict(default_meta)
+    merged.update(raw)
+    merged["scope"] = scope
+    return merged
 
 
 def _parse_iso_date(value: str) -> str:
@@ -1072,12 +1104,13 @@ def _build_symbol_name_ko_map(
     top_picks: list[dict[str, Any]],
     pipeline_tables: dict[str, Any],
     results: list[dict[str, Any]],
+    scope: str = "US",
     ai_symbols: list[str] | None = None,
 ) -> dict[str, str]:
     symbols: set[str] = set()
     inferred: dict[str, str] = {}
     inferred_company: dict[str, str] = {}
-    universe_company_map = _load_universe_symbol_company_map()
+    universe_company_map = _load_universe_symbol_company_map(scope=scope)
 
     def _add_symbol(raw: Any) -> None:
         symbol = str(raw or "").strip().upper()
@@ -1232,15 +1265,22 @@ def _normalize_company_name(company_name: str) -> str:
     return text
 
 
-def _universe_cache_path() -> Path:
+def _universe_cache_path(scope: str = "US") -> Path:
+    normalized = str(scope or "US").strip().upper()
+    if normalized == "KR":
+        env_path = str(os.getenv("KR_UNIVERSE_CACHE_PATH") or "").strip()
+        if env_path:
+            return Path(env_path)
+        return Path("reports/cache/universe/kr_universe.json")
+
     env_path = str(os.getenv("US_UNIVERSE_CACHE_PATH") or "").strip()
     if env_path:
         return Path(env_path)
     return Path("reports/cache/universe/us_universe.json")
 
 
-def _load_universe_symbol_company_map() -> dict[str, str]:
-    path = _universe_cache_path()
+def _load_universe_symbol_company_map(scope: str = "US") -> dict[str, str]:
+    path = _universe_cache_path(scope=scope)
     if not path.exists():
         return {}
     try:

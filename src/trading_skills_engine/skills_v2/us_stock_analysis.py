@@ -11,8 +11,10 @@ from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV
 
 class USStockAnalysisAnalyzer(SkillAnalyzer):
     slug = "us-stock-analysis"
+    _CACHE_REVISION = 2
 
     def run(self, params: dict[str, Any], context: AnalyzerContext) -> SkillRunResultV2:
+        market_scope = str(context.market_provider.get_market_scope() or "US").upper()
         ticker = str(params.get("ticker") or "").upper().strip()
         if not ticker:
             try:
@@ -20,7 +22,7 @@ class USStockAnalysisAnalyzer(SkillAnalyzer):
             except Exception:
                 return unavailable_result(
                     skill_slug=self.slug,
-                    summary_ko="US 유니버스를 불러오지 못해 단일 종목 분석을 시작할 수 없습니다.",
+                    summary_ko=f"{market_scope} 유니버스를 불러오지 못해 단일 종목 분석을 시작할 수 없습니다.",
                     reason_code="UNIVERSE_LOAD_FAILED",
                     source_statuses={"fmp": "unavailable"},
                 )
@@ -33,7 +35,14 @@ class USStockAnalysisAnalyzer(SkillAnalyzer):
                     source_statuses={"fmp": "unavailable"},
                 )
 
-        cache_key = _cache_key(self.slug, {"ticker": ticker})
+        cache_key = _cache_key(
+            self.slug,
+            {
+                "ticker": ticker,
+                "market_scope": market_scope,
+                "cache_revision": self._CACHE_REVISION,
+            },
+        )
         cached = context.cache_store.get_fresh(cache_key)
         if cached:
             payload = cached.payload if isinstance(cached.payload, dict) else {}

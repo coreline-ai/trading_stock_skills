@@ -15,13 +15,22 @@ class EarningsCalendarAnalyzer(SkillAnalyzer):
     slug = "earnings-calendar"
 
     def run(self, params: dict[str, Any], context: AnalyzerContext) -> SkillRunResultV2:
+        market_scope = str(context.market_provider.get_market_scope() or "US").upper()
         days = _to_int(params.get("days"), 7)
         min_market_cap = _to_float(params.get("min_market_cap"), 2_000_000_000)
 
         start = context.as_of_date
         end = context.as_of_date + timedelta(days=max(1, days))
 
-        cache_key = _cache_key(self.slug, {"start": start.isoformat(), "end": end.isoformat(), "min_mcap": min_market_cap})
+        cache_key = _cache_key(
+            self.slug,
+            {
+                "start": start.isoformat(),
+                "end": end.isoformat(),
+                "min_mcap": min_market_cap,
+                "market_scope": market_scope,
+            },
+        )
         cached = context.cache_store.get_fresh(cache_key)
         if cached:
             payload = cached.payload if isinstance(cached.payload, dict) else {}
@@ -45,7 +54,7 @@ class EarningsCalendarAnalyzer(SkillAnalyzer):
 
         try:
             raw = context.fmp_calendar.get_earnings_calendar(start=start, end=end)
-            payload = self._parse_earnings(raw, min_market_cap=min_market_cap)
+            payload = self._parse_earnings(raw, min_market_cap=min_market_cap, market_scope=market_scope)
             if not payload["earnings"]:
                 stale = context.cache_store.get_stale(cache_key)
                 if stale and _source_state(stale.payload) == "live":
@@ -72,7 +81,12 @@ class EarningsCalendarAnalyzer(SkillAnalyzer):
                 source_statuses={"fmp": "unavailable"},
             )
 
-    def _parse_earnings(self, raw: list[dict[str, Any]], min_market_cap: float) -> dict[str, Any]:
+    def _parse_earnings(
+        self,
+        raw: list[dict[str, Any]],
+        min_market_cap: float,
+        market_scope: str = "US",
+    ) -> dict[str, Any]:
         rows: list[dict[str, Any]] = []
         density = Counter()
 
@@ -93,7 +107,7 @@ class EarningsCalendarAnalyzer(SkillAnalyzer):
                 "timing": timing,
                 "source_url": "https://financialmodelingprep.com",
             }
-            if row["ticker"]:
+            if row["ticker"] and _ticker_matches_scope(row["ticker"], market_scope):
                 rows.append(row)
                 density[date_text[:10]] += 1
 
@@ -153,3 +167,13 @@ def _source_state(payload: Any) -> str:
     if isinstance(payload, dict):
         return str(payload.get("_source_state") or "stale")
     return "stale"
+
+
+def _ticker_matches_scope(ticker: str, market_scope: str) -> bool:
+    normalized = str(ticker or "").upper().strip()
+    if not normalized:
+        return False
+    if str(market_scope).upper() == "KR":
+        base = normalized.split(".")[0]
+        return base.isdigit() and len(base) == 6
+    return True

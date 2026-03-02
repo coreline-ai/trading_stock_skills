@@ -711,6 +711,78 @@ def test_v2_two_stage_fallback_to_recommender_top10_when_all_analyzers_reject(cl
     assert "fallback_recommender_top10_applied" in pipeline["final_summary"]["dropped_by_stage"]
 
 
+def test_v2_two_stage_all_pass_fallback_to_watch_on_sparse(client, monkeypatch):
+    from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
+    from trading_skills_engine.skills_v2.contracts import AnalyzerEvaluationV2
+
+    first_pass_symbol_by_target: dict[str, str] = {}
+
+    def _pass_first_then_watch(
+        symbol,
+        result,
+        source_recommender=None,
+        target_group=None,
+        symbol_strength_0_100=None,
+    ):
+        del result, symbol_strength_0_100
+        target = target_group if target_group in {"intersection", "top10"} else "top10"
+        if target not in first_pass_symbol_by_target:
+            first_pass_symbol_by_target[target] = str(symbol)
+        decision = "PASS" if first_pass_symbol_by_target[target] == str(symbol) else "WATCH"
+        return AnalyzerEvaluationV2(
+            symbol=str(symbol),
+            source_recommender=source_recommender,
+            target_group=target,
+            decision=decision,
+            score=72.0 if decision == "PASS" else 58.0,
+            reasons=["test sparse fallback"],
+            risk_flags=[],
+        )
+
+    monkeypatch.setattr(
+        SkillEngineOrchestratorV2,
+        "_evaluate_symbol_for_analyzer",
+        staticmethod(_pass_first_then_watch),
+    )
+
+    response = client.post(
+        "/api/v2/skills/run",
+        json={
+            "selected_skills": [
+                "vcp-screener",
+                "macro-regime-detector",
+            ],
+            "as_of_date": "2026-02-26",
+            "top_picks_mode": "two_stage_intersection",
+            "top_picks_limit": 5,
+            "pipeline_config": {
+                "recommender_skills": ["vcp-screener"],
+                "analyzer_skills": ["macro-regime-detector"],
+                "recommender_top_n": 10,
+                "intersection_policy": "strict",
+                "analyzer_pass_policy": "all_pass",
+            },
+            "params_by_skill": {
+                "top-picks": {
+                    "fallback_to_watch_on_empty": True,
+                }
+            },
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    pipeline = body["pipeline"]
+
+    assert body["top_picks"]
+    assert len(body["top_picks"]) >= 2
+    assert pipeline["final_summary"]["policy_used"] == "pass_or_watch"
+    assert any(
+        str(item).startswith("analyzer_filtered_top10_sparse[all_pass]")
+        for item in pipeline["final_summary"]["dropped_by_stage"]
+    )
+    assert "fallback_pass_or_watch_sparse_applied" in pipeline["final_summary"]["dropped_by_stage"]
+
+
 def test_v2_two_stage_intersection_contract(client, monkeypatch):
     from trading_skills_engine.data.rss_client import RSSClient
 

@@ -150,6 +150,7 @@ class AIReportService:
         source_report = self._read_source_report()
         target_rows = _extract_target_rows(source_report)
         source_run_id = str(source_report.get("run_id") or "") or None
+        market_scope = str((source_report.get("universe_meta") or {}).get("scope") or "US").upper()
 
         if not target_rows:
             report = AIReport(
@@ -183,7 +184,12 @@ class AIReportService:
             packet_by_symbol[symbol] = {
                 "symbol": symbol,
                 "internal": row.get("internal", {}),
-                "evidence": self._collect_evidence(symbol, row.get("internal", {}), warnings),
+                "evidence": self._collect_evidence(
+                    symbol=symbol,
+                    internal_metrics=row.get("internal", {}),
+                    warnings=warnings,
+                    market_scope=market_scope,
+                ),
             }
 
         glm_client = GLMClient.from_env()
@@ -199,7 +205,8 @@ class AIReportService:
             return report
 
         system_prompt, user_prompt = _build_glm_prompts(
-            [_compact_packet(item) for item in packet_by_symbol.values()]
+            [_compact_packet(item) for item in packet_by_symbol.values()],
+            market_scope=market_scope,
         )
         self._touch_runtime_if_running()
         try:
@@ -375,6 +382,7 @@ class AIReportService:
         symbol: str,
         internal_metrics: dict[str, Any],
         warnings: list[str],
+        market_scope: str = "US",
     ) -> list[dict[str, Any]]:
         evidence: list[dict[str, Any]] = []
         if internal_metrics:
@@ -391,20 +399,30 @@ class AIReportService:
         yahoo_error: str | None = None
         stooq_error: str | None = None
 
-        try:
-            evidence.append(self.yahoo_client.fetch_quote(symbol))
-            yahoo_ok = True
-        except Exception as exc:
-            yahoo_error = f"YAHOO_FAIL:{symbol}:{exc}"
-            logger.warning("yahoo evidence fetch failed symbol=%s error=%s", symbol, exc)
+        yahoo_candidates = _symbol_candidates_for_yahoo(symbol=symbol, market_scope=market_scope)
+        for yahoo_symbol in yahoo_candidates:
+            try:
+                row = self.yahoo_client.fetch_quote(yahoo_symbol)
+                row["request_symbol"] = yahoo_symbol
+                evidence.append(row)
+                yahoo_ok = True
+                break
+            except Exception as exc:
+                yahoo_error = f"YAHOO_FAIL:{yahoo_symbol}:{exc}"
+                logger.warning("yahoo evidence fetch failed symbol=%s error=%s", yahoo_symbol, exc)
 
         if not yahoo_ok:
-            try:
-                evidence.append(self.stooq_client.fetch_quote(symbol))
-                stooq_ok = True
-            except Exception as exc:
-                stooq_error = f"STOOQ_FAIL:{symbol}:{exc}"
-                logger.warning("stooq evidence fetch failed symbol=%s error=%s", symbol, exc)
+            stooq_candidates = _symbol_candidates_for_stooq(symbol=symbol, market_scope=market_scope)
+            for stooq_symbol in stooq_candidates:
+                try:
+                    row = self.stooq_client.fetch_quote(stooq_symbol)
+                    row["request_symbol"] = stooq_symbol
+                    evidence.append(row)
+                    stooq_ok = True
+                    break
+                except Exception as exc:
+                    stooq_error = f"STOOQ_FAIL:{stooq_symbol}:{exc}"
+                    logger.warning("stooq evidence fetch failed symbol=%s error=%s", stooq_symbol, exc)
 
         if not yahoo_ok and not stooq_ok:
             if yahoo_error:
@@ -414,13 +432,14 @@ class AIReportService:
             fmp_client = FMPClient.from_env()
             if fmp_client is not None:
                 try:
-                    rows = fmp_client.fetch_quotes([symbol])
+                    fmp_symbol = _symbol_candidates_for_fmp(symbol=symbol, market_scope=market_scope)[0]
+                    rows = fmp_client.fetch_quotes([fmp_symbol])
                     if rows and isinstance(rows[0], dict):
                         row = rows[0]
                         evidence.append(
                             {
                                 "source": "fmp",
-                                "url": f"{fmp_client.base_url}/quote?symbol={symbol}",
+                                "url": f"{fmp_client.base_url}/quote?symbol={fmp_symbol}",
                                 "metrics": {
                                     "price": _coerce_float(row.get("price"), None, None, None),
                                     "change_pct": _coerce_float(
@@ -495,7 +514,12 @@ def _extract_target_rows(source_report: dict[str, Any]) -> list[dict[str, Any]]:
     return rows[:5]
 
 
-def _build_glm_prompts(packets: list[dict[str, Any]]) -> tuple[str, str]:
+def _build_glm_prompts(
+    packets: list[dict[str, Any]],
+    market_scope: str = "US",
+) -> tuple[str, str]:
+    scope = "KR" if str(market_scope).upper() == "KR" else "US"
+    scope_ko = "국내 주식" if scope == "KR" else "미국 주식"
     schema_hint = {
         "portfolio_summary_ko": "string",
         "symbols": [
@@ -511,7 +535,7 @@ def _build_glm_prompts(packets: list[dict[str, Any]]) -> tuple[str, str]:
         ],
     }
     system_prompt = (
-        "너는 미국 주식 최종 판정 분석기다. "
+        f"너는 {scope_ko} 최종 판정 분석기다. "
         "입력된 근거만 사용해 JSON만 출력한다. "
         "과도한 확신을 금지하고, BUY/WATCH/AVOID 3단계로 판정한다. "
         "투자 자문이 아닌 참고 분석 문체로 한국어 작성."
@@ -528,6 +552,39 @@ def _build_glm_prompts(packets: list[dict[str, Any]]) -> tuple[str, str]:
         f"입력 데이터: {json.dumps(packets, ensure_ascii=False)}"
     )
     return system_prompt, user_prompt
+
+
+def _symbol_candidates_for_yahoo(symbol: str, market_scope: str) -> list[str]:
+    normalized = str(symbol or "").strip().upper()
+    if not normalized:
+        return []
+    if str(market_scope).upper() != "KR":
+        return [normalized]
+    if normalized.isdigit() and len(normalized) == 6:
+        return [f"{normalized}.KS", f"{normalized}.KQ", normalized]
+    return [normalized]
+
+
+def _symbol_candidates_for_stooq(symbol: str, market_scope: str) -> list[str]:
+    normalized = str(symbol or "").strip().upper()
+    if not normalized:
+        return []
+    if str(market_scope).upper() != "KR":
+        return [normalized]
+    if normalized.isdigit() and len(normalized) == 6:
+        return [f"{normalized}.KR", normalized]
+    return [normalized]
+
+
+def _symbol_candidates_for_fmp(symbol: str, market_scope: str) -> list[str]:
+    normalized = str(symbol or "").strip().upper()
+    if not normalized:
+        return []
+    if str(market_scope).upper() != "KR":
+        return [normalized]
+    if normalized.isdigit() and len(normalized) == 6:
+        return [f"{normalized}.KS", f"{normalized}.KQ", normalized]
+    return [normalized]
 
 
 def _compact_packet(packet: dict[str, Any]) -> dict[str, Any]:

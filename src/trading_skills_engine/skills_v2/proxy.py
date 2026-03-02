@@ -14,7 +14,7 @@ from trading_skills_engine.skills_v2.traits import get_skill_trait
 class ProxySkillAnalyzer(SkillAnalyzer):
     """Market-state-backed proxy analyzer for catalog slugs without dedicated implementations."""
 
-    _CACHE_REVISION = 4
+    _CACHE_REVISION = 5
 
     def __init__(self, definition: SkillDefinition) -> None:
         self.definition = definition
@@ -25,6 +25,7 @@ class ProxySkillAnalyzer(SkillAnalyzer):
         risk_tilt = str(params.get("risk_tilt") or "balanced").strip().lower()
         if risk_tilt not in {"defensive", "balanced", "aggressive"}:
             risk_tilt = "balanced"
+        market_scope = str(context.market_provider.get_market_scope() or "US").upper()
         profile = _build_skill_profile(self.definition.slug)
         profile_signature = _profile_signature(profile)
 
@@ -34,6 +35,7 @@ class ProxySkillAnalyzer(SkillAnalyzer):
                 "as_of": context.as_of_date.isoformat(),
                 "horizon_days": horizon_days,
                 "risk_tilt": risk_tilt,
+                "market_scope": market_scope,
                 "profile_signature": profile_signature,
                 "cache_revision": self._CACHE_REVISION,
             },
