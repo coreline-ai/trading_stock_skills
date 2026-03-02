@@ -233,6 +233,110 @@ def test_dashboard_run_applies_single_and_multi_ticker_filter(tmp_path: Path, mo
         assert symbol in allowed
 
 
+def test_dashboard_bff_v2_builds_korean_name_for_unmapped_symbols(tmp_path: Path, monkeypatch):
+    report_path = tmp_path / "latest_skill_runs_v2.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "run_id": "test-run-ko-name",
+                "as_of_date": "2026-02-28",
+                "data_sources": {"fmp": "stale", "rss": "live"},
+                "results": [],
+                "pipeline": {},
+                "warnings": [],
+                "top_picks": [
+                    {"symbol": "ABCD", "name": "Acme Robotics Common Stock", "score": 77.1, "reason": "test"},
+                    {"symbol": "WXYZ", "score": 70.5, "reason": "test"},
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    universe_cache_path = tmp_path / "us_universe.json"
+    universe_cache_path.write_text(
+        json.dumps(
+            {
+                "scope": "US",
+                "source": "live",
+                "symbols": [
+                    {"symbol": "WXYZ", "name": "Future Dynamics Common Stock"},
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("US_UNIVERSE_CACHE_PATH", str(universe_cache_path))
+
+    bff = DashboardBFFV2(report_path=report_path)
+    model = bff.get_dashboard_view_model()
+    symbol_name_ko = model.get("symbol_name_ko", {})
+
+    assert symbol_name_ko.get("ABCD")
+    assert symbol_name_ko.get("WXYZ")
+
+
+def test_dashboard_bff_v2_includes_ai_report_symbols_in_korean_map(tmp_path: Path, monkeypatch):
+    report_path = tmp_path / "latest_skill_runs_v2.json"
+    _write_minimal_v2_report(report_path)
+
+    ai_report_path = tmp_path / "latest_ai_report.json"
+    ai_report_path.write_text(
+        json.dumps(
+            {
+                "run_id": "ai-run-test",
+                "status": "ok",
+                "symbols": [
+                    {"symbol": "NVDA", "decision": "BUY"},
+                    {"symbol": "msft", "decision": "WATCH"},
+                    {"symbol": "abcd", "decision": "WATCH"},
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("AI_REPORT_PATH", str(ai_report_path))
+
+    bff = DashboardBFFV2(report_path=report_path)
+    model = bff.get_dashboard_view_model()
+    symbol_name_ko = model.get("symbol_name_ko", {})
+
+    assert symbol_name_ko.get("NVDA")
+    assert symbol_name_ko.get("MSFT")
+    assert symbol_name_ko.get("ABCD")
+
+
+def test_dashboard_bff_v2_preloads_universe_symbols_for_korean_map(tmp_path: Path, monkeypatch):
+    report_path = tmp_path / "latest_skill_runs_v2.json"
+    _write_minimal_v2_report(report_path)
+
+    universe_cache_path = tmp_path / "us_universe.json"
+    universe_cache_path.write_text(
+        json.dumps(
+            {
+                "scope": "US",
+                "source": "live",
+                "symbols": [
+                    {"symbol": "MSFT", "name": "Microsoft Corporation - Common Stock"},
+                    {"symbol": "AAL", "name": "American Airlines Group, Inc. - Common Stock"},
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("US_UNIVERSE_CACHE_PATH", str(universe_cache_path))
+
+    bff = DashboardBFFV2(report_path=report_path)
+    model = bff.get_dashboard_view_model()
+    symbol_name_ko = model.get("symbol_name_ko", {})
+
+    assert symbol_name_ko.get("MSFT") == "마이크로소프트"
+    assert symbol_name_ko.get("AAL")
+
+
 def test_dashboard_ai_report_run_redirects_and_persists_unavailable_when_key_missing(
     tmp_path: Path,
     monkeypatch,

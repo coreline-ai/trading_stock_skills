@@ -48,7 +48,7 @@
   <body class="bg-bg font-sans text-slate-900">
     <main class="mx-auto max-w-[1240px] p-4 md:p-6">
       {% macro symbol_with_ko(symbol) -%}
-        {% set sym = (symbol or '') %}
+        {% set sym = ((symbol or '') | string | trim | upper) %}
         {% set ko = model.symbol_name_ko.get(sym) if model.symbol_name_ko else '' %}
         <span class="font-semibold">{{ sym }}</span>{% if ko %}<span class="ml-1 text-[11px] text-muted">({{ ko }})</span>{% endif %}
       {%- endmacro %}

@@ -649,6 +649,68 @@ def test_v2_two_stage_all_pass_fallback_to_watch_on_empty(client, monkeypatch):
     assert "fallback_pass_or_watch_applied" in pipeline["final_summary"]["dropped_by_stage"]
 
 
+def test_v2_two_stage_fallback_to_recommender_top10_when_all_analyzers_reject(client, monkeypatch):
+    from trading_skills_engine.engine.orchestrator_v2 import SkillEngineOrchestratorV2
+    from trading_skills_engine.skills_v2.contracts import AnalyzerEvaluationV2
+
+    def _always_reject(
+        symbol,
+        result,
+        source_recommender=None,
+        target_group=None,
+        symbol_strength_0_100=None,
+    ):
+        del result, symbol_strength_0_100
+        return AnalyzerEvaluationV2(
+            symbol=str(symbol),
+            source_recommender=source_recommender,
+            target_group=target_group if target_group in {"intersection", "top10"} else None,
+            decision="REJECT",
+            score=30.0,
+            reasons=["test reject decision"],
+            risk_flags=["test_all_reject"],
+        )
+
+    monkeypatch.setattr(
+        SkillEngineOrchestratorV2,
+        "_evaluate_symbol_for_analyzer",
+        staticmethod(_always_reject),
+    )
+
+    response = client.post(
+        "/api/v2/skills/run",
+        json={
+            "selected_skills": [
+                "vcp-screener",
+                "macro-regime-detector",
+            ],
+            "as_of_date": "2026-02-26",
+            "top_picks_mode": "two_stage_intersection",
+            "pipeline_config": {
+                "recommender_skills": ["vcp-screener"],
+                "analyzer_skills": ["macro-regime-detector"],
+                "recommender_top_n": 10,
+                "intersection_policy": "strict",
+                "analyzer_pass_policy": "all_pass",
+            },
+            "params_by_skill": {
+                "top-picks": {
+                    "fallback_to_watch_on_empty": True,
+                }
+            },
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    pipeline = body["pipeline"]
+
+    assert body["top_picks"]
+    assert pipeline["final_summary"]["policy_used"] == "pass_or_watch"
+    assert pipeline["final_summary"]["top5_from_top10"]
+    assert "analyzer_filtered_top10_empty[all_pass]" in pipeline["final_summary"]["dropped_by_stage"]
+    assert "fallback_recommender_top10_applied" in pipeline["final_summary"]["dropped_by_stage"]
+
+
 def test_v2_two_stage_intersection_contract(client, monkeypatch):
     from trading_skills_engine.data.rss_client import RSSClient
 

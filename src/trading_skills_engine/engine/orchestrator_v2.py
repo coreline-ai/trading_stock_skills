@@ -741,6 +741,15 @@ class SkillEngineOrchestratorV2:
                         "two-stage: all_pass 결과가 비어 pass_or_watch 폴백을 적용했습니다."
                     )
                     dropped_by_stage.append("fallback_pass_or_watch_applied")
+                elif target_symbols.get("top10"):
+                    # 마지막 안전장치: analyzer가 전 종목을 걸러도 추천 파이프라인 결과는 노출한다.
+                    final_intersection_symbols = []
+                    final_top10_symbols = list(target_symbols.get("top10", []))
+                    effective_policy = "pass_or_watch"
+                    warnings.append(
+                        "two-stage: pass_or_watch 결과도 비어 analyzer 필터를 우회하고 recommender top10을 사용했습니다."
+                    )
+                    dropped_by_stage.append("fallback_recommender_top10_applied")
 
         intersection_ranking_rows = SkillEngineOrchestratorV2._build_rank_rows(
             symbols=final_intersection_symbols,

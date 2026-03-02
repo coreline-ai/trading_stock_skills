@@ -98,6 +98,150 @@ KOREAN_COMPANY_ALIASES: dict[str, str] = {
     "Cheniere Energy": "셰니어 에너지",
 }
 
+COMPANY_KO_TOKEN_ALIASES: dict[str, str] = {
+    "AMERICAN": "아메리칸",
+    "AIR": "에어",
+    "AIRLINES": "에어라인즈",
+    "ATLANTIC": "애틀랜틱",
+    "PACIFIC": "퍼시픽",
+    "APPLIED": "어플라이드",
+    "OPTICAL": "옵티컬",
+    "OPTOELECTRONICS": "옵토일렉트로닉스",
+    "ACQUISITION": "어퀴지션",
+    "ACQUISITIONS": "어퀴지션스",
+    "ORDINARY": "오디너리",
+    "SHARE": "셰어",
+    "SHARES": "셰어즈",
+    "CLASS": "클래스",
+    "STOCK": "스톡",
+    "TRADING": "트레이딩",
+    "BANK": "뱅크",
+    "BANCORP": "뱅코프",
+    "FINANCE": "파이낸스",
+    "RETAIL": "리테일",
+    "INDUSTRIALS": "인더스트리얼스",
+    "ELECTRONIC": "일렉트로닉",
+    "FOODS": "푸즈",
+    "FOOD": "푸드",
+    "PHARMA": "파마",
+    "TECHNOLOGY": "테크놀로지",
+    "TECHNOLOGIES": "테크놀로지스",
+    "THERAPEUTICS": "테라퓨틱스",
+    "PHARMACEUTICALS": "파마슈티컬스",
+    "BIOTECH": "바이오테크",
+    "BIOTECHNOLOGY": "바이오테크놀로지",
+    "BIOSCIENCE": "바이오사이언스",
+    "BIOSCIENCES": "바이오사이언스",
+    "BIOLOGICS": "바이오로직스",
+    "BIO": "바이오",
+    "MEDICAL": "메디컬",
+    "HEALTH": "헬스",
+    "HEALTHCARE": "헬스케어",
+    "COMMUNICATION": "커뮤니케이션",
+    "COMMUNICATIONS": "커뮤니케이션즈",
+    "SOFTWARE": "소프트웨어",
+    "SYSTEM": "시스템",
+    "SYSTEMS": "시스템즈",
+    "NETWORK": "네트워크",
+    "NETWORKS": "네트웍스",
+    "ENERGY": "에너지",
+    "MATERIALS": "머티리얼즈",
+    "INDUSTRIES": "인더스트리즈",
+    "INDUSTRIAL": "인더스트리얼",
+    "DYNAMICS": "다이내믹스",
+    "GLOBAL": "글로벌",
+    "INTERNATIONAL": "인터내셔널",
+    "GROUP": "그룹",
+    "HOLDING": "홀딩",
+    "HOLDINGS": "홀딩스",
+    "CAPITAL": "캐피털",
+    "FINANCIAL": "파이낸셜",
+    "ROBOTICS": "로보틱스",
+    "SEMICONDUCTOR": "세미컨덕터",
+    "SEMICONDUCTORS": "세미컨덕터",
+    "MOTOR": "모터",
+    "MOTORS": "모터스",
+    "ELECTRIC": "일렉트릭",
+    "ELECTRONICS": "일렉트로닉스",
+    "AEROSPACE": "에어로스페이스",
+    "VENTURES": "벤처스",
+    "ANALYTICS": "애널리틱스",
+    "DIGITAL": "디지털",
+    "MEDIA": "미디어",
+    "CLOUD": "클라우드",
+    "AI": "에이아이",
+    "DATA": "데이터",
+    "LAB": "랩",
+    "LABS": "랩스",
+    "LABORATORIES": "래버러토리스",
+}
+
+GENERIC_COMPANY_KO_TOKENS: set[str] = {
+    "그룹",
+    "홀딩",
+    "홀딩스",
+    "인터내셔널",
+    "글로벌",
+    "캐피털",
+    "파이낸셜",
+    "커뮤니케이션",
+    "커뮤니케이션즈",
+}
+
+COMPANY_NAME_CLEANUP_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"\(.*?\)"),
+    re.compile(r"\bcommon stock\b.*", re.IGNORECASE),
+    re.compile(r"\bordinary shares?\b.*", re.IGNORECASE),
+    re.compile(r"\bdepositary shares?\b.*", re.IGNORECASE),
+    re.compile(r"\bclass\s+[a-z]\b.*", re.IGNORECASE),
+)
+
+COMPANY_NOISE_TOKENS: set[str] = {
+    "INC",
+    "INCORPORATED",
+    "CORP",
+    "CORPORATION",
+    "CO",
+    "COMPANY",
+    "LTD",
+    "LIMITED",
+    "PLC",
+    "LP",
+    "LLC",
+    "NV",
+    "SA",
+    "THE",
+}
+
+KOREAN_TICKER_LETTER_NAMES: dict[str, str] = {
+    "A": "에이",
+    "B": "비",
+    "C": "씨",
+    "D": "디",
+    "E": "이",
+    "F": "에프",
+    "G": "지",
+    "H": "에이치",
+    "I": "아이",
+    "J": "제이",
+    "K": "케이",
+    "L": "엘",
+    "M": "엠",
+    "N": "엔",
+    "O": "오",
+    "P": "피",
+    "Q": "큐",
+    "R": "알",
+    "S": "에스",
+    "T": "티",
+    "U": "유",
+    "V": "브이",
+    "W": "더블유",
+    "X": "엑스",
+    "Y": "와이",
+    "Z": "지",
+}
+
 
 class DashboardBFFV2:
     def __init__(self, report_path: Path | None = None) -> None:
@@ -195,17 +339,27 @@ class DashboardBFFV2:
         top_picks = _normalize_top_picks(report.get("top_picks", []))
         pipeline_tables = _normalize_pipeline(report.get("pipeline", {}))
         _decorate_pipeline_tables(pipeline_tables, catalog_by_slug)
-        symbol_name_ko = _build_symbol_name_ko_map(
-            top_picks=top_picks,
-            pipeline_tables=pipeline_tables,
-            results=results_enriched,
-        )
-        selected_skill_top5 = _build_selected_skill_top5(results_enriched)
-        final_intersection_top5 = _build_final_intersection_top5(pipeline_tables)
         ai_runtime = _build_ai_runtime(
             source_report=report,
             ai_report_service=self.ai_report_service,
         )
+        ai_symbols: list[str] = []
+        latest_ai_report = ai_runtime.get("latest_report")
+        if isinstance(latest_ai_report, dict):
+            for row in latest_ai_report.get("symbols", []):
+                if isinstance(row, dict):
+                    symbol = str(row.get("symbol") or "").strip().upper()
+                    if symbol:
+                        ai_symbols.append(symbol)
+
+        symbol_name_ko = _build_symbol_name_ko_map(
+            top_picks=top_picks,
+            pipeline_tables=pipeline_tables,
+            results=results_enriched,
+            ai_symbols=ai_symbols,
+        )
+        selected_skill_top5 = _build_selected_skill_top5(results_enriched)
+        final_intersection_top5 = _build_final_intersection_top5(pipeline_tables)
         recommender_list = [item for item in catalog if item["trait_role"] in {"direct", "candidate"}]
         analyzer_list = [item for item in catalog if item["trait_role"] == "analysis_only"]
         selected_recommender_count = sum(1 for item in recommender_list if item.get("selected"))
@@ -918,9 +1072,12 @@ def _build_symbol_name_ko_map(
     top_picks: list[dict[str, Any]],
     pipeline_tables: dict[str, Any],
     results: list[dict[str, Any]],
+    ai_symbols: list[str] | None = None,
 ) -> dict[str, str]:
     symbols: set[str] = set()
     inferred: dict[str, str] = {}
+    inferred_company: dict[str, str] = {}
+    universe_company_map = _load_universe_symbol_company_map()
 
     def _add_symbol(raw: Any) -> None:
         symbol = str(raw or "").strip().upper()
@@ -935,7 +1092,8 @@ def _build_symbol_name_ko_map(
             symbols.add(symbol)
             company_name = str(pick.get("name") or "").strip()
             if company_name:
-                ko = KOREAN_COMPANY_ALIASES.get(company_name)
+                inferred_company[symbol] = company_name
+                ko = _company_alias_ko(company_name)
                 if ko:
                     inferred[symbol] = ko
 
@@ -985,17 +1143,132 @@ def _build_symbol_name_ko_map(
             continue
         company = str(fundamentals.get("company") or "").strip()
         if company:
-            ko = KOREAN_COMPANY_ALIASES.get(company)
+            inferred_company[ticker] = company
+            ko = _company_alias_ko(company)
             if ko:
                 inferred[ticker] = ko
             symbols.add(ticker)
 
+    for symbol in ai_symbols or []:
+        _add_symbol(symbol)
+
+    # 화면에 노출되지 않은 심볼도 한글명 매핑을 미리 준비해 둔다.
+    for symbol in universe_company_map:
+        _add_symbol(symbol)
+
     symbol_name_ko: dict[str, str] = {}
     for symbol in sorted(symbols):
-        ko = inferred.get(symbol) or KOREAN_SYMBOL_ALIASES.get(symbol)
+        company_name = inferred_company.get(symbol) or universe_company_map.get(symbol) or ""
+        ko = (
+            inferred.get(symbol)
+            or KOREAN_SYMBOL_ALIASES.get(symbol)
+            or _company_name_to_korean(company_name, symbol)
+            or _ticker_to_korean(symbol)
+        )
         if ko:
             symbol_name_ko[symbol] = ko
     return symbol_name_ko
+
+
+def _company_alias_ko(company_name: str) -> str:
+    direct = KOREAN_COMPANY_ALIASES.get(company_name)
+    if direct:
+        return direct
+    normalized = _normalize_company_name(company_name)
+    if not normalized:
+        return ""
+    return KOREAN_COMPANY_ALIASES.get(normalized, "")
+
+
+def _company_name_to_korean(company_name: str, symbol: str) -> str:
+    normalized = _normalize_company_name(company_name)
+    if not normalized:
+        return ""
+
+    direct = KOREAN_COMPANY_ALIASES.get(normalized)
+    if direct:
+        return direct
+
+    tokens = re.findall(r"[A-Za-z0-9&.+-]+", normalized)
+    output_tokens: list[str] = []
+    for token in tokens[:5]:
+        upper = token.upper()
+        if upper in COMPANY_NOISE_TOKENS:
+            continue
+        mapped = COMPANY_KO_TOKEN_ALIASES.get(upper)
+        if mapped:
+            output_tokens.append(mapped)
+            continue
+        if upper.isalpha() and len(upper) <= 5:
+            output_tokens.append(_ticker_to_korean(upper))
+            continue
+        if upper.isdigit():
+            output_tokens.append(upper)
+            continue
+
+    if output_tokens:
+        if not any(token not in GENERIC_COMPANY_KO_TOKENS for token in output_tokens):
+            return _ticker_to_korean(symbol)
+        return " ".join(output_tokens[:3])
+    return _ticker_to_korean(symbol)
+
+
+def _ticker_to_korean(symbol: str) -> str:
+    letters: list[str] = []
+    for ch in str(symbol or "").upper():
+        mapped = KOREAN_TICKER_LETTER_NAMES.get(ch)
+        if mapped:
+            letters.append(mapped)
+    return "".join(letters)
+
+
+def _normalize_company_name(company_name: str) -> str:
+    text = str(company_name or "").strip()
+    if not text:
+        return ""
+    for pattern in COMPANY_NAME_CLEANUP_PATTERNS:
+        text = pattern.sub("", text).strip()
+    text = re.sub(r"\s+", " ", text).strip(" -,.")
+    return text
+
+
+def _universe_cache_path() -> Path:
+    env_path = str(os.getenv("US_UNIVERSE_CACHE_PATH") or "").strip()
+    if env_path:
+        return Path(env_path)
+    return Path("reports/cache/universe/us_universe.json")
+
+
+def _load_universe_symbol_company_map() -> dict[str, str]:
+    path = _universe_cache_path()
+    if not path.exists():
+        return {}
+    try:
+        stat = path.stat()
+    except OSError:
+        return {}
+    return _load_universe_symbol_company_map_cached(str(path), int(stat.st_mtime_ns))
+
+
+@lru_cache(maxsize=4)
+def _load_universe_symbol_company_map_cached(path_str: str, _mtime_ns: int) -> dict[str, str]:
+    path = Path(path_str)
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    rows = payload.get("symbols")
+    if not isinstance(rows, list):
+        return {}
+    result: dict[str, str] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        symbol = str(row.get("symbol") or "").strip().upper()
+        company = _normalize_company_name(str(row.get("name") or ""))
+        if symbol and company:
+            result[symbol] = company
+    return result
 
 
 def _build_ai_runtime(
