@@ -21,3 +21,8 @@ venv/
 reports/cache/
 reports/skill_runs/history_v2/
 reports/runtime/
+reports/ai/
+reports/eod/
+reports/diagnostics/
+reports/skill_runs/latest_skill_runs.json
+reports/skill_runs/latest_skill_runs_v2.json
