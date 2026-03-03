@@ -73,7 +73,7 @@ cp .env.example .env
 
 ### 3) 서버 실행
 ```bash
-# start | stop | restart | status | check
+# start | stop | restart | status | check | run
 scripts/dashboard_server.sh restart
 scripts/dashboard_server.sh status
 
@@ -83,12 +83,16 @@ scripts/dashboard_server.sh ensure
 # watchdog 상시 감시(15초 주기)
 scripts/dashboard_watchdog.sh start
 scripts/dashboard_watchdog.sh status
+
+# 포그라운드 실행(디버깅/원인 추적)
+scripts/dashboard_server.sh run
 ```
 
 참고:
 - `dashboard_server.sh` 기본 실행은 런타임 산출물을 `reports/runtime/*.runtime.json`에 저장합니다.
 - 깃 추적 중인 `reports/skill_runs/latest_*.json`, `reports/ai/latest_ai_report.json` 파일 오염을 줄이기 위한 기본 동작입니다.
 - 기존 경로를 유지하려면 실행 시 `SKILL_RUN_REPORT_V2_PATH`, `AI_REPORT_PATH`, `AI_REPORT_RUNTIME_PATH`를 직접 지정하세요.
+- 스크립트는 `python>=3.11` + `uvicorn` 설치 런타임을 자동 탐색합니다. 찾지 못하면 원인 메시지를 출력하고 종료합니다.
 
 접속:
 - `http://127.0.0.1:8001/dashboard`

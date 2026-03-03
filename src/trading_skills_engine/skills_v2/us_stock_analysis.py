@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 from hashlib import sha256
 from typing import Any
+from urllib.error import HTTPError
 
 from trading_skills_engine.data.cache_store import CacheStore
 from trading_skills_engine.skills_v2.base import AnalyzerContext, SkillAnalyzer, unavailable_result
@@ -12,6 +14,7 @@ from trading_skills_engine.skills_v2.contracts import CacheInfo, SkillRunResultV
 class USStockAnalysisAnalyzer(SkillAnalyzer):
     slug = "us-stock-analysis"
     _CACHE_REVISION = 2
+    _DEFAULT_STALE_MAX_AGE_HOURS = 6.0
 
     def run(self, params: dict[str, Any], context: AnalyzerContext) -> SkillRunResultV2:
         market_scope = str(context.market_provider.get_market_scope() or "US").upper()
@@ -52,8 +55,23 @@ class USStockAnalysisAnalyzer(SkillAnalyzer):
             if not (context.fmp_news is not None and fmp_state != "live"):
                 return self._build_ok(cached.payload, CacheStore.cache_info("fresh", cached), fmp_state)
 
+        stale_max_age_hours = _clamp_non_negative(
+            _to_float(params.get("stale_max_age_hours"), self._DEFAULT_STALE_MAX_AGE_HOURS)
+        )
+        prefer_stale_cache = _to_bool(params.get("prefer_stale_cache"), default=True)
+        stale = context.cache_store.get_stale(cache_key)
+        if (
+            prefer_stale_cache
+            and stale
+            and _source_state(stale.payload) == "live"
+            and _cache_age_hours(stale.fetched_at) <= stale_max_age_hours
+        ):
+            context.warnings.append(
+                f"{self.slug}: CACHE_FIRST_STALE age={_cache_age_hours(stale.fetched_at):.2f}h <= {stale_max_age_hours:.2f}h"
+            )
+            return self._build_ok(stale.payload, CacheStore.cache_info("stale", stale), "stale")
+
         if context.fmp_news is None:
-            stale = context.cache_store.get_stale(cache_key)
             if stale:
                 context.warnings.append(f"{self.slug}: NO_API_KEY -> stale cache 사용")
                 return self._build_ok(stale.payload, CacheStore.cache_info("stale", stale), "stale")
@@ -89,6 +107,55 @@ class USStockAnalysisAnalyzer(SkillAnalyzer):
             payload["_source_state"] = "live"
             saved = context.cache_store.set(cache_key, payload, ttl_hours=24)
             return self._build_ok(payload, CacheStore.cache_info("fresh", saved), "live")
+        except HTTPError as exc:
+            stale = context.cache_store.get_stale(cache_key)
+            if stale and _source_state(stale.payload) == "live":
+                context.warnings.append(f"{self.slug}: HTTP_{exc.code} -> stale cache 사용")
+                return self._build_ok(stale.payload, CacheStore.cache_info("stale", stale), "stale")
+            if exc.code == 429:
+                return unavailable_result(
+                    skill_slug=self.slug,
+                    summary_ko="FMP API 호출 제한(HTTP 429)으로 단일 종목 데이터 조회에 실패했습니다. 잠시 후 재시도하거나 stale 캐시를 확보하세요.",
+                    reason_code="FMP_HTTP_429",
+                    source_statuses={"fmp": "unavailable"},
+                )
+            return unavailable_result(
+                skill_slug=self.slug,
+                summary_ko=f"FMP HTTP 오류({exc.code})로 단일 종목 데이터 조회에 실패했습니다.",
+                reason_code=f"FMP_HTTP_{exc.code}",
+                source_statuses={"fmp": "unavailable"},
+            )
+        except RuntimeError as exc:
+            if stale and _source_state(stale.payload) == "live":
+                context.warnings.append(f"{self.slug}: {exc} -> stale cache 사용")
+                return self._build_ok(stale.payload, CacheStore.cache_info("stale", stale), "stale")
+            if str(exc) == "FMP_HTTP_429":
+                return unavailable_result(
+                    skill_slug=self.slug,
+                    summary_ko="FMP API 호출 제한(HTTP 429)으로 단일 종목 데이터 조회에 실패했습니다. 잠시 후 재시도하거나 stale 캐시를 확보하세요.",
+                    reason_code="FMP_HTTP_429",
+                    source_statuses={"fmp": "unavailable"},
+                )
+            if str(exc) == "FMP_RATE_LIMIT_COOLDOWN":
+                return unavailable_result(
+                    skill_slug=self.slug,
+                    summary_ko="FMP 429 쿨다운이 진행 중이라 라이브 조회를 건너뛰었습니다. 잠시 후 재시도하거나 stale 캐시를 사용하세요.",
+                    reason_code="FMP_RATE_LIMIT_COOLDOWN",
+                    source_statuses={"fmp": "unavailable"},
+                )
+            if str(exc) == "FMP_DAILY_LIMIT_REACHED":
+                return unavailable_result(
+                    skill_slug=self.slug,
+                    summary_ko="로컬 FMP 일일 호출 한도에 도달해 단일 종목 데이터 조회를 중단했습니다. 대시보드에서 일일 한도를 조정하거나 다음 날짜에 재시도하세요.",
+                    reason_code="FMP_DAILY_LIMIT_REACHED",
+                    source_statuses={"fmp": "unavailable"},
+                )
+            return unavailable_result(
+                skill_slug=self.slug,
+                summary_ko="단일 종목 데이터 조회 중 런타임 오류가 발생했습니다.",
+                reason_code="FETCH_FAILED",
+                source_statuses={"fmp": "unavailable"},
+            )
         except Exception:
             stale = context.cache_store.get_stale(cache_key)
             if stale and _source_state(stale.payload) == "live":
@@ -201,3 +268,26 @@ def _source_state(payload: Any) -> str:
     if isinstance(payload, dict):
         return str(payload.get("_source_state") or "stale")
     return "stale"
+
+
+def _cache_age_hours(fetched_at: datetime) -> float:
+    return max(0.0, (datetime.now(UTC) - fetched_at).total_seconds() / 3600.0)
+
+
+def _clamp_non_negative(value: float) -> float:
+    if value < 0:
+        return 0.0
+    return value
+
+
+def _to_bool(value: Any, default: bool) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return default
+    normalized = str(value).strip().lower()
+    if normalized in {"1", "true", "yes", "y", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "n", "off"}:
+        return False
+    return default
