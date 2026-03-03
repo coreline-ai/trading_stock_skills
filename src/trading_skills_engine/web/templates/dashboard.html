@@ -884,7 +884,7 @@
                       <div class="mt-3 rounded-lg bg-slate-50 p-2 text-xs">
                         <p>earnings {{ result.analysis_payload.earnings|length }}건</p>
                         {% for row in result.analysis_payload.earnings[:5] %}
-                          <p class="mt-1">{{ row.date }} · {{ row.ticker }} · {{ row.timing }}</p>
+                          <p class="mt-1">{{ row.date }} · {{ symbol_with_ko(row.ticker) }} · {{ row.timing }}</p>
                         {% endfor %}
                       </div>
                     {% endif %}
@@ -900,7 +900,7 @@
 
                     {% if result.status == 'ok' and result.skill_slug == 'us-stock-analysis' %}
                       <div class="mt-3 rounded-lg bg-slate-50 p-2 text-xs">
-                        <p>{{ result.analysis_payload.ticker }} · {{ result.analysis_payload.fundamentals.sector }}</p>
+                        <p>{{ symbol_with_ko(result.analysis_payload.ticker) }} · {{ result.analysis_payload.fundamentals.sector }}</p>
                         <p class="mt-1">price {{ '%.2f'|format(result.analysis_payload.technicals.price or 0) }} · day {{ '%.2f'|format(result.analysis_payload.technicals.day_change_pct or 0) }}%</p>
                         <p class="mt-1">bull: {{ result.analysis_payload.bull_case[0] if result.analysis_payload.bull_case else '-' }}</p>
                         <p class="mt-1">bear: {{ result.analysis_payload.bear_case[0] if result.analysis_payload.bear_case else '-' }}</p>

@@ -366,6 +366,110 @@ def test_dashboard_bff_v2_preloads_universe_symbols_for_korean_map(tmp_path: Pat
     assert symbol_name_ko.get("AAL")
 
 
+def test_dashboard_bff_v2_uses_kr_universe_names_for_numeric_symbols(tmp_path: Path, monkeypatch):
+    report_path = tmp_path / "latest_skill_runs_v2.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "run_id": "test-run-kr-ko-name",
+                "as_of_date": "2026-02-28",
+                "data_sources": {"fmp": "stale", "rss": "live"},
+                "results": [],
+                "pipeline": {},
+                "warnings": [],
+                "top_picks": [
+                    {"symbol": "005930", "score": 81.2, "reason": "test"},
+                    {"symbol": "000660", "score": 75.5, "reason": "test"},
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    scope_path = tmp_path / "runtime" / "market_scope.json"
+    scope_path.parent.mkdir(parents=True, exist_ok=True)
+    scope_path.write_text(json.dumps({"scope": "KR"}), encoding="utf-8")
+    monkeypatch.setenv("MARKET_SCOPE_RUNTIME_SETTINGS_PATH", str(scope_path))
+
+    kr_universe_cache_path = tmp_path / "kr_universe.json"
+    kr_universe_cache_path.write_text(
+        json.dumps(
+            {
+                "scope": "KR",
+                "source": "live",
+                "symbols": [
+                    {"symbol": "005930", "name": "삼성전자"},
+                    {"symbol": "000660", "name": "SK하이닉스"},
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("KR_UNIVERSE_CACHE_PATH", str(kr_universe_cache_path))
+
+    bff = DashboardBFFV2(report_path=report_path)
+    model = bff.get_dashboard_view_model()
+    symbol_name_ko = model.get("symbol_name_ko", {})
+
+    assert model["universe_meta"]["scope"] == "KR"
+    assert symbol_name_ko.get("005930") == "삼성전자"
+    assert symbol_name_ko.get("000660") == "SK하이닉스"
+
+
+def test_dashboard_bff_v2_uses_kr_universe_names_for_kr_symbol_variants(tmp_path: Path, monkeypatch):
+    report_path = tmp_path / "latest_skill_runs_v2.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "run_id": "test-run-kr-symbol-variants",
+                "as_of_date": "2026-02-28",
+                "data_sources": {"fmp": "stale", "rss": "live"},
+                "results": [],
+                "pipeline": {},
+                "warnings": [],
+                "top_picks": [
+                    {"symbol": "005930.KS", "score": 81.2, "reason": "test"},
+                    {"symbol": "A000660", "score": 75.5, "reason": "test"},
+                    {"symbol": "KRX:035420", "score": 74.1, "reason": "test"},
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    scope_path = tmp_path / "runtime" / "market_scope.json"
+    scope_path.parent.mkdir(parents=True, exist_ok=True)
+    scope_path.write_text(json.dumps({"scope": "KR"}), encoding="utf-8")
+    monkeypatch.setenv("MARKET_SCOPE_RUNTIME_SETTINGS_PATH", str(scope_path))
+
+    kr_universe_cache_path = tmp_path / "kr_universe.json"
+    kr_universe_cache_path.write_text(
+        json.dumps(
+            {
+                "scope": "KR",
+                "source": "live",
+                "symbols": [
+                    {"symbol": "005930", "name": "삼성전자"},
+                    {"symbol": "000660", "name": "SK하이닉스"},
+                    {"symbol": "035420", "name": "NAVER"},
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("KR_UNIVERSE_CACHE_PATH", str(kr_universe_cache_path))
+
+    bff = DashboardBFFV2(report_path=report_path)
+    model = bff.get_dashboard_view_model()
+    symbol_name_ko = model.get("symbol_name_ko", {})
+
+    assert symbol_name_ko.get("005930.KS") == "삼성전자"
+    assert symbol_name_ko.get("A000660") == "SK하이닉스"
+    assert symbol_name_ko.get("KRX:035420") == "NAVER"
+
+
 def test_dashboard_ai_report_run_redirects_and_persists_unavailable_when_key_missing(
     tmp_path: Path,
     monkeypatch,

@@ -360,7 +360,7 @@ class DashboardBFFV2:
             top_picks=top_picks,
             pipeline_tables=pipeline_tables,
             results=results_enriched,
-            scope=str((report.get("universe_meta") or {}).get("scope") or "US"),
+            scope=str(universe_meta.get("scope") or "US"),
             ai_symbols=ai_symbols,
         )
         selected_skill_top5 = _build_selected_skill_top5(results_enriched)
@@ -1110,6 +1110,7 @@ def _build_symbol_name_ko_map(
     symbols: set[str] = set()
     inferred: dict[str, str] = {}
     inferred_company: dict[str, str] = {}
+    normalized_scope = str(scope or "US").strip().upper()
     universe_company_map = _load_universe_symbol_company_map(scope=scope)
 
     def _add_symbol(raw: Any) -> None:
@@ -1191,10 +1192,26 @@ def _build_symbol_name_ko_map(
 
     symbol_name_ko: dict[str, str] = {}
     for symbol in sorted(symbols):
-        company_name = inferred_company.get(symbol) or universe_company_map.get(symbol) or ""
+        canonical_symbol = symbol
+        if normalized_scope == "KR":
+            canonical_symbol = _normalize_kr_symbol(symbol) or symbol
+        company_name = (
+            inferred_company.get(symbol)
+            or inferred_company.get(canonical_symbol)
+            or universe_company_map.get(symbol)
+            or universe_company_map.get(canonical_symbol)
+            or ""
+        )
+        if normalized_scope == "KR" and company_name:
+            symbol_name_ko[symbol] = company_name
+            if canonical_symbol and canonical_symbol != symbol:
+                symbol_name_ko[canonical_symbol] = company_name
+            continue
         ko = (
             inferred.get(symbol)
+            or inferred.get(canonical_symbol)
             or KOREAN_SYMBOL_ALIASES.get(symbol)
+            or KOREAN_SYMBOL_ALIASES.get(canonical_symbol)
             or _company_name_to_korean(company_name, symbol)
             or _ticker_to_korean(symbol)
         )
@@ -1217,6 +1234,8 @@ def _company_name_to_korean(company_name: str, symbol: str) -> str:
     normalized = _normalize_company_name(company_name)
     if not normalized:
         return ""
+    if _contains_hangul(normalized):
+        return normalized
 
     direct = KOREAN_COMPANY_ALIASES.get(normalized)
     if direct:
@@ -1263,6 +1282,27 @@ def _normalize_company_name(company_name: str) -> str:
         text = pattern.sub("", text).strip()
     text = re.sub(r"\s+", " ", text).strip(" -,.")
     return text
+
+
+def _contains_hangul(text: str) -> bool:
+    return bool(re.search(r"[가-힣]", str(text or "")))
+
+
+def _normalize_kr_symbol(raw_symbol: str) -> str:
+    symbol = str(raw_symbol or "").strip().upper()
+    if not symbol:
+        return ""
+    if symbol.startswith("KRX:"):
+        symbol = symbol.split(":", 1)[1].strip()
+    if symbol.startswith("A") and len(symbol) == 7 and symbol[1:].isdigit():
+        symbol = symbol[1:]
+    if "." in symbol:
+        head = symbol.split(".", 1)[0].strip()
+        if head:
+            symbol = head
+    if symbol.isdigit() and len(symbol) == 6:
+        return symbol
+    return symbol
 
 
 def _universe_cache_path(scope: str = "US") -> Path:
