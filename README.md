@@ -12,6 +12,7 @@ FastAPI 기반 트레이딩 스킬 실행 엔진과 대시보드입니다.
 - https://github.com/tradermonty/claude-trading-skills
 
 ## Table of Contents
+- [최근 수정 내역 (2026-03)](#최근-수정-내역-2026-03)
 - [핵심 기능](#핵심-기능)
 - [아키텍처 개요](#아키텍처-개요)
 - [빠른 시작](#빠른-시작)
@@ -28,6 +29,22 @@ FastAPI 기반 트레이딩 스킬 실행 엔진과 대시보드입니다.
 - [산출물 경로](#산출물-경로)
 - [트러블슈팅](#트러블슈팅)
 - [레거시(v1) 엔드포인트](#레거시v1-엔드포인트)
+
+## 최근 수정 내역 (2026-03)
+아래는 최근 5개 핵심 커밋(2026-03-02 ~ 2026-03-03) 기준 실제 코드 변경 분석입니다.
+
+| 날짜 | 커밋 | 변경 주제 | 상세 내용 | 운영 영향 |
+| --- | --- | --- | --- | --- |
+| 2026-03-03 | `fff50f5` | KR 종목 한글명 렌더링 보강 | `dashboard_bff_v2`에서 KR 심볼 정규화(`005930.KS`, `A000660`, `KRX:035420`) 후 캐시 유니버스의 회사명을 우선 매핑하도록 수정 | 국내장 결과 표에서 숫자 티커 옆 한글 종목명 노출 안정화 |
+| 2026-03-03 | `1e06317` | FMP 429 회피 + 런타임 하드닝 | `fmp_client`에 429 쿨다운 상태 파일(`reports/runtime/fmp_rate_limit_state.json`), 재시도 지연(`1,2,4초` 기본), 쿨다운 중 네트워크 호출 스킵 추가. `us-stock-analysis`는 stale 캐시 우선(`prefer_stale_cache`) 사용 및 429/쿨다운/일일한도 reason code를 분리 | 429 연속 발생 시 즉시 재호출 폭주를 막고, stale 캐시로 결과 연속성 확보 |
+| 2026-03-03 | `885bac7` | US/KR 유니버스 실행 안정화 | 시장 모드 런타임 스토어(`market_scope_runtime`) 및 `/dashboard/market-scope` 토글 추가. `all_pass` 결과가 희소할 때 `pass_or_watch` 폴백 확장 로직 보강 | `US/KR` 전환 시 유니버스 메타/필터 안내 일관성 개선, TOP5 빈 결과 감소 |
+| 2026-03-02 | `1067d46` | TOP5 안전 폴백 추가 | analyzer 전량 거절 시에도 최종 TOP10 기반 TOP5를 유지하는 마지막 안전장치(`fallback_recommender_top10_applied`) 추가 | “결과가 비는” 실행 케이스를 사용자 화면에서 완화 |
+| 2026-03-02 | `b50d2be` | US 유니버스 모드 + Z.AI 근거 통합 | US 유니버스 모드 전환(`SP500_PLUS_NASDAQ_TOP500`/`US_TOP_LIQUIDITY`)과 AI 리포트용 Search MCP 근거 수집 파이프라인 연동 | AI 리포트 근거 다양화, 유니버스 구성 제어성 향상 |
+
+검증 포인트(최근 변경에 직접 대응):
+- `tests/test_dashboard_selection.py` : KR 심볼 변형 매핑, 시장 토글, 대시보드 선택/표시 검증
+- `tests/test_engine_api_v2.py` : two-stage 폴백 정책(`all_pass` -> `pass_or_watch` -> recommender top10) 검증
+- `tests/test_fmp_client.py` : 429 재시도/쿨다운 상태 파일/쿨다운 중 네트워크 스킵 검증
 
 ## 핵심 기능
 - **38개 스킬 카탈로그 실행**
@@ -129,6 +146,10 @@ python3.11 -m uvicorn trading_skills_engine.web.app:app --host 127.0.0.1 --port 
 - 분석 스킬별 평가(타겟 분리: intersection/top10)
 - 최종 결과 요약(최종 교집합 + 최종 TOP5)
 - AI 최종 리포트(GLM 4.5)
+
+주의:
+- `추천 스킬별 결과 테이블`에는 추천 역할(`direct/candidate`) 스킬만 집계됩니다.
+- 분석 전용(`analysis_only`) 스킬은 `분석 스킬별 평가 테이블`에만 표시됩니다.
 
 ## AI 최종 리포트
 최종 추천 종목(TOP5)을 대상으로 AI 판정을 생성합니다.
@@ -271,11 +292,20 @@ EOF
 기본값:
 - 일일 호출 한도: `250`
 - Base URL: `https://financialmodelingprep.com/stable`
+- HTTP 429 재시도 지연: `1,2,4초` (`FMP_HTTP_RETRY_DELAYS_SEC`)
+- 429 쿨다운: `180초` (`FMP_RATE_LIMIT_COOLDOWN_SEC`)
+- 429 상태 파일: `reports/runtime/fmp_rate_limit_state.json`
 - 기본 시장 모드: `US`
 - US 유니버스 TTL: `60분`
 - US 유니버스 모드: `SP500_PLUS_NASDAQ_TOP500` (S&P500 + NASDAQ 시총 상위 500 합집합)
 - KR 유니버스 TTL: `60분`
 - KR 유니버스 모드: `KOSPI500_KOSDAQ200` (코스피 500 + 코스닥 200 시총 기반)
+
+429 회피 동작(요약):
+1. `us-stock-analysis`가 조건 충족 시 stale cache를 우선 사용(`prefer_stale_cache=true`, `stale_max_age_hours=6`)
+2. FMP 호출 중 HTTP 429가 발생하면 상태 파일에 쿨다운 만료 시각 기록
+3. 쿨다운 기간에는 라이브 네트워크 호출을 건너뛰고 `FMP_RATE_LIMIT_COOLDOWN`으로 빠르게 종료
+4. 쿨다운 종료 후 라이브 호출 재개
 
 추가 환경 변수:
 - `TRADING_SKILLS_ENV_FILE` : `.env` 경로 오버라이드
@@ -285,6 +315,9 @@ EOF
 - `MARKET_SCOPE_RUNTIME_SETTINGS_PATH` : 시장 모드 런타임 설정 파일 경로 변경
 - `FMP_RUNTIME_SETTINGS_PATH` : FMP 런타임 설정 파일 경로 변경
 - `FMP_USAGE_PATH` : FMP 사용량 파일 경로 변경
+- `FMP_HTTP_RETRY_DELAYS_SEC` : FMP HTTP 재시도 지연(초, 쉼표 구분 예: `1,2,4`)
+- `FMP_RATE_LIMIT_COOLDOWN_SEC` : FMP 429 이후 쿨다운 지속 시간(초)
+- `FMP_RATE_LIMIT_STATE_PATH` : FMP 429 쿨다운 상태 파일 경로
 - `US_UNIVERSE_CACHE_PATH` : US 유니버스 캐시 파일 경로 변경
 - `US_UNIVERSE_TTL_MIN` : US 유니버스 캐시 TTL(분)
 - `US_UNIVERSE_MODE` : 유니버스 선택 모드 (`SP500_PLUS_NASDAQ_TOP500` 또는 `US_TOP_LIQUIDITY`)
@@ -328,6 +361,9 @@ EOF
 | `SKILL_RUN_HISTORY_MAX_DAYS` | `0` | v2 history 보관 일수 (`0`이면 기간 제한 비활성) |
 | `FMP_RUNTIME_SETTINGS_PATH` | `reports/runtime/fmp_settings.json` | FMP 런타임 설정 경로 |
 | `FMP_USAGE_PATH` | `reports/runtime/fmp_usage.json` | FMP 호출 사용량 경로 |
+| `FMP_HTTP_RETRY_DELAYS_SEC` | `1,2,4` | FMP HTTP 429/500/URLError 재시도 지연(초, 쉼표 구분) |
+| `FMP_RATE_LIMIT_COOLDOWN_SEC` | `180` | HTTP 429 발생 후 라이브 호출 쿨다운 시간(초) |
+| `FMP_RATE_LIMIT_STATE_PATH` | `reports/runtime/fmp_rate_limit_state.json` | 429 쿨다운 상태 저장 경로 |
 | `US_UNIVERSE_CACHE_PATH` | `reports/cache/universe/us_universe.json` | US 유니버스 캐시 경로 |
 | `US_UNIVERSE_TTL_MIN` | `60` | US 유니버스 캐시 TTL(분) |
 | `US_UNIVERSE_MODE` | `SP500_PLUS_NASDAQ_TOP500` | `S&P500 + NASDAQ top500` 모드 또는 `US_TOP_LIQUIDITY` |
@@ -406,6 +442,13 @@ tail -f /tmp/trading_skills_watchdog_8001.log
   - FMP 토글 OFF
   - 호출량 초기화(날짜 경과)
   - 한도 상향(설정 파일)
+
+### `FMP_HTTP_429` 또는 `FMP_RATE_LIMIT_COOLDOWN`
+- `reports/runtime/fmp_rate_limit_state.json`의 `blocked_until_epoch`가 현재 시각보다 크면 쿨다운 진행 중입니다.
+- 쿨다운 중에는 라이브 조회 대신 stale 캐시 경로를 사용하도록 설계되어 있습니다.
+- 운영 환경에서 429가 잦으면 아래 값을 늘려 요청 밀도를 낮추세요.
+  - `FMP_HTTP_RETRY_DELAYS_SEC` (예: `1,2,4,8`)
+  - `FMP_RATE_LIMIT_COOLDOWN_SEC` (예: `300`)
 
 ### `AI 최종 리포트 생성` 클릭 후 반응이 없거나 실패
 1. `GLM_API_KEY` 설정 여부 확인
